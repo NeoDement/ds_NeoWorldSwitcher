@@ -276,84 +276,85 @@ scrp 1 2 1000 75
 
 
 
+		doif part va01 = 1
 *target the part we're working on
-		part va01
+			part va01
 
 
 *12_x
-		sets va02 vtos va01
-		adds va02 "_x"
-		setv va61 game va02
+			sets va02 vtos va01
+			adds va02 "_x"
+			setv va61 game va02
 
 *12_x + button_width
-		setv va62 va61
-		addv va62 game "button_width"
+			setv va62 va61
+			addv va62 game "button_width"
 
 
 *12_y
-		sets va02 vtos va01
-		adds va02 "_y"
-		setv va71 game va02
+			sets va02 vtos va01
+			adds va02 "_y"
+			setv va71 game va02
 
 *12_y + button_height
-		setv va72 va71
-		addv va72 game "button_height"
+			setv va72 va71
+			addv va72 game "button_height"
 
 
 *12_lit
-		sets va02 vtos va01
-		adds va02 "_lit"
-		setv va50 game va02
+			sets va02 vtos va01
+			adds va02 "_lit"
+			setv va50 game va02
 
 
 *12_icon_type
-		sets va02 vtos va01
-		adds va02 "_icon_type"
-		sets va83 game va02
+			sets va02 vtos va01
+			adds va02 "_icon_type"
+			sets va83 game va02
 
 
 
-		doif va83 = "custom"
+			doif va83 = "custom"
 
 *12_icon_on
-			sets va02 vtos va01
-			adds va02 "_icon_on"
-			sets va81 game va02
+				sets va02 vtos va01
+				adds va02 "_icon_on"
+				sets va81 game va02
 
 *12_icon_off
-			sets va02 vtos va01
-			adds va02 "_icon_off"
-			sets va82 game va02
+				sets va02 vtos va01
+				adds va02 "_icon_off"
+				sets va82 game va02
 
-		else
+			else
 
 *12_spritename
-			sets va02 vtos va01
-			adds va02 "_spritename"
-			sets va81 game va02
+				sets va02 vtos va01
+				adds va02 "_spritename"
+				sets va81 game va02
 
 *12_firstframe
-			sets va02 vtos va01
-			adds va02 "_firstframe"
-			setv va82 game va02
+				sets va02 vtos va01
+				adds va02 "_firstframe"
+				setv va82 game va02
 
-		endi
-
-
+			endi
 
 
 
 
-		setv va99 0
 
-		doif _p1_ > va61 and _p1_ < va62 and _p2_ > va71 and _p2_ < va72
+
+			setv va99 0
+
+			doif _p1_ > va61 and _p1_ < va62 and _p2_ > va71 and _p2_ < va72
 *		doif mopx > va61 and mopx < va62 and mopy > va71 and mopy < va72
-			setv va99 1
-		endi
+				setv va99 1
+			endi
 
-		doif va50 = 1
-			setv va99 1
-		endi
+			doif va50 = 1
+				setv va99 1
+			endi
 
 **put va99 in a state where it won't get changed by the code below
 *		doif va50 = 2
@@ -363,61 +364,62 @@ scrp 1 2 1000 75
 
 
 *if we were told to highlight it, change us to the appropriate gallery
-		doif va99 = 1
+			doif va99 = 1
 
 
 *are we a custom icon?
-			doif va83 = "custom"
+				doif va83 = "custom"
 
 
-				doif gall <> va81
-					gall va81 0
-				endi
+					doif gall <> va81
+						gall va81 0
+					endi
 
-			else
+				else
 
 *				doif gall <> va81 and base <> va82
-				addv va82 1
+					addv va82 1
 
 *todo: here: add doif. don't set gall if we're already on this frame.
-				gall "blnk" 0
-				gall va81 va82
+					gall "blnk" 0
+					gall va81 va82
 
-			endi
+				endi
 
 *if we were told to unhighlight it, change us to the appropriate gallery
-		elif va99 = 0
+			elif va99 = 0
 
-			doif va83 = "custom"
+				doif va83 = "custom"
 
-				doif gall <> va82
-					gall va82 0
+					doif gall <> va82
+						gall va82 0
+					endi
+
+				else
+
+*todo: here: add doif. don't set gall if we're already on this frame.
+					gall "blnk" 0
+					gall va81 va82
+
 				endi
 
 			else
-
-*todo: here: add doif. don't set gall if we're already on this frame.
-				gall "blnk" 0
-				gall va81 va82
-
-			endi
-
-		else
-			dbg: asrt "what" = "hh"
+				dbg: asrt "what" = "hh"
 *
 *todo: here: this needs patching up. non-custom icons are non-functional.
 *			pose 1
 
+			endi
+
+
+
+
+
+
 		endi
 
-
-
-
-
-
-
-
 		subv va01 1
+
 	untl va01 = 6
 
 endm
