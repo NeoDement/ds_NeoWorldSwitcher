@@ -1,0 +1,1023 @@
+enum 1 1 14546
+	kill targ
+next
+
+
+
+new: comp 1 1 14546 "small_useful_screen" 1 0 3000
+
+seta game "ColourEditor" targ
+
+
+
+scrp 1 1 14546 10
+
+	inst
+
+
+
+
+*listen for mouse wheel
+	imsk 32
+
+
+*move it way out of bounds (we move it onscreen when its "created", we never actually delete it)
+	mvto -1000 -1000
+
+
+
+
+
+
+*palette colour bg box
+	pat: dull 1 "WorldSwitcher_IconEditor_Controls" 26 213 39 1
+
+
+
+
+*accept button
+	pat: butt 100 "small_useful_screen" 1 2 58 106 2 [] 100 0
+
+*cancel button
+	pat: butt 101 "small_useful_screen" 3 2 200 106 2 [] 101 0
+
+
+
+
+*Palette Index 873:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 4, as this is the fifth image set in the file (Palette sized)
+*add 1 so we start on the invisible frame instead of the outline frame
+
+*NEW (upper) colour
+	pat: dull 1000 "WorldSwitcher_IconEditor_Palette" 873 215 41 2
+
+*CURRENT (lower) colour
+	pat: dull 1001 "WorldSwitcher_IconEditor_Palette" 873 215 63 2
+
+	part 1001
+
+
+
+*RGB SLIDERS!!!!!!
+
+
+*****************************************************************************
+**RED slider
+*****************************************************************************
+
+	targ ownr
+
+*X and Y position of slider
+	setv va00 32
+	setv va01 25
+
+
+*remember part numbers so slider script can refer to them
+	setv va02 7000
+	setv va03 7001
+	setv va04 7002
+
+*X offset of editable text component of slider
+	setv va05 va00
+*	addv va05 game "WorldSwitcher_slider_TextboxXOffset"
+	addv va05 136
+
+*Y offset of editable text component of slider
+	setv va06 va01
+	addv va06 game "WorldSwitcher_slider_TextboxYOffset"
+
+
+*button component of slider (backdrop of slider bar, clicking it makes the control active)
+	pat: butt va02 "WorldSwitcher_IconEditor_Controls" 27 0 VA00 VA01 2 [] 7000 0
+
+*playhead component of slider
+	pat: butt va03 "WorldSwitcher_Slider" 2 0 VA00 VA01 5 [] 7000 0
+
+*editable text component of slider
+	pat: text va04 "WorldSwitcher_Slider" 3 VA05 VA06 1 7003 "WhiteOnTransparentChars"
+	part va04
+	frmt 8 8 8 8 0 0 2
+
+
+
+*slider manager for Brush Size slider.
+	new: simp 1 1 64769 "blnk" 0 0 0
+
+*set a named variable on the compound object to point to this slider in particular
+	seta mame "RedSlider" targ
+
+*compound object this slider is part of
+	seta name "ParentObject" ownr
+
+
+*X/Y coords of top left corner of slider
+	setv name "X" va00
+	setv name "Y" va01
+
+*part numbers for each component of the slider
+	setv name "Slider_PartNumber" va02
+	setv name "Playhead_PartNumber" va03
+	setv name "Textbox_PartNumber" va04
+
+*default playhead and slider width can also be overridden here (RGB sliders are slightly less wide than default)
+	setv name "Slider_Width" 128
+*    setv name "Playhead_Width" 0
+
+
+*unique name for this slider (can be useful to kill all sliders with a certain name in a rscr, etc)
+	sets name "SliderName" "RedSlider"
+
+*minimum and maximum values our slider can display. can be negative.
+	setv name "MinValue" 0
+	setv name "MaxValue" 5
+
+*default/current value for our slider. must be between min and max.
+	setv name "Value" 0
+
+
+*number of digits after the decimal point. can be 0 for whole numbers.
+	setv name "DecimalPrecision" 0
+
+
+
+
+*show a + sign before the number when it's greater than 0?
+	setv name "ShowPlusSign" 0
+
+*script on Compound Object to run after setting the value (can be 0 to run no script)
+	setv name "ValueUpdateScript" 7002
+
+
+*INITIALIZE!
+	mesg writ targ 1005
+
+
+
+
+*target main Compound Object again
+	targ ownr
+
+*****************************************************************************
+
+
+
+*****************************************************************************
+**GREEN slider
+*****************************************************************************
+
+	targ ownr
+
+*X and Y position of slider
+	setv va00 32
+	setv va01 53
+
+
+*remember part numbers so slider script can refer to them
+	setv va02 8000
+	setv va03 8001
+	setv va04 8002
+
+*X offset of editable text component of slider
+	setv va05 va00
+*	addv va05 game "WorldSwitcher_slider_TextboxXOffset"
+	addv va05 136
+
+*Y offset of editable text component of slider
+	setv va06 va01
+	addv va06 game "WorldSwitcher_slider_TextboxYOffset"
+
+
+*button component of slider (backdrop of slider bar, clicking it makes the control active)
+	pat: butt va02 "WorldSwitcher_IconEditor_Controls" 28 0 VA00 VA01 2 [] 7000 0
+
+*playhead component of slider
+	pat: butt va03 "WorldSwitcher_Slider" 2 0 VA00 VA01 5 [] 7000 0
+
+*editable text component of slider
+	pat: text va04 "WorldSwitcher_Slider" 3 VA05 VA06 1 7004 "WhiteOnTransparentChars"
+	part va04
+	frmt 8 8 8 8 0 0 2
+
+
+
+*slider manager for Brush Size slider.
+	new: simp 1 1 64769 "blnk" 0 0 0
+
+*set a named variable on the compound object to point to this slider in particular
+	seta mame "GreenSlider" targ
+
+*compound object this slider is part of
+	seta name "ParentObject" ownr
+
+
+*X/Y coords of top left corner of slider
+	setv name "X" va00
+	setv name "Y" va01
+
+*part numbers for each component of the slider
+	setv name "Slider_PartNumber" va02
+	setv name "Playhead_PartNumber" va03
+	setv name "Textbox_PartNumber" va04
+
+*default playhead and slider width can also be overridden here (RGB sliders are slightly less wide than default)
+	setv name "Slider_Width" 128
+*    setv name "Playhead_Width" 0
+
+
+*unique name for this slider (can be useful to kill all sliders with a certain name in a rscr, etc)
+	sets name "SliderName" "GreenSlider"
+
+*minimum and maximum values our slider can display. can be negative.
+	setv name "MinValue" 0
+	setv name "MaxValue" 5
+
+*default/current value for our slider. must be between min and max.
+	setv name "Value" 0
+
+
+*number of digits after the decimal point. can be 0 for whole numbers.
+	setv name "DecimalPrecision" 0
+
+
+
+
+*show a + sign before the number when it's greater than 0?
+	setv name "ShowPlusSign" 0
+
+*script on Compound Object to run after setting the value (can be 0 to run no script)
+	setv name "ValueUpdateScript" 7002
+
+
+*INITIALIZE!
+	mesg writ targ 1005
+
+
+
+
+*target main Compound Object again
+	targ ownr
+
+*****************************************************************************
+
+
+*****************************************************************************
+**BLUE slider
+*****************************************************************************
+
+	targ ownr
+
+*X and Y position of slider
+	setv va00 32
+	setv va01 81
+
+
+*remember part numbers so slider script can refer to them
+	setv va02 9000
+	setv va03 9001
+	setv va04 9002
+
+*X offset of editable text component of slider
+	setv va05 va00
+*	addv va05 game "WorldSwitcher_slider_TextboxXOffset"
+	addv va05 136
+
+*Y offset of editable text component of slider
+	setv va06 va01
+	addv va06 game "WorldSwitcher_slider_TextboxYOffset"
+
+
+*button component of slider (backdrop of slider bar, clicking it makes the control active)
+	pat: butt va02 "WorldSwitcher_IconEditor_Controls" 29 0 VA00 VA01 2 [] 7000 0
+
+*playhead component of slider
+	pat: butt va03 "WorldSwitcher_Slider" 2 0 VA00 VA01 5 [] 7000 0
+
+*editable text component of slider
+	pat: text va04 "WorldSwitcher_Slider" 3 VA05 VA06 1 7005 "WhiteOnTransparentChars"
+	part va04
+	frmt 8 8 8 8 0 0 2
+
+
+
+*slider manager for Brush Size slider.
+	new: simp 1 1 64769 "blnk" 0 0 0
+
+*set a named variable on the compound object to point to this slider in particular
+	seta mame "BlueSlider" targ
+
+*compound object this slider is part of
+	seta name "ParentObject" ownr
+
+
+*X/Y coords of top left corner of slider
+	setv name "X" va00
+	setv name "Y" va01
+
+*part numbers for each component of the slider
+	setv name "Slider_PartNumber" va02
+	setv name "Playhead_PartNumber" va03
+	setv name "Textbox_PartNumber" va04
+
+*default playhead and slider width can also be overridden here (RGB sliders are slightly less wide than default)
+	setv name "Slider_Width" 128
+*    setv name "Playhead_Width" 0
+
+
+*unique name for this slider (can be useful to kill all sliders with a certain name in a rscr, etc)
+	sets name "SliderName" "BlueSlider"
+
+*minimum and maximum values our slider can display. can be negative.
+	setv name "MinValue" 0
+	setv name "MaxValue" 5
+
+*default/current value for our slider. must be between min and max.
+	setv name "Value" 0
+
+
+*number of digits after the decimal point. can be 0 for whole numbers.
+	setv name "DecimalPrecision" 0
+
+
+
+
+*show a + sign before the number when it's greater than 0?
+	setv name "ShowPlusSign" 0
+
+*script on Compound Object to run after setting the value (can be 0 to run no script)
+	setv name "ValueUpdateScript" 7002
+
+
+*INITIALIZE!
+	mesg writ targ 1005
+
+
+
+
+*target main Compound Object again
+	targ ownr
+
+*****************************************************************************
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+****************************************************************************************
+******************************* SHARED SLIDER SCRIPT ***********************************
+****************************************7000********************************************
+
+scrp 1 1 14546 7000
+
+	inst
+
+*target RED Slider
+	targ mame "RedSlider"
+*check if (slider back piece) or (slider playhead) is under the mouse cursor
+	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp
+		mesg writ targ 1000
+		stop
+	endi
+
+
+*target GREEN Slider
+	targ mame "GreenSlider"
+*check if (slider back piece) or (slider playhead) is under the mouse cursor
+	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp
+		mesg writ targ 1000
+		stop
+	endi
+
+
+*target BLUE Slider
+	targ mame "BlueSlider"
+*check if (slider back piece) or (slider playhead) is under the mouse cursor
+	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp
+		mesg writ targ 1000
+		stop
+	endi
+
+endm
+
+
+
+
+
+****************************************************************************************
+************************** RED SLIDER TEXT INPUT SCRIPT ******************************
+****************************************7003********************************************
+
+scrp 1 1 14546 7003
+
+	inst
+
+	targ null
+
+	fcus
+
+*target RED Slider
+
+	mesg writ mame "RedSlider" 1006
+
+
+endm
+
+
+****************************************************************************************
+************************** GREEN SLIDER TEXT INPUT SCRIPT ******************************
+****************************************7003********************************************
+
+scrp 1 1 14546 7004
+
+	inst
+
+	targ null
+
+	fcus
+
+*target RED Slider
+
+	mesg writ mame "GreenSlider" 1006
+
+
+endm
+
+
+****************************************************************************************
+************************** BLUE SLIDER TEXT INPUT SCRIPT ******************************
+****************************************7003********************************************
+
+scrp 1 1 14546 7005
+
+	inst
+
+	targ null
+
+	fcus
+
+*target RED Slider
+
+	mesg writ mame "BlueSlider" 1006
+
+
+endm
+
+
+
+****************************************************************************************
+************************* BRUSH SLIDER VALUE CHANGED SCRIPT ****************************
+****************************************7002********************************************
+
+*this is called by our slider (name "ValueUpdateScript")
+
+scrp 1 1 14546 7002
+
+	inst
+
+*this stops us from running the script before all the sliders have loaded in
+	doif type mame "RedSlider" = 3 and type mame "GreenSlider" = 3 and type mame "BlueSlider" = 3
+
+*get current R G and B Values by targing each slider in turn
+		targ mame "RedSlider"
+		sets va01 vtos ftoi name "Value"
+
+		targ mame "GreenSlider"
+		adds va01 vtos ftoi name "Value"
+
+		targ mame "BlueSlider"
+		adds va01 vtos ftoi name "Value"
+
+
+*load up a palette entry (ie 503)
+		sets va30 va01
+
+		gsub get_palette_index_from_string_va30_into_va31
+
+		targ ownr
+
+		part 1000
+		pose va31
+
+*remember new values for easy access
+		setv name "NewPaletteIndex" va31
+*		sets name "NewPaletteRGB" va30
+
+	endi
+
+
+
+
+
+
+*todo: this subr is defined identically both here and in "pixelgridcontrols.cos"
+*any changes to it will have to be reflected there!
+
+
+*takes a three character input and calculates the index using the equation i*36 + j*6 + k
+	subr get_palette_index_from_string_va30_into_va31
+
+*convert each character of the string into its numerical equivalent by subtracting 48
+		setv va31 char va30 1
+		subv va31 48
+
+		setv va32 char va30 2
+		subv va32 48
+
+		setv va33 char va30 3
+		subv va33 48
+
+*The number 36 here is actually 6^2 (6 squared), and it helps in calculating the index of a three-digit string where each digit can range from 0-5,
+*similarly, the number 6 is 6^1 (6 to the power of 1).
+
+		mulv va31 36
+		mulv va32 6
+
+		addv va31 va32
+		addv va31 va33
+
+*add 2 to skip the outline frame and invisible frame.
+		addv va31 2
+
+*put us back in 0 - X space instead of 1 - X space...
+		subv va31 1
+
+	retn
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+*RAW MOUSE WHEEL SCRIPT
+
+scrp 1 1 14546 78
+
+
+*mousewheel controls whichever slider we're hovering over :)
+
+*The delta value is sent in _P1_ - 120 units per 'click'.
+
+
+	inst
+
+
+
+
+*target RED Slider
+	targ mame "RedSlider"
+*check if any part of this slider is under the mouse cursor
+	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
+*send slider a message telling it to increase or decrease our value via _p1_
+		mesg wrt+ targ 1004 _p1_ 0 0
+		stop
+	endi
+
+
+*target GREEN Slider
+	targ mame "GreenSlider"
+*check if any part of this slider is under the mouse cursor
+	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
+*send slider a message telling it to increase or decrease our value via _p1_
+		mesg wrt+ targ 1004 _p1_ 0 0
+		stop
+	endi
+
+
+*target BLUE Slider
+	targ mame "BlueSlider"
+*check if any part of this slider is under the mouse cursor
+	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
+*send slider a message telling it to increase or decrease our value via _p1_
+		mesg wrt+ targ 1004 _p1_ 0 0
+		stop
+	endi
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+*ACCEPT BUTTON
+
+scrp 1 1 14546 100
+
+	lock
+
+	inst
+
+*unpause everything!
+	call 9001 0 0
+
+	part 100
+	pose 1
+	wait 5
+
+	inst
+
+*reset button
+	pose 0
+
+*todo: this feels clumsy...
+	targ game "IconEditor_Main"
+
+
+	setv va01 game "IconEditor_Palette_Columns"
+	mulv va01 game "IconEditor_Palette_Rows"
+
+
+*check if we already have this colour, and make sure it is in fact a new colour (would be annoying to tick yes on a new palette entry and have it detect itself and fail...)
+	setv va00 0
+
+
+*palette entries start at 1001
+	setv va02 1001
+
+	reps va01
+
+
+*if this palette entry already exists...
+		part va02
+
+		doif pose = mame "NewPaletteIndex" and mame "NewPaletteIndex" <> mame "CurrentPaletteIndex"
+
+			setv va00 1
+
+		endi
+
+		addv va02 1
+
+	repe
+
+
+
+
+
+
+
+
+
+	doif va00 = 0
+
+
+
+
+
+
+
+
+
+
+*put new palette pose into selected colour preview
+		part name "SelectedColourPreview_PartNumber"
+		pose mame "NewPaletteIndex"
+
+*put new palette pose into selected colour
+		part name "SelectedPalettePart"
+		pose mame "NewPaletteIndex"
+
+
+
+		targ game "IconEditor_PixelGrid"
+
+*put palette INDEX into global selected colour variable
+		setv name "SelectedPaletteIndex" mame "NewPaletteIndex"
+*put palette RGB CODE into global selected colour variable
+*	sets name "SelectedPaletteRGB" mame "NewPaletteRGB"
+
+
+
+
+*and now for the most annoying part... correcting that palette entry on all visible grids
+
+
+		setv va01 game "IconEditor_NumPixelsX"
+		mulv va01 game "IconEditor_NumPixelsY"
+
+		setv va02 1
+
+		reps va01
+
+			targ game "IconEditor_PixelGrid"
+			part va02
+
+			dbg: outs "im TIRED"
+			dbg: outv pose
+			dbg: outv mame "NewPaletteIndex"
+
+			doif pose = mame "CurrentPaletteIndex"
+				pose mame "NewPaletteIndex"
+				targ game "IconEditor_Preview"
+				pose mame "NewPaletteIndex"
+				targ game "IconEditor_Preview_Darkened"
+				pose mame "NewPaletteIndex"
+			endi
+
+
+			addv va02 1
+
+
+		repe
+
+	else
+
+*todo: fix this
+		dbg: asrt "you already" = "have this colour"
+
+	endi
+
+
+
+*self-terminate
+	call 200 0 0
+
+
+
+endm
+
+
+
+
+*CANCEL BUTTON
+
+scrp 1 1 14546 101
+
+	lock
+	inst
+
+
+*unpause everything!
+	call 9001 0 0
+
+	part 101
+	pose 1
+	wait 5
+
+	inst
+
+*self-terminate
+	call 200 0 0
+
+endm
+
+
+
+
+scrp 1 1 14546 200
+
+	inst
+
+*	kill ownr
+
+*hide panel
+	mvto -1000 -1000
+
+*reset button
+	pose 0
+
+
+	targ game "WorldSwitcher_IconPanel"
+
+*move screen darkener just behind the Icon Chooser panel again. everything is obscured in such a way that this darkens everything appropriately.
+	setv va00 plne
+	subv va00 1
+
+	targ game "WorldSwitcher_ScreenFader"
+	plne va00
+
+
+
+*unclick button on main object
+
+	targ game "IconEditor_Main"
+
+	part 1101
+
+	pose 1
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+*9000 - PAUSE
+
+scrp 1 1 14546 9000
+
+
+*PAUSE the game when the palette window is open so we don't accidentally click any other buttons
+
+
+	inst
+	wpau 1
+	enum 1 0 0
+		doif gnus eq 2 and spcs eq 12
+			paus 0
+		else
+			paus 1
+		endi
+	next
+	enum 2 0 0
+		doif gnus eq 1 and spcs eq 1
+			paus 0
+		else
+			paus 1
+		endi
+	next
+	enum 3 0 0
+*			doif gnus ne 3 and spcs ne 103
+		paus 1
+*			endi
+	next
+	enum 4 0 0
+		paus 1
+	next
+
+*but we DON'T pause the palette window itself
+	enum 1 1 14546
+		paus 0
+	next
+
+
+*or the slider managers lol
+	enum 1 1 64769
+		paus 0
+	next
+
+
+endm
+
+
+
+
+*9001 - UNPAUSE
+
+scrp 1 1 14546 9001
+
+*UNPAUSE/RESUME the game when done editing your colour.
+
+	inst
+	wpau 0
+	enum 1 0 0
+		paus 0
+	next
+	enum 2 0 0
+		paus 0
+	next
+	enum 3 0 0
+		paus 0
+	next
+	enum 4 0 0
+		paus 0
+	next
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+*summon the palette window
+
+scrp 1 1 14546 1000
+
+	inst
+
+*PAUSE everything except the palette panel (no accidental misclicks)
+	call 9000 0 0
+
+*_P1_ is Index (for pose), _P2_ is RGB code (for editing)
+	setv name "NewPaletteIndex" _p1_
+
+	setv name "CurrentPaletteIndex" _p1_
+
+*	sets name "NewPaletteRGB" _p2_
+
+
+*todo: this is an awful, awful hack
+	setv va31 name "NewPaletteIndex"
+	gsub get_string_from_palette_index_va31_into_va30
+
+
+	sets _p2_ va30
+
+
+
+*set both current and new colours to be the same colour initially
+	part 1000
+	pose _p1_
+	part 1001
+	pose _p1_
+
+
+
+*set each sliders current value to the corresponding digit of the incoming RGB code
+	mesg wrt+ mame "RedSlider" 1003 stoi subs _p2_ 1 1 0 0
+
+	mesg wrt+ mame "GreenSlider" 1003 stoi subs _p2_ 2 1 0 0
+
+	mesg wrt+ mame "BlueSlider" 1003 stoi subs _p2_ 3 1 0 0
+
+
+
+*move it to center of window
+	mvto 256 215
+
+
+
+
+	subr get_string_from_palette_index_va31_into_va30
+
+*fix off by 1 error here
+		subv va31 1
+
+*the calculation here works on the same principle as get_palette_index_from_string but in the opposite direction -
+*converting from a base-10 number back to a base-6 three-digit number.
+
+*int i = index / 36;
+		setv va32 va31
+		divv va32 36
+
+*index %= 36;
+		modv va31 36
+
+*int j = index / 6;
+		setv va33 va31
+		divv va33 6
+
+*int k = index % 6;
+		setv va34 va31
+		modv va34 6
+
+
+*return $"ijk";
+		sets va30 vtos ftoi va32
+		adds va30 vtos ftoi va33
+		adds va30 vtos ftoi va34
+
+	retn
+
+
+
+
+
+
+
+endm

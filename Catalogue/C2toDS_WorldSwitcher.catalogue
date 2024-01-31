@@ -1,0 +1,14 @@
+# ================================ #
+# C2toDS WorldSwitcher Strings     #
+# ================================ #
+
+TAG "WorldSwitcher_CreationScreen_Text"
+# 0
+"Please choose a name and icon for your new world:"
+"Please decide which content you want to dock with the\nDocking Station Capillata using the checklist below."
+"Room Count:"
+"Icon Set:"
+"Custom Icon"
+# 5
+"Please choose a new name and icon for your world:"
+"Modify\nSelected World"

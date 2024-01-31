@@ -1,0 +1,1852 @@
+*delete any existing PixelGrids, we never want more than one set
+inst
+
+
+*full scale PixelGrids
+enum 1 1 64742
+	kill targ
+next
+
+*mini PixelGrids
+enum 1 1 64743
+	kill targ
+next
+
+
+*fake mouse cursor
+enum 1 1 66650
+	kill targ
+next
+
+
+
+
+
+
+
+
+
+************************************************
+
+*               GLOBAL VARIABLES               *
+
+************************************************
+
+
+
+*NUMBER OF PIXELS ON THE X (horizontal) AXIS
+setv game "IconEditor_NumPixelsX" 28
+
+*NUMBER OF PIXELS ON THE Y (vertical) AXIS
+setv game "IconEditor_NumPixelsY" 28
+
+*PIXEL SIZE (Each pixel is represented by an X*X block)
+setv game "IconEditor_PixelSize" 8
+
+*PIXEL SIZE ON THE REAL SCALE PREVIEW IMAGE (Each pixel is represented by an X*X block)
+setv game "IconEditor_PixelSizeTiny" 1
+
+*DEFAULT BRUSH SIZE IS 1x1 //todo: this is defined in multiple places
+sets game "IconEditor_BrushSize" "X,"
+
+
+
+
+
+
+*LOCATION OF BUFFER FRAME (used for some transform operations and for taking photos for the sprites!)
+setv game "IconEditor_Buffer_X" 1000
+setv game "IconEditor_Buffer_Y" 1000
+
+*these are the coordinates and dimensions used when taking a photo of the buffer, to be used as an icon
+*coordinates point to the CENTER of the snapshot, not the top left!
+setv game "IconEditor_Snapshot_X" 1024
+setv game "IconEditor_Snapshot_Y" 1014
+
+setv game "IconEditor_Snapshot_Width" 48
+setv game "IconEditor_Snapshot_Height" 29
+
+
+
+
+
+
+*TODO: is this where we should be defining this?
+
+*what should we set buzz (ideal interval in milliseconds between each tick) to?
+
+*lower values are smoother, this is used when the mouse is over the drawing surface to make them more responsive to input
+setv game "IconEditor_Tickrate_Fast" 10
+
+
+
+
+
+
+
+
+
+
+
+
+
+*note: pixel grids are actually created in the main icon editor creation script!
+
+
+
+
+
+
+
+
+
+
+*TODO: IT SHOULD BE CHECKING IF IT'S IN THE BOUNDS OF THE CANVAS HERE TOO!
+
+*RAW MOUSE DOWN SCRIPT
+
+*ov00 is set to 1 when the mouse is pressed down.
+
+scrp 1 1 64742 76
+
+*1 left mouse/2 right mouse
+	setv ov00 _p1_
+
+**1 - left mouse button
+*	doif _p1_ = 1
+*
+**set ov00 to 1 so the mouse move script knows to keep drawing when the mouse moves.
+*		setv ov00 1
+
+	inst
+
+*get pointer coords
+	setv va00 mopx
+	setv va01 mopy
+
+*CHECK IF THE POINTER IS OVER THE DRAWING SURFACE (OV03 STORES IF WE'RE OVER THE DRAWING SURFACE OR NOT)
+	call 9007 va00 va01
+	doif OV03 = 1
+
+*DRAW AT X/Y WITH CURRENTLY SELECTED BRUSH
+		call 9010 va00 va01
+
+	endi
+*	endi
+
+endm
+
+
+
+
+*RAW MOUSE UP SCRIPT
+
+*ov00 is set to 0 when the mouse is NOT pressed down.
+
+scrp 1 1 64742 77
+
+	setv ov00 0
+
+endm
+
+
+
+
+
+*RAW MOUSE MOVE SCRIPT
+
+scrp 1 1 64742 75
+
+
+	doif game "IconEditor_CursorMode" <> 0
+
+*get pointer coords
+		setv va00 mopx
+		setv va01 mopy
+
+		targ ownr
+
+		inst
+
+*CHECK IF THE POINTER IS OVER THE DRAWING SURFACE (OV03 STORES IF WE'RE OVER THE DRAWING SURFACE OR NOT)
+		call 9007 va00 va01
+		doif OV03 = 1
+
+*PAUSE the game when drawing on the canvas and change tickrate to 20ms. this allows much smoother update rate for guis and drawing surfaces.
+			call 9999 ownr 0
+
+
+*inst
+
+
+*target the real Hand and make it invisible. TODO: have an external manager object that restores visibility if any errors happen
+			targ pntr
+
+			show 0
+
+*target fake cursor object and set it to the current Tool.
+			targ game "IconEditor_Cursor"
+
+			pose game "IconEditor_CursorMode"
+
+*IconEditor CURSOR MODES!
+*0 - none, default Pointer?
+*1 - Brush Tool
+*2 - Eraser Tool
+*3 - Fill Can
+*4 - Colour Picker
+
+
+*attach the fake cursor to the real cursor.
+
+			frel pntr
+
+			flto 0 -26
+
+
+
+******************* END OF SET CURSOR BLOCK ***********************
+
+			targ ownr
+
+
+			call 9010 va00 va01
+
+*HAND IS OUTSIDE THE PIXEL GRID!
+*todo: account for c2tods custom cursor!
+
+		else
+
+************************** new mess, clean this up! sorry.
+
+*UNPAUSE/RESUME the game when done drawing on the canvas.
+
+			call 9998 0 0
+
+*target the real Hand and make it visible again.
+
+			targ pntr
+
+			show 1
+
+
+*target fake cursor object and set it to No Tool.
+			targ game "IconEditor_Cursor"
+
+*IconEditor CURSOR MODES!
+*0 - none, default Hand
+*1 - Pencil Tool
+*2 - Colour Picker (unimplemented)
+*3 - Fill Can (unimplemented)
+
+
+*detach the fake cursor from the real cursor, hide it
+
+			frel null
+
+			flto -50 -50
+
+
+		endi
+
+****************************************
+
+
+	else
+
+
+
+
+*UNPAUSE/RESUME the game when done drawing on the canvas.
+
+		call 9998 0 0
+
+
+
+
+*target the real Hand and make it visible again.
+
+		targ pntr
+
+		show 1
+
+
+*target fake cursor object and set it to No Tool.
+		targ game "IconEditor_Cursor"
+
+*IconEditor CURSOR MODES!
+*0 - none, default Hand
+*1 - Pencil Tool
+*2 - Colour Picker (unimplemented)
+*3 - Fill Can (unimplemented)
+
+
+*detach the fake cursor from the real cursor, hide it
+
+		frel null
+
+		flto -50 -50
+
+
+	endi
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+*****************************************************************************************************
+*****************************************************************************************************
+**  CHECK IF THE POINTER IS OVER THE DRAWING PANEL (_P1_ should be mouseX, _P2_ should be mouseY_) **
+***********************(9007)************************************************************************
+*****************************************************************************************************
+
+************************************************
+* RETURNS 1 (TRUE) TO OV03 IF WE ARE IN BOUNDS *
+************************************************
+
+scrp 1 1 64742 9007
+
+*get canvas bounds and store them in va00, va01, va02 and va03
+
+	inst
+
+	setv va00 posl
+	setv va01 post
+
+	setv va02 va00
+	setv va03 va01
+
+*grab the Number Of Pixels on each axis and multiply it by how big a pixel is to get the canvas width/height
+
+	setv va06 game "IconEditor_NumPixelsX"
+	mulv va06 game "IconEditor_PixelSize"
+
+	setv va07 game "IconEditor_NumPixelsY"
+	mulv va07 game "IconEditor_PixelSize"
+
+	addv va02 va06
+	addv va03 va07
+
+
+	setv va04 _p1_
+	setv va05 _p2_
+
+
+
+*if the mouse cursor is inside the pixel grid bounds
+	doif va04 > va00 and va04 < va02 and va05 > va01 and va05 < va03
+
+		setv OV03 1
+
+	else
+
+		setv OV03 0
+
+*when unsetting inside pixel grid bounds, we also clear the brush preview grid. otherwise the last preview gets stuck until the mouse touches it again.
+
+*clear any previous selected marker pixels
+
+		call 9011 0 0
+
+
+
+	endi
+
+endm
+
+
+
+
+
+
+
+
+*******************************************************************************************
+*******************************************************************************************
+**  CONVERT XY COORDINATE TO PART NUMBER (NOT MULTIPLIED!!!!) (_P1_ should be mouseX, _P2_ should be mouseY_) **
+***********************(9009)**************************************************************
+*******************************************************************************************
+
+******************************
+* RETURNS PART NUMBER TO ov70 *
+******************************
+
+*todo: maybe add an option to only let it pick parts on a given agent?
+
+scrp 1 1 64742 9009
+
+	inst
+
+*VA98 - X AXIS POS from input _P1_
+	setv va98 _p1_
+*VA99 - Y AXIS POS from input _P2_
+	setv va99 _p2_
+
+*subtract the position of the canvas itself from the pointer position
+*(this leaves us with values starting at 0 instead of 99452 or whatever)
+*	subv va98 va00
+*	subv va99 va01
+
+	subv va98 posl
+	subv va99 post
+
+*divide by IconEditor_PixelSize (a pixel is X pixels wide and tall)
+	divv va98 game "IconEditor_PixelSize"
+	divv va99 game "IconEditor_PixelSize"
+
+
+
+**round to the nearest int (cant control if it rounds up or down)
+*	setv va98 ftoi va98
+*	setv va99 ftoi va99
+
+*round them DOWN to the nearest int. by cutting off everything after the decimal point.		
+	sets va98 vtos va98
+	sets va99 vtos va99
+
+*find the decimal point
+	setv va50 sins va98 1 "."
+	setv va51 sins va99 1 "."
+
+	subv va50 1
+	subv va51 1
+
+*cut off everything else
+	sets va98 subs va98 1 va50
+	sets va99 subs va99 1 va51
+
+*convert the strings back to integers
+	setv va98 stoi va98
+	setv va99 stoi va99
+
+
+
+*subtract 1 from the number of pixels on both axes first (because of the 0th row/column)
+	setv va50 game "IconEditor_NumPixelsX"
+	subv va50 1
+
+	setv va51 game "IconEditor_NumPixelsY"
+	subv va51 1
+
+
+
+*if either of the values exceed their bounds, CLAMP them to the max
+*this is because the pointer x/y values update a bit too late when you drag it or something.
+	doif va98 > va50
+		setv va98 va50
+	endi
+
+	doif va99 > va51
+		setv va99 va51
+	endi
+
+	doif va98 < 0
+		setv va98 0
+	endi
+
+	doif va99 < 0
+		setv va99 0
+	endi
+*end of clamp operation
+
+
+
+
+	addv va98 va99
+
+*add 1 to the final value so we're base 1 instead of base 0
+*	addv va98 1
+
+
+	targ ownr
+
+	setv ov70 va98
+
+
+*this makes the current norn say which grid pixel ID we are hovering over.
+
+*		targ norn
+
+*		sezz vtos va98
+
+*		targ ownr
+
+endm
+
+
+
+
+
+*convert X/Y coordinate (usually mouseX and mouseY) into 2d array coords (ie 12, 18)
+
+*outputs new X into name "Result1" and new Y into name "Result2"
+
+********
+* 9015 *
+********
+
+
+scrp 1 1 64742 9015
+
+
+	inst
+
+*todo: should be able to replace this with scrp 9010!
+
+*VA98 - X AXIS POS from input _P1_
+	setv va98 _p1_
+*VA99 - Y AXIS POS from input _P2_
+	setv va99 _p2_
+
+*subtract the position of the canvas itself from the pointer position
+*(this leaves us with values starting at 0 instead of 99452 or whatever)
+	subv va98 posl
+	subv va99 post
+
+*divide by IconEditor_PixelSize (a pixel is X pixels wide and tall)
+	divv va98 game "IconEditor_PixelSize"
+	divv va99 game "IconEditor_PixelSize"
+
+
+
+**round to the nearest int (cant control if it rounds up or down)
+*	setv va98 ftoi va98
+*	setv va99 ftoi va99
+
+
+
+*no longer needed but keeping it here just in case/as reference
+
+*round them DOWN to the nearest int. by cutting off everything after the decimal point.		
+	sets va98 vtos va98
+	sets va99 vtos va99
+
+
+*find the decimal point
+	setv va50 sins va98 1 "."
+	setv va51 sins va99 1 "."
+
+	subv va50 1
+	subv va51 1
+
+*cut off everything else
+	sets va98 subs va98 1 va50
+	sets va99 subs va99 1 va51
+
+*convert the strings back to integers
+	setv va98 stoi va98
+	setv va99 stoi va99
+
+
+	setv name "Result1" va98
+	setv name "Result2" va99
+
+
+
+
+
+endm
+
+
+
+
+*******************************************************************************************
+*******************************************************************************************
+**  CONVERT WORLD XY COORDINATE TO PART NUMBER (_P1_ should be mouseX, _P2_ should be mouseY_) **
+***********************(9008)**************************************************************
+*******************************************************************************************
+
+******************************
+* RETURNS PART NUMBER TO ov69 (via 9012) *
+******************************
+
+*todo: maybe add an option to only let it pick parts on a given agent?
+
+scrp 1 1 64742 9008
+
+	inst
+
+*todo: should be able to replace this with scrp 9010!
+
+*VA98 - X AXIS POS from input _P1_
+	setv va98 _p1_
+*VA99 - Y AXIS POS from input _P2_
+	setv va99 _p2_
+
+*subtract the position of the canvas itself from the pointer position
+*(this leaves us with values starting at 0 instead of 99452 or whatever)
+	subv va98 posl
+	subv va99 post
+
+*divide by IconEditor_PixelSize (a pixel is X pixels wide and tall)
+	divv va98 game "IconEditor_PixelSize"
+	divv va99 game "IconEditor_PixelSize"
+
+
+
+**round to the nearest int (cant control if it rounds up or down)
+*	setv va98 ftoi va98
+*	setv va99 ftoi va99
+
+*round them DOWN to the nearest int. by cutting off everything after the decimal point.		
+	sets va98 vtos va98
+	sets va99 vtos va99
+
+
+*find the decimal point
+	setv va50 sins va98 1 "."
+	setv va51 sins va99 1 "."
+
+	subv va50 1
+	subv va51 1
+
+*cut off everything else
+	sets va98 subs va98 1 va50
+	sets va99 subs va99 1 va51
+
+*convert the strings back to integers
+	setv va98 stoi va98
+	setv va99 stoi va99
+
+
+
+
+
+*call 9009 with our corrected coords
+	call 9012 va98 va99
+
+endm
+
+
+
+
+
+*convert 2d array position (ie 16, 23) into a part number
+
+**************** 9012  ****************
+
+scrp 1 1 64742 9012
+
+	inst
+
+*if either of the values exceed their bounds, CLAMP them to the max
+	setv va98 _p1_
+	setv va99 _p2_
+
+*subtract 1 from the number of pixels on both axes first (because of the 0th row/column)
+	setv va50 game "IconEditor_NumPixelsX"
+	subv va50 1
+
+	setv va51 game "IconEditor_NumPixelsY"
+	subv va51 1
+
+
+	doif va98 > va50
+		setv va98 va50
+	endi
+
+	doif va99 > va51
+		setv va99 va51
+	endi
+
+	doif va98 < 0
+		setv va98 0
+	endi
+
+	doif va99 < 0
+		setv va99 0
+	endi
+*end of clamp operation
+
+
+*multiply va99 (Y coordinate in tiny pixels) by the number of X (horizontal) pixels
+
+*		mulv va99 18
+	mulv va99 game "IconEditor_NumPixelsX"
+
+
+
+	addv va98 va99
+
+*add 1 to the final value so we're base 1 instead of base 0
+	addv va98 1
+
+
+	targ ownr
+
+	setv ov69 va98
+
+endm
+
+
+
+
+
+
+
+**
+**
+**
+***really early wip of CONVERT PART NUMBER TO X/Y. not sure what params it will need to work but hoping it can just reverse the math of the other function
+**
+*********************************************************************************************
+*********************************************************************************************
+****  CONVERT XY COORDINATE TO PART NUMBER (_P1_ should be mouseX, _P2_ should be mouseY_) **
+*************************(9008)**************************************************************
+*********************************************************************************************
+**
+********************************
+*** RETURNS PART NUMBER TO ov69 *
+********************************
+**
+***todo: maybe add an option to only let it pick parts on a given agent?
+**
+**scrp 1 1 64742 9008
+**
+**
+***VA98 - X AXIS POS from input _P1_
+**	setv va98 _p1_
+***VA99 - Y AXIS POS from input _P2_
+**	setv va99 _p2_
+**
+***subtract the position of the canvas itself from the pointer position
+***(this leaves us with values starting at 0 instead of 99452 or whatever)
+***	subv va98 va00
+***	subv va99 va01
+**
+**	subv va98 posl
+**	subv va99 post
+**
+***divide by IconEditor_PixelSize (a pixel is X pixels wide and tall)
+**	divv va98 game "IconEditor_PixelSize"
+**	divv va99 game "IconEditor_PixelSize"
+**
+***round to the nearest int (cant control if it rounds up or down)
+**	setv va98 ftoi va98
+**	setv va99 ftoi va99
+**
+**
+**
+***no longer needed but keeping it here just in case/as reference
+**
+****round them DOWN to the nearest int. by cutting off everything after the decimal point.		
+***	sets va98 vtos va98
+***	sets va99 vtos va99
+***
+***
+****find the decimal point
+***	setv va50 sins va98 1 "."
+***	setv va51 sins va99 1 "."
+***
+***	subv va50 1
+***	subv va51 1
+***
+****cut off everything else
+***	sets va98 subs va98 1 va50
+***	sets va99 subs va99 1 va51
+***
+****convert the strings back to integers
+***	setv va98 stoi va98
+***	setv va99 stoi va99
+**
+*
+*
+*
+*
+*
+**if either of the values exceed their bounds, CLAMP them to the max
+**this is because the pointer x/y values update a bit too late when you drag it or something.
+*
+*
+**subtract 1 from the number of pixels on both axes first (because of the 0th row/column)
+*setv va50 game "IconEditor_NumPixelsX"
+*subv va50 1
+*
+*setv va51 game "IconEditor_NumPixelsY"
+*subv va51 1
+*
+*
+*doif va98 > va50
+*setv va98 va50
+*endi
+*
+*doif va99 > va51
+*setv va99 va51
+*endi
+**end of clamp operation
+*
+*
+**add 1 to every value so we start at 1 instead of 0 and break some calculations.
+**		addv va98 1
+**		addv va99 1
+*
+*
+** 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18
+*
+** 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36
+*
+*
+**multiply va99 (Y coordinate in tiny pixels) by the number of X (horizontal) pixels
+*
+**		mulv va99 18
+*mulv va99 game "IconEditor_NumPixelsX"
+*
+*
+*
+*addv va98 va99
+*
+**add 1 to the final value so we're base 1 instead of base 0
+*addv va98 1
+*
+*
+*targ ownr
+*
+*setv ov69 va98
+*
+*endm
+*
+*
+*
+**part number
+*setv va00 ov69
+*
+**subtract 1, because it's offset by 1 at the end of the conversion process from x/y
+*subv va00 1
+
+
+
+
+
+
+******************************************************************
+* DRAW AT X/Y WITH SELECTED BRUSH - _p1_ _p2_ mouse cursor again *
+******************************************************************
+
+scrp 1 1 64742 9010
+
+*wait 1
+
+	inst
+
+	lock
+
+
+*clear any previous selected marker pixels
+
+	call 9011 0 0
+
+
+
+*set colour to draw with in VA50
+
+*eraser tool/right click colour override us to invisible black
+	doif game "IconEditor_CursorMode" = 3 or ov00 = 2
+		setv va50 0
+	else
+		setv va50 name "SelectedPaletteIndex"
+	endi
+
+
+
+
+
+*BRUSH TOOL (or ERASER, which is a variation of brush tool which uses special colour 0)
+	doif game "IconEditor_CursorMode" = 1 or game "IconEditor_CursorMode" = 3
+
+
+
+
+
+
+* -----> game "IconEditor_BrushSize" STORES CURRENT BRUSH <-----
+
+*here's an example using a small brush:
+
+*		" X ,"
+*		"XXX,"
+*		" X ,"
+
+
+*load in the brush to VA70
+		sets va70 game "IconEditor_BrushSize"
+
+*third column is ignored
+*2nd column is ignored
+
+
+
+*position of comma is how many entries to skip in the string to get to the next line: 4	
+		setv va25 sins va70 1 ","
+
+		setv va26 va25
+		divv va26 2.0
+		subv va26 1
+		mulv va26 game "IconEditor_PixelSize"
+
+
+
+
+**round to the nearest int (problem: cant control if it rounds up or down)
+*		setv va26 ftoi va26
+*		setv va99 ftoi va99
+
+*round them DOWN to the nearest int. by cutting off everything after the decimal point.		
+		sets va26 vtos va26
+
+
+*find the decimal point
+		setv va27 sins va26 1 "."
+
+		subv va27 1
+
+*cut off everything else
+		sets va26 subs va26 1 va27
+
+*convert the strings back to integers
+		setv va26 stoi va26
+
+
+
+
+
+
+
+
+
+
+		subv _p1_ va26
+		subv _p2_ va26
+
+*position of comma-1 is brush hw/ in pixels: 3	
+		setv va24 va25
+		subv va24 1
+
+
+*store initial position of mouse cursor in VA02
+		setv VA02 _p1_
+
+*VA40 tracks the index in the brush string. string indexes start at 1.
+		setv VA40 1
+
+*run the loop VA24 (3) times in the Y axis.
+		reps va24
+
+
+
+*BEFORE START OF NEW ROW, PREPARE STRING...
+
+*store VA40 (1) + VA24 (3) in VA41 (4).
+			setv va41 va40
+			addv va41 va25
+
+*store the string from VA40 (1) to VA41 (4) in VA65
+			sets va65 subs va70 va40 va24
+
+*			" X "
+
+
+
+			addv va40 va25
+
+
+
+
+*loop iteration
+			setv va05 1
+
+			reps va24
+
+*		START OF NEW ROW
+				sets va49 subs va65 va05 1
+
+				doif va49 <> " "
+
+* *CONVERT XY COORDINATE TO PART NUMBER (OV69) **
+					call 9008 _p1_ _p2_
+
+
+					setv va10 ov69
+
+*only draw if mouse button is held down
+					doif ov00 <> 0
+*					doif 0 = 0
+
+*erase
+
+*apply new pixel colour to main pixelgrid
+						part va10
+						pose va50
+
+*apply new pixel colour to LIT preview grid
+						targ game "IconEditor_Preview"
+						part va10
+						pose va50
+
+
+*apply  new pixel colour to UNLIT preview grid
+						targ game "IconEditor_Preview_Darkened"
+						part va10
+						pose va50
+
+
+					else
+
+*target the brush preview (highlight) grid and set the pose to 0 (highlighted)
+						targ game "IconEditor_BrushPreview"
+						part va10
+						pose 0
+
+
+					endi
+
+				endi
+
+				targ ownr
+
+
+				addv va05 1
+
+*	add pixel size to cursor _X_ position
+				addv _p1_ game "IconEditor_PixelSize"
+			repe
+
+*reset X position
+			setv _p1_ va02
+*increase Y position
+			addv _p2_ game "IconEditor_PixelSize"
+
+			targ ownr
+
+		repe
+
+
+
+
+
+
+
+
+
+
+
+*todo: could use the buffer instead of a virtual infinitely sized array...
+
+
+
+*FILL TOOL - NEW CONTIGUOUS IMPLEMENTATION
+
+	elif game "IconEditor_CursorMode" = 2
+
+
+*convert X/Y to part number
+		call 9008 _p1_ _p2_
+
+
+
+*must be clicking
+		doif ov00 = 1 or ov00 = 2
+
+*right click fills transparent
+			doif ov00 = 2
+				setv va50 0
+			endi
+
+
+
+*subtract 1 from the number of pixels on both axes first (because of the 0th row/column)
+			setv va20 game "IconEditor_NumPixelsX"
+			subv va20 1
+
+			setv va51 game "IconEditor_NumPixelsY"
+			subv va51 1
+
+
+
+
+
+*select that part
+			part ov69
+
+
+*store pose (colour index) of highlighted pixel
+			setv va04 pose
+
+
+*do nothing if our target pixel is already the correct colour
+			doif va04 = va50
+				stop
+			endi
+
+
+
+*CONVERT X/Y TO 2D ARRAY COORDS
+			call 9015 _p1_ _p2_
+
+
+*add clicked tile to queue
+			setv name "FillQueue_1_X" name "Result1"
+			setv name "FillQueue_1_Y" name "Result2"
+			setv name "FillQueue_Count" 1
+
+*reset visited queue?
+			setv name "FillQueue_Visited_Count" 0
+
+
+			loop
+
+*get next item off the top of the Fill Queue stack
+				sets va70 "FillQueue_"
+				adds va70 vtos name "FillQueue_Count"
+
+				sets va71 va70
+
+				adds va70 "_X"
+				adds va71 "_Y"
+
+*move the actual values out of the name variables into va98 and va99
+
+*"FillQueue_N_X"
+				setv va98 name va70
+*"FillQueue_N_Y"
+				setv va99 name va71
+
+*			dbg: outs va70
+*			dbg: outv name va70
+*			dbg: outs va71
+*			dbg: outv name va71
+
+				doif va98 <= va20 and va99 <= va51 and va98 >= 0 and va99 >= 0
+
+
+					addv name "FillQueue_Visited_Count" 1
+
+*add current item to VISITED Queue stack
+					sets va80 "FillQueue_Visited_"
+					adds va80 vtos name "FillQueue_Visited_Count"
+
+					sets va81 va80
+
+					adds va80 "_X"
+					adds va81 "_Y"
+
+
+*"FillQueue_Visited_N_X" = "FillQueue_J_X"
+					setv name va80 name va70
+*"FillQueue_Visited_N_Y" = "FillQueue_J_Y"
+					setv name va81 name va71
+
+*			addv name "FillQueue_Visited_Count" 1
+
+
+
+
+
+*delete the read entries and reduce the queue count
+					deln va70
+					deln va71
+					subv name "FillQueue_Count" 1
+
+
+*            // Ensure coordinates are valid and the current value matches the initial value.
+*            if (x < 0 || y < 0 || x >= array.GetLength(0) || y >= array.GetLength(1) || array[x, y] != initialValue)
+*                continue;
+
+
+
+
+**if either of the values exceed their bounds, CLAMP them to the max
+**this is because the pointer x/y values update a bit too late when you drag it or something.
+*			doif va98 > va20
+*				setv va98 va20
+*			endi
+*
+*			doif va99 > va51
+*				setv va99 va51
+*			endi
+*
+*			doif va98 < 0
+*				setv va98 0
+*			endi
+*
+*			doif va99 < 0
+*				setv va99 0
+*			endi
+**end of clamp operation
+
+
+*		doif va98 <= va20 and va99 <= va51 and va98 >= 0 and va99 >= 0
+
+
+*convert 2d array position (ie 16, 23) into a part number
+					call 9012 va98 va99
+
+
+*				dbg: outs "part number:"
+*				dbg: outv ov69
+
+
+					part ov69
+
+
+					doif pose = va04
+
+*pose va50
+
+
+*apply new pixel colour to main pixelgrid
+						pose va50
+
+*apply new pixel colour to LIT preview grid
+						targ game "IconEditor_Preview"
+						part mv69
+						pose va50
+
+
+*apply  new pixel colour to UNLIT preview grid
+						targ game "IconEditor_Preview_Darkened"
+						part mv69
+						pose va50
+
+						targ ownr
+
+
+
+
+
+
+
+*set up offsets and add tile to queue
+
+*(X, Y-1)
+						setv va30 0
+						setv va31 -1
+
+						gsub Add_To_Queue
+
+*(X, Y+1)
+						setv va30 0
+						setv va31 1
+
+						gsub Add_To_Queue
+
+
+*(X-1, Y)
+						setv va30 -1
+						setv va31 0
+
+						gsub Add_To_Queue
+
+
+*(X+1, Y)
+						setv va30 1
+						setv va31 0
+
+						gsub Add_To_Queue
+
+
+
+
+*				else
+*
+*					dbg: outs " "
+*					dbg: outs "not a match, moving on..."
+*
+*
+*
+*					setv va77 pose
+*					pose 5
+*					slow
+*					inst
+*					pose va77
+*
+*					dbg: outs "X:"
+*					dbg: outv va98
+*					dbg: outs "Y:"
+*					dbg: outv va99
+*
+*
+*					dbg: outs ""
+*					dbg: outs "========================="
+*					dbg: outs "queue length:"
+*					dbg: outv name "FillQueue_Count"
+*					dbg: outs "========================="
+*					dbg: outs ""
+*
+*		dbg: outs "~ ~ ~"
+*		dbg: outs "attempting to add entry"
+*		dbg: outv name "FillQueue_Count"
+*		dbg: outs "at"
+*		dbg: outv va40
+*		dbg: outv va41
+*
+*
+*
+*			sets va80 "FillQueue_Visited_"
+*			adds va80 vtos va13
+*
+*			sets va81 va80
+*
+*			adds va80 "_X"
+*			adds va81 "_Y"
+*
+*
+*				dbg: outs "FAILED! WE ALREADY HAVE THIS ONE?"
+*
+*				dbg: outs "look:"
+*				dbg: outs va80
+*				dbg: outv name va80
+*				dbg: outs "is the same as"
+*				dbg: outv va40
+*
+*				dbg: outs ""
+*
+*				dbg: outs va81
+*				dbg: outv name va81
+*				dbg: outs "is the same as"
+*				dbg: outv va41
+*
+*
+*
+*
+*
+*					dbg: outs "crashing lol"
+*					dbg: asrt 0 = 3
+*
+**					dbg: outs "NOT WHAT YOU WANTED? POSE WAS "
+**					dbg: outv pose
+**					dbg: outs "BUT WE WANTED:"
+**					dbg: outv va04
+					endi
+				else
+
+*delete the read entries and reduce the queue count
+					deln va70
+					deln va71
+					subv name "FillQueue_Count" 1
+
+				endi
+
+
+*			dbg: outs ""
+*			dbg: outs "========================="
+*			dbg: outs "queue length:"
+*			dbg: outv name "FillQueue_Count"
+*			dbg: outs "========================="
+*			dbg: outs ""
+
+*			slow
+*			inst
+
+*			dbg: outs va80
+
+*keep going until the Fill Queue is totally empty
+			untl name "FillQueue_Count" = 0
+
+			dbg: outs "finale:"
+			dbg: outv name "FillQueue_Visited_Count"
+
+
+
+*		setv ov00 0
+*		dbg: asrt 0 = 3
+*		wait 100
+			setv ov00 0
+
+		else
+
+*target the brush preview (highlight) grid and set the pose to 0 (highlighted)
+			targ game "IconEditor_BrushPreview"
+			part mv69
+			pose 0
+
+			targ ownr
+
+		endi
+
+
+
+
+
+*OLD FILL TOOL - NOT CONTIGUOUS!
+
+	elif game "IconEditor_CursorMode" = 5
+
+
+
+*convert X/Y to part number
+		call 9008 _p1_ _p2_
+
+*select that part
+		part ov69
+
+
+*store pose (colour index) of highlighted pixel
+		setv va04 pose
+
+
+		inst
+
+*pixel grid is 18x18
+		setv va00 game "IconEditor_NumPixelsX"
+		mulv va00 game "IconEditor_NumPixelsY"
+
+
+		setv va01 0
+
+		reps va00
+
+			targ ownr
+
+			addv va01 1
+
+			part va01
+
+*if current pixel we're checking is the same as the colour we're checking against
+			doif pose = va04
+
+
+
+*only fill if mouse button is held down
+				doif ov00 <> 0
+
+*apply new pixel colour to main pixelgrid
+					part va01
+					pose va20
+
+*apply new pixel colour to LIT preview grid
+					targ game "IconEditor_Preview"
+					part va01
+					pose va20
+
+*apply  new pixel colour to UNLIT preview grid
+					targ game "IconEditor_Preview_Darkened"
+					part va01
+					pose va20
+
+*if brush button isn't held down, update the drawing preview overlay instead
+				else
+
+*target the brush preview (highlight) grid and set the pose to 0 (highlighted)
+					targ game "IconEditor_BrushPreview"
+					part va01
+					pose 0
+
+				endi
+
+			endi
+
+
+
+		repe
+
+
+
+
+
+
+
+
+
+*PICKER TOOL
+	elif game "IconEditor_CursorMode" = 4
+
+*convert X/Y to part number
+		call 9008 _p1_ _p2_
+
+		part ov69
+
+		setv va00 pose
+
+*mouse must be held down
+		doif ov00 = 1
+
+
+			targ game "IconEditor_Main"
+
+			setv va01 game "IconEditor_Palette_Columns"
+			mulv va01 game "IconEditor_Palette_Rows"
+
+
+*palette entries start at 1001
+			setv va02 1001
+
+			reps va01
+
+
+*if this palette entry already exists, simply select it
+				part va02
+
+				doif pose = va00
+
+					mesg wrt+ targ 1001 va02 0 0
+
+				endi
+
+				addv va02 1
+
+			repe
+
+		endi
+
+
+*target the brush preview (highlight) grid and set the pose to 0 (highlighted)
+		targ game "IconEditor_BrushPreview"
+		part mv69
+		pose 0
+
+	endi
+
+
+
+
+
+
+
+
+
+
+	subr Add_To_Queue
+
+*enforced delay to stop us reaching the instruction limit...
+
+		doif va19 = 10
+			setv va19 0
+			slow
+			inst
+		endi
+
+		addv va19 1
+
+
+
+*increase queue count
+		addv name "FillQueue_Count" 1
+
+*add new entry to top of Fill Queue stack
+		sets va90 "FillQueue_"
+		adds va90 vtos name "FillQueue_Count"
+
+		sets va91 va90
+
+		adds va90 "_X"
+		adds va91 "_Y"
+
+
+*add Xoffset to X, Yoffset to Y
+		setv va40 va98
+		setv va41 va99
+
+		addv va40 va30
+		addv va41 va31
+
+
+
+**		doif va40 <= va20 and va41<= va51 and va40 >= 0 and va41 >= 0
+*		doif va40 > va20 or va41 > va51 or va40 < 0 or va41 < 0
+*			dbg: outs "this happened at least once"
+*		else
+
+
+*		dbg: outs "~ ~ ~"
+*		dbg: outs "attempting to add entry"
+*		dbg: outv name "FillQueue_Count"
+*		dbg: outs "at"
+*		dbg: outv va40
+*		dbg: outv va41
+
+
+
+*visited queue entries start at 1, not 0
+		setv va13 1
+
+*reset bool checking if we had a Visited conflict
+		setv va14 0
+
+
+
+*check every entry in the visited queue against the new entry we are attempting to create
+*reps name "FillQueue_Visited_Count"
+
+*iteration counter
+		setv va16 name "FillQueue_Visited_Count"
+		loop
+
+			sets va80 "FillQueue_Visited_"
+			adds va80 vtos va13
+
+			sets va81 va80
+
+			adds va80 "_X"
+			adds va81 "_Y"
+
+			addv va13 1
+
+*we found a duplicate!
+			doif name va80 = va40 and name va81 = va41
+				setv va14 1
+
+*im tired. fix this todo:
+				setv va16 0
+
+
+*				dbg: outs "FAILED! WE ALREADY HAVE THIS ONE?"
+*
+*				dbg: outs "look:"
+*				dbg: outs va80
+*				dbg: outv name va80
+*				dbg: outs "is the same as"
+*				dbg: outv va40
+*
+*				dbg: outs ""
+*
+*				dbg: outs va81
+*				dbg: outv name va81
+*				dbg: outs "is the same as"
+*				dbg: outv va41
+
+			else
+
+			endi
+
+*repe
+			subv va16 1
+
+*todo: we are reading WAY past the end of the array into a bunch of 0 entries. fix this??
+*			doif name va80 = 0 and name va81 = 0
+*				dbg: outs "ya. no."
+*			endi
+
+		untl va16 <= 0
+
+
+		doif va14 = 0
+
+*add them to the stack!!
+			setv name va90 va40
+			setv name va91 va41
+*			dbg: outs ""
+*			dbg: outs "SUCCESS"
+*			dbg: outs ""
+		else
+*undo the queue count addition from earlier - it is no longer relevant.
+			subv name "FillQueue_Count" 1
+		endi
+
+*		dbg: outs "~ ~ ~"
+*		dbg: outs ""
+
+
+
+*		endi
+
+	retn
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+******************************************************
+******************************************************
+**  PAUSE - _P1 is object to skip, set it to OWNR)  **
+***********************(9999)*************************
+******************************************************
+
+scrp 1 1 64742 9999
+
+	inst
+
+	doif game "IconEditor_Paused" = 0
+
+		setv game "IconEditor_Paused" 1
+
+
+
+
+
+
+*remember original tickrate to restore it when closing dropdown!
+
+*save it in a NAME variable (NOT GAME), in case anything else tries to write to it at an awkward time...
+		setv name "Tickrate_Original" buzz
+
+*change tickrate, set ideal interval in milliseconds between each tick. 
+*this allows much smoother update rate for guis and drawing surfaces.
+		buzz game "IconEditor_Tickrate_Fast"
+
+
+*
+*
+**PAUSE the game when drawing on the canvas, hovering over the dropdown menus, etc
+**so that norn brains don't have to attempt to tick at the new faster BUZZ rate.
+*
+*
+*		inst
+*		wpau 1
+*		enum 1 0 0
+*			doif gnus eq 2 and spcs eq 12
+*				paus 0
+*			else
+*				paus 1
+*			endi
+*		next
+*		enum 2 0 0
+*			doif gnus eq 1 and spcs eq 1
+*				paus 0
+*			else
+*				paus 1
+*			endi
+*		next
+*		enum 3 0 0
+**			doif gnus ne 3 and spcs ne 103
+*			paus 1
+**			endi
+*		next
+*		enum 4 0 0
+*			paus 1
+*		next
+*
+**yep, we even pause the pause gui
+**enum 1 2 6
+**	paus 0
+**next
+*
+**check if there was any object you were told NOT to pause
+*		setv va00 type _P1_
+*		doif va00 >= 3 and va00 <= 7
+*
+**DON'T pause the object which called this pause
+*			targ _P1_
+*			paus 0
+*		endi
+
+	endi
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*********************
+*********************
+**  UNPAUSE/RESUME **
+********(9998)*******
+*********************
+
+scrp 1 1 64742 9998
+
+	inst
+
+	doif game "IconEditor_Paused" <> 0
+
+		setv game "IconEditor_Paused" 0
+
+
+*its saved in a NAME variable (NOT GAME), in case anything else tries to write to it at an awkward time...
+		doif name "Tickrate_Original" <> 0
+*restore original tickrate from variable set when this was opened
+			buzz name "Tickrate_Original"
+		else
+			buzz 50
+		endi
+
+
+
+**change tickrate, set ideal interval in milliseconds between each tick. 
+**slow it back down to default when the cursor is off the PixelGrid for normal performance.
+**TODO: store this variable in memory instead of assuming it was 50 before you touched the grid.
+*		buzz 50
+
+*		inst
+*		wpau 0
+*		enum 1 0 0
+*			paus 0
+*		next
+*		enum 2 0 0
+*			paus 0
+*		next
+*		enum 3 0 0
+*			paus 0
+*		next
+*		enum 4 0 0
+*			paus 0
+*		next
+
+	endi
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*****************************************************************
+*****************************************************************
+**  MAIN PIXELGRID SCRIPT 9011 IS USED TO CLEAR SELECTION MARKER OVERLAY **
+******************************( 9011 )*****************************
+*****************************************************************
+
+scrp 1 1 64742 9011
+
+	inst
+
+*pixel grid is 18x18
+	setv va00 game "IconEditor_NumPixelsX"
+	mulv va00 game "IconEditor_NumPixelsY"
+
+
+	setv va01 0
+
+	reps va00
+
+		addv va01 1
+
+*target selection marker and apply blank pose (1) for each pixel
+		targ game "IconEditor_BrushPreview"
+		part va01
+		pose 1
+
+
+	repe
+
+endm

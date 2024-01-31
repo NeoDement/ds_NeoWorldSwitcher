@@ -1,0 +1,1189 @@
+*enum 1 1 34543
+*	kill targ
+*next
+
+
+
+
+*kill dropdown stuff??
+
+*enum 1 1 64741
+*	kill targ
+*next
+*
+*
+*enum 1 1 55555
+*	kill targ
+*next
+
+
+
+
+
+
+
+******* ALL WORLD ICON PICKER RELATED STRINGS *******
+
+inst
+
+*catalogue tag to read strings from
+sets va20 "WorldSwitcher_CreationScreen_Text"
+
+*might as well reload catalogue files
+reaf
+
+
+*read in strings from specified catalogue file
+doif reaq va20 = 1
+
+	sets game "UI_ICONSET" read va20 3
+	sets game "UI_CUSTOM" read va20 4
+
+*plain english fallback in case the catalogue file is missing
+else
+
+	sets game "UI_ICONSET" "Icon Set:"
+	sets game "UI_CUSTOM" "Custom Icon"
+
+endi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*this gets immediately set back to 1 whenever we load the iconsets anyway.
+
+setv game "WorldSwitcher_IconChooser_CurrentPage" 1
+
+
+
+
+
+*all the magic happens in the creation script. this is called from script 200 in DS world switcherC2.cos
+*new: comp 1 1 34543 "worldswitcher_IconPanel" 1 0 1000
+
+
+
+
+
+*creation script
+
+scrp 1 1 34543 10
+
+
+
+	inst
+
+
+*remember this object for later!
+	seta game "WorldSwitcher_IconPanel" targ
+
+
+* left button
+	pat: butt 1 "worldswitcher_IconPanel" 3 2 15 167 1 [] 1000 0
+* right button
+	pat: butt 2 "worldswitcher_IconPanel" 5 2 263 167 2 [] 1000 0
+
+
+*	part 1
+*	pose 1
+*
+*	part 2
+*	pose 1
+
+
+* + button (OPEN ICON EDITOR)
+	pat: butt 3 "worldswitcher_IconPanel" 2 1 91 167 3 [] 2000 0
+
+* Icon Set:
+	pat: fixd 4 "worldswitcher_IconPanel" 9 12 12 4 "whiteontransparentchars"
+	part 4
+*ptxt "Icon Set:"
+	ptxt game "UI_ICONSET"
+
+
+
+
+
+* Open Icon Editor text
+	pat: fixd 5 "worldswitcher_IconPanel" 9 123 168 5 "whiteontransparentchars"
+	part 5
+*ptxt "Open icon editor"
+	ptxt game "UI_CUSTOM"
+
+
+
+
+
+
+
+	wait 1
+
+
+	inst
+
+
+****************************************************************************
+*Iconset dropdown
+****************************************************************************
+
+*remember X and Y of dropdown to create list in the correct place when clicked!
+	setv va00 94
+	setv va01 14
+
+*remember part numbers so dropdown manager can refer to them
+	setv va02 6
+	setv va03 7
+
+*Y of fixed text component of dropdown
+	setv va04 va01
+	addv va04 game "WorldSwitcher_dropdown_TextboxYOffset"
+
+*name of sprite file to use when creating the dropdown
+	sets va05 "WorldSwitcher_IconEditor_Dropdown_Long"
+
+
+*button component of dropdown
+	pat: butt va02 "WorldSwitcher_IconEditor_Dropdown_Long" 0 0 va00 va01 1 [] 6001 1
+
+*fixed text component of dropdown
+	pat: fixd va03 "WorldSwitcher_IconEditor_Dropdown_Long" 8 va00 va04 1 "whiteontransparentchars"
+
+
+
+*dropdown manager for Create Action To Perform dropdown.
+	new: comp 1 1 64741 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+
+
+*set a named variable on the compound object to point to this dropdown in particular
+	seta mame "IconsetDropdown" targ
+
+*OV00 - compound object this dropdown is part of
+	seta ov00 ownr
+
+*compound object this slider is part of
+	seta name "ParentObject" ownr
+
+*X/Y coords of top left corner of dropdown
+	setv name "X" va00
+	setv name "Y" va01
+
+*specific X/Y coords of top left corner of listbox component of dropdown can be specified here (still relative to the top left corner of the dropdown button)
+*if not set, it will appear just beneath your dropdown button (the height of one segment)
+*	setv name "X_Offset" 0
+*	setv name "Y_Offset" 0
+
+
+*part numbers for each component of the slider. if a textbox part isn't specified, the current dropdown text value won't be automatically put in the box.
+	setv name "Button_PartNumber" va02
+	setv name "Textbox_PartNumber" va03
+
+*name of sprite file to use when creating the dropdown (should usually match the file used when creating the parts)
+	sets name "Gallery" va05
+
+*dropdown width should match the width of your sprites.
+
+*here are the widths to use for the default sprites
+*WorldSwitcher_IconEditor_Dropdown_Long - 192
+*WorldSwitcher_IconEditor_Dropdown_Medium - 128
+*WorldSwitcher_IconEditor_Dropdown_Short - 102
+	setv name "Width" 192
+
+*default height (21) can also be overridden here. height is distance between entries in the listbox.
+*    setv name "Height" 0
+
+*maximum number of entries to display on screen at once can be overriden here. useful for menus near the bottom of the screen, for example.
+*	setv name "MaxNumItemsToDisplay" 0
+
+
+*script on Compound Object to run after selecting an item (can be 0 to run no script)
+	setv name "ValueUpdateScript" 6002
+
+**populate the dropdown with desired items. 1001 also acts as an initialization script.
+*
+*	mesg wrt+ targ 1001 game "UI_ROTATE90" 0 0
+*	mesg wrt+ targ 1001 game "UI_ROTATEMINUS90" 0 0
+*	mesg wrt+ targ 1001 game "UI_ROTATE180" 0 0
+
+
+*target main Compound Object again
+	targ ownr
+
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*initialize
+	call 10000 0 0
+
+
+
+*mvto 4270 10595
+*mvto 10 10
+
+
+*mvto 410 480
+
+
+*floatable
+	attr 32
+
+*todo: is this important?
+*(DISABLED: imsk is now only enabled when this is brought on screen (in DS world switcherC2.cos)
+**listen for mouse moves + mouse clicks
+*	imsk 12
+
+
+
+
+
+
+
+
+
+
+	setv va00 plne
+	subv va00 1
+
+
+*make the background dark (less distracting)
+
+	new: simp 1 2 64736 "WorldSwitcher_ScreenFader" 1 0 va00
+
+	attr 32
+
+	flto 0 0
+
+	alph 165 1
+
+	seta game "WorldSwitcher_ScreenFader" targ
+
+
+	targ ownr
+
+**center it
+*
+*	setv va90 wndw
+*	divv va90 2
+*	setv va91 wndh
+*	divv va91 2
+*	setv va92 wdth
+*	divv va92 2
+*	setv va93 hght
+*	divv va93 2
+*
+*	subv va90 va92
+*	subv va91 va93
+*
+*	flto va90 va91
+
+	flto 254 205
+
+*listen for mouse moves + mouse clicks
+	imsk 12
+
+
+*todo: it would probably be smart to implement PAUSE/UNPAUSE like dropdowns have.
+*whatever solution you implement should be copied over to the Icon Editor
+*the colour editor has a nice solution...
+
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+*open icon editor
+
+scrp 1 1 34543 2000
+
+	inst
+
+*pause our icon chooser panel until the icon editor unpauses it.
+	paus 1
+
+	new: comp 1 1 64736 "WorldSwitcher_IconEditor_Controls" 1 45 1500
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*CLOSE script
+
+scrp 1 1 34543 4000
+
+	inst
+
+
+	kill game "WorldSwitcher_ScreenFader"
+
+
+
+*unpause main guy!
+	targ game "WorldSwitcher_Main"
+	paus 0
+
+*goot bye
+
+	kill mame "IconsetDropdown"
+
+	kill ownr
+
+
+endm
+
+
+
+
+***************************************************************************************
+****************************** SHARED DROPDOWN SCRIPT *********************************
+***************************************************************************************
+
+
+
+scrp 1 1 34543 6001
+
+	inst
+
+*target Iconset Dropdown
+	targ mame "IconsetDropdown"
+*check if the correct button part number for this dropdown was sent
+	doif name "Button_PartNumber" = _p1_
+
+		targ ownr
+*todo: testing something. without this, switching from Random Icons to Standard should occasionally cause an index out of range error?
+		imsk 0
+		targ mame "IconsetDropdown"
+
+		mesg writ targ 1000
+		stop
+	endi
+
+endm
+
+
+
+
+
+
+
+
+
+*************************************************************************************
+***************************** SHARED BUTTON SCRIPT **********************************
+*************************************************************************************
+
+
+scrp 1 1 34543 1000
+
+	inst
+
+	lock
+
+
+	part _p1_
+
+*if button is enabled
+
+	doif pose = 1
+
+
+*LEFT
+		doif _p1_ = 1
+			subv game "WorldSwitcher_IconChooser_CurrentPage" 1
+			doif game "WorldSwitcher_IconChooser_CurrentPage" < 1
+				setv game "WorldSwitcher_IconChooser_CurrentPage" 1
+			endi
+*RIGHT
+		else
+			addv game "WorldSwitcher_IconChooser_CurrentPage" 1
+			doif game "WorldSwitcher_IconChooser_CurrentPage" > game "WorldSwitcher_IconChooser_MaxPage"
+				setv game "WorldSwitcher_IconChooser_CurrentPage" game "WorldSwitcher_IconChooser_MaxPage"
+			endi
+		endi
+
+
+*call re-draw of icons using current page (don't reset to 1 param)
+		call 6002 0 1
+
+
+	endi
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+*load iconsets script
+
+scrp 1 1 34543 10000
+
+
+	lock
+
+	inst
+
+
+
+
+
+
+	file glob 1 "*.iconset"
+
+*check how many "*.iconset" were found
+
+*this line should work, but it doesn't read the entire line.
+*setv va50 inni
+
+*so we just read the whole line and convert that to a number instead.
+	setv va60 stoi innl
+
+*	dbg: outv va60
+
+*loop iteration counter
+	setv va90 0
+
+	reps va60
+
+		sets va01 innl
+
+*		dbg: outs va01
+
+*get length of globbed file string...	
+		setv va08 strl va01
+
+*globbed files start with ".", so we remove 11 (number of characters forward we are looking from va02 (number of characters to read in total))
+*this stops it reading past the end of the string and causing an error.
+		subv va08 11
+*+1 because we need to read from AFTER that character.
+		addv va08 1
+
+*and then just return the last bit of the name such as "WorldSwitcher_Icons_C1.iconset"
+		sets name va90 subs va01 11 va08
+
+		addv va90 1
+	repe
+
+
+*run the loop again, this time to load up each file pointed to by the previous input stream (from globbing the directory)
+
+*loop iteration counter
+	setv va90 0
+
+
+
+**** AUTO Iconset ***
+*
+*
+**todo: handle errors if this doesn't exist? right?
+*		targ game "WorldSwitcher_IconPanel"
+*		
+*		*this is a fake "iconset" category to allow the user to automatically have the script assign an icon based on enabled addons.
+*		mesg wrt+ name "IconsetDropdown" 1001 "Auto" 0 0
+*		targ ownr
+*		
+*		
+**		addv va90 1
+
+
+
+	doif va60 > 0
+
+
+		reps va60
+
+			file iope 1 name va90
+
+*todo: do something if you cant find it
+*also do something if there are any missing keyvalues instead of infinite loop...
+
+
+*load in all the necessary icon data
+			sets va35 "displayname:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			sets va50 va30
+
+			sets va35 "spritefile:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			sets va51 va30
+
+			sets va35 "iconcount:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			sets va52 va30
+
+
+
+
+*"N"
+			sets va81 vtos va90
+
+*"N_displayName"
+			sets va82 va81
+			adds va82 "_displayName"
+			sets name va82 va50
+*		dbg: outs name va82
+
+*todo: handle errors if this doesn't exist? right?
+*		targ game "WorldSwitcher_IconPanel"
+			mesg wrt+ name "IconsetDropdown" 1001 va50 0 0
+*		targ ownr
+
+
+*"N_spriteFile"
+			sets va82 va81
+			adds va82 "_spriteFile"
+			sets name va82 va51
+*		dbg: outs name va82
+
+*"N_iconCount"
+			sets va82 va81
+			adds va82 "_iconCount"
+			setv name va82 stoi va52
+*		dbg: outv name va82
+
+
+*		dbg: outs va82
+
+
+
+
+
+			file iclo
+
+
+
+*	untl inok = 0
+
+*increase loop Iteration
+			addv va90 1
+
+		repe
+
+	endi
+
+
+
+
+*keep track of how many iconsets are loaded in so we can load them into the dropdown
+	setv name "iconsets_count" va60
+
+
+	doif name "iconsets_count" > 0
+
+*call re-draw of icons using current page (reset to 1 param)
+		call 6002 0 0
+
+	endi
+
+
+
+*the subroutine that makes it happen!
+
+	subr load_value_from_key_named_va35_into_string_va30
+
+*init keyName string
+		sets va01 ""
+
+		loop
+			sets va00 innl
+
+			sets va02 lowa va00
+
+			doif sins va02 1 va35 = -1
+				adds va01 va00
+			endi
+
+		untl sins va02 1 va35 <> -1
+
+
+*	setv va03 strl va02
+*	subv va03 sins va02 1 "frame0: "
+
+*	sets va99 subs va02 sins va02 1 "frame0: " va03
+
+
+*read from position N (length of keyName string) (VA03) to the END OF STRING. calculated by subtracting VA03 from the length of the current string (VA02).
+		setv va03 strl va35
+*this way off by 1 and we were reading the first pixel with as ":10" instead of "10"
+		addv va03 1
+		setv va04 strl va02
+		subv va04 va03
+
+
+*new fix, todo, might be dodgy. stops it cutting off the last character of icons...
+		addv va04 1
+
+*  	vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+		sets va30 subs va00 va03 va04
+*  	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+	retn
+
+
+
+	targ ownr
+
+
+
+
+
+
+endm
+
+
+
+
+
+
+*mouse CLICK script (used to send selected icon GALL and POSE back to parent form)
+
+scrp 1 1 34543 76
+
+	inst
+
+	doif hots <> ownr
+
+		call 4000 0 0
+	endi
+
+
+*left click only
+	doif _p1_ = 1
+
+*use same logic as mouse move to get our pose index
+		call 75 0 1
+
+	endi
+
+endm
+
+
+
+
+*mouse MOVE script (used to highlight behind icon)
+
+*(ALSO used by mouse click script to get the index of icon clicked using _p2_
+
+scrp 1 1 34543 75
+
+
+	inst
+
+*todo: idk why i'm doing it this way.
+	doif part 9 = 0
+		pat: dull 9 "worldswitcher_IconPanel" 8 -1000 -1000 9
+	endi
+
+
+*initial icon X/Y positions
+	setv va11 13
+	setv va12 44
+
+	setv va21 va11
+	setv va22 va12
+
+
+
+
+
+*loop iteration count
+	setv va90 1
+
+
+
+
+*target Iconset Dropdown
+	targ mame "IconsetDropdown"
+
+	sets va50 vtos name "Index"
+
+
+	targ ownr
+
+
+
+
+*read in the specified icon count
+	sets va51 va50
+	adds va51 "_iconCount"
+
+
+
+
+	doif name va51 = 0 or game "WorldSwitcher_IconChooser_IconsPerPage" = 0
+		stop
+	endi
+
+
+
+
+
+
+
+	reps game "WorldSwitcher_IconChooser_IconsPerPage"
+
+
+
+*get bounds of active icon
+
+*left
+		setv va31 va21
+		addv va31 5
+		addv va31 posl
+
+*up
+		setv va32 va22
+		addv va32 post
+
+*right
+		setv va33 va21
+		addv va33 42
+		addv va33 posl
+
+
+*down
+		setv va34 va22
+		addv va34 29
+		addv va34 post
+
+
+		doif mopx > va31 and mopx < va33 and mopy > va32 and mopy < va34
+			pat: move 9 va21 va22
+
+
+
+*if _p2_ is 1, that means we were called by the mouseclick event and should fire the appropriate icon back to the main form
+			doif _p2_ = 1
+*				dbg: outv va90
+
+
+
+
+
+*target Iconset Dropdown
+				targ mame "IconsetDropdown"
+
+				sets va50 vtos name "Index"
+
+				targ ownr
+
+
+*read in the specified sprite file name
+				sets va51 va50
+				adds va51 "_spriteFile"
+				sets va23 name va51
+
+
+
+
+
+
+*do some maths to find our icon number
+
+*28 x 0 = 0
+				setv va24 28
+				setv va25 game "WorldSwitcher_IconChooser_CurrentPage"
+				subv va25 1
+
+				mulv va24 va25
+
+
+*0 + 5 = 5
+				addv va24 va90
+
+*5 x 2 = 10
+				mulv va24 2
+
+				subv va24 1
+
+
+*set gall and pose
+				targ game "WorldSwitcher_Main"
+				part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+				gall "blnk" 0
+
+*				dbg: outs va23
+*				dbg: outv va24
+
+				gall va23 va24
+
+
+*create a button to reset the icon. script 4000 in "DS world switcherC2.cos"
+*or script 4001 for the password page
+				doif part 50 = 0
+
+*if world switcher is on "create new world" screen.
+					doif ov00 = 1 or ov00 = 2
+						pat: butt 50 "WorldSwitcher_WorldCreation" 13 2 471 101 2 [] 4000 0
+*if world switcher is  (most likely) on "enter/change password" mode
+					else
+						pat: butt 50 "WorldSwitcher_WorldCreation" 13 2 471 101 2 [] 4001 0
+
+					endi
+
+
+					setv game "WorldSwitcher_WorldCreation_AutoIcon" 0
+
+				endi
+
+
+
+
+
+*close icon editor!!
+				call 4000 0 0
+
+
+			endi
+
+
+
+
+
+
+		endi
+
+
+*every 7 icons, time for a new row
+		setv va91 va90
+		modv va91 7
+
+		doif va91 = 0
+*Reset X Position for next row
+			setv va21 va11
+*+32 Y Position
+			addv va22 30
+		else
+*+38 X Position
+			addv va21 38
+		endi
+
+*+1 iteration count
+		addv va90 1
+
+	repe
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+scrp 1 1 34543 6002
+
+
+
+	lock
+
+
+	inst
+
+
+
+
+*if _p2_ isn't specified (dropdown click), reset page number.
+	doif _p2_ = 0
+		setv game "WorldSwitcher_IconChooser_CurrentPage" 1
+	endi
+
+
+
+
+*do a loop to kill all the icon parts
+	setv va00 -1
+	loop
+
+		setv va00 pnxt va00
+
+*don't delete part -1 and don't delete non-icon parts!
+		doif va00 <> -1 and va00 >= 10
+			pat: kill va00
+		endi
+
+	untl va00 = -1
+
+
+
+
+
+
+*initial icon X/Y positions
+	setv va11 13
+	setv va12 44
+
+	setv va21 va11
+	setv va22 va12
+
+
+
+
+
+
+*target Iconset Dropdown
+	targ mame "IconsetDropdown"
+
+	sets va50 vtos name "Index"
+
+
+	targ ownr
+
+
+
+*read in the specified sprite file name
+	sets va51 va50
+	adds va51 "_spriteFile"
+	sets va23 name va51
+
+
+*read in the specified icon count
+	sets va51 va50
+	adds va51 "_iconCount"
+
+
+
+*loop iteration count
+	setv va90 1
+
+	doif name va51 = 0
+		stop
+	endi
+
+
+
+
+
+	setv va97 name va51
+
+
+*Total Pages
+*int totalPages = (totalIcons + maxIconsPerPage - 1) / maxIconsPerPage;
+	setv va98 va97
+	addv va98 28
+	subv va98 1
+	divv va98 28
+	setv va98 ftoi va98
+
+	setv game "WorldSwitcher_IconChooser_MaxPage" va98
+
+
+*	dbg: outs "TOTAL PAGES:"
+*	dbg: outv va98
+
+
+
+*Icons This Page
+*int iconsThisPage = Math.Min(maxIconsPerPage, totalIcons - (maxIconsPerPage * (page - 1)));
+
+*totalIcons - (maxIconsPerPage * (page - 1))
+
+
+	setv va80 game "WorldSwitcher_IconChooser_CurrentPage"
+	subv va80 1
+	setv va81 28
+	mulv va81 va80
+
+*gotta multiply va97 (total icons loaded) by 2 to get the true sprite index value.
+	setv va88 va97
+	mulv va97 2
+	subv va88 va81
+
+*Math.Min(maxIconsPerPage, )
+
+*	dbg: outs "GRAAH?:"
+*	dbg: outv va88
+
+
+	doif va88 > 28
+		setv va88 28
+	endi
+
+*	dbg: outs "GRAAH!:"
+*	dbg: outv va88
+
+
+
+
+
+	setv va24 28
+
+	setv va25 game "WorldSwitcher_IconChooser_CurrentPage"
+	subv va25 1
+
+	mulv va24 va25
+
+	mulv va24 2
+
+
+*icon numbers start at 1, the 0 frames are the dim versions
+	addv va24 1
+
+
+	setv game "WorldSwitcher_IconChooser_IconsPerPage" va88
+
+
+
+	reps va88
+
+
+
+*icon part numbers start at 10 (away from the buttons)
+		setv va00 va90
+		addv va00 10
+
+
+
+*part N - ICON SPRITE
+		pat: dull va00 va23 va24 va21 va22 10
+
+
+
+*+2 image index
+		addv va24 2
+
+
+
+*every 7 icons, time for a new row
+		setv va91 va90
+		modv va91 7
+
+		doif va91 = 0
+*Reset X Position for next row
+			setv va21 va11
+*+32 Y Position
+			addv va22 30
+		else
+*+38 X Position
+			addv va21 38
+		endi
+
+
+*+1 iteration count
+		addv va90 1
+
+
+	repe
+
+
+	doif part 9 = 1
+		pat: kill 9
+	endi
+
+*todo: idk. testing testng.
+	imsk 12
+
+	call 75 0 0
+
+
+
+
+
+
+*LEFT
+*		doif _p1_ = 1
+*			subv game "WorldSwitcher_IconChooser_CurrentPage" 1
+
+	part 1
+
+	doif game "WorldSwitcher_IconChooser_CurrentPage" <= 1
+		pose 0
+	else
+		pose 1
+	endi
+
+*RIGHT
+*	else
+*			addv game "WorldSwitcher_IconChooser_CurrentPage" 1
+
+	part 2
+
+	doif game "WorldSwitcher_IconChooser_CurrentPage" >= game "WorldSwitcher_IconChooser_MaxPage"
+		pose 0
+	else
+		pose 1
+	endi
+*	endi
+
+
+
+
+
+
+endm

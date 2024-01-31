@@ -1,0 +1,3496 @@
+enum 1 1 64736
+	kill targ
+next
+
+
+
+
+
+
+******* ALL ICON EDITOR RELATED STRINGS *******
+
+inst
+
+*catalogue tag to read strings from
+sets va20 "WorldSwitcher_IconEditor_Text"
+
+*might as well reload catalogue files
+reaf
+
+*read in strings from specified catalogue file
+doif reaq va20 = 1
+
+	sets game "UI_APPNAME" read va20 0
+	sets game "UI_BRUSHSIZE" read va20 1
+	sets game "UI_UNLIT" read va20 2
+	sets game "UI_LIT" read va20 3
+
+*	sets game "UI_NEW" read va20 4
+*	sets game "UI_DELETE" read va20 5
+*	sets game "UI_RENAME" read va20 6
+*	sets game "UI_COPY" read va20 7
+
+	sets game "UI_ROTATE90" read va20 8
+	sets game "UI_ROTATEMINUS90" read va20 9
+	sets game "UI_ROTATE180" read va20 10
+
+	sets game "UI_FLIPHORIZONTAL" read va20 11
+	sets game "UI_FLIPVERTICAL" read va20 12
+
+	sets game "UI_INVERT" read va20 13
+	sets game "UI_CLEAR" read va20 14
+
+	sets game "UI_EDITCOLOUR" read va20 15
+
+	sets game "UI_RIGHTCLICKFILL" read va20 16
+
+*plain english fallback in case the catalogue file is missing
+else
+
+	sets game "UI_APPNAME" "Icon Editor:"
+	sets game "UI_BRUSHSIZE" "Brush Size"
+	sets game "UI_UNLIT" "Unlit:"
+	sets game "UI_LIT" "Lit:"
+
+*	sets game "UI_NEW" "New"
+*	sets game "UI_DELETE" "Delete"
+*	sets game "UI_RENAME" "Rename"
+*	sets game "UI_COPY" "Copy"
+
+	sets game "UI_ROTATE90" "Rotate 90"
+	sets game "UI_ROTATEMINUS90" "Rotate -90"
+	sets game "UI_ROTATE180" "Rotate 180"
+
+	sets game "UI_FLIPHORIZONTAL" "Flip Horizontal"
+	sets game "UI_FLIPVERTICAL" "Flip Vertical"
+
+	sets game "UI_INVERT" "Invert"
+	sets game "UI_CLEAR" "Clear"
+
+	sets game "UI_EDITCOLOUR" "Edit Colour"
+
+	sets game "UI_RIGHTCLICKFILL" "Tip: Right-click with the fill tool to erase pixels"
+
+endi
+
+
+
+******* PALETTE SIZE *******
+
+setv game "IconEditor_Palette_Rows" 8
+setv game "IconEditor_Palette_Columns" 2
+
+
+******* DEFAULT PALETTE *******
+
+*WHITE
+sets game "Default_Palette_1" "555"
+*BLACK
+sets game "Default_Palette_2" "000"
+
+*LIGHT GREY
+sets game "Default_Palette_3" "333"
+*DARK GREY
+sets game "Default_Palette_4" "222"
+
+*SCARLET
+sets game "Default_Palette_5" "500"
+*BROWN
+sets game "Default_Palette_6" "201"
+
+*ORANGE
+sets game "Default_Palette_7" "530"
+*TURQOUISE todo: finalize and correctly label the palette entries
+sets game "Default_Palette_8" "421"
+
+*YELLOW
+sets game "Default_Palette_9" "541"
+*BROWN
+sets game "Default_Palette_10" "320"
+
+*LIME GREEN
+sets game "Default_Palette_11" "351"
+*DARK GREEN
+sets game "Default_Palette_12" "030"
+
+*LIGHT BLUE
+sets game "Default_Palette_13" "245"
+*BLUE
+sets game "Default_Palette_14" "005"
+
+*PINK
+sets game "Default_Palette_15" "535"
+*PURPLE
+sets game "Default_Palette_16" "304"
+
+
+
+
+******************************
+
+
+
+
+
+
+*everything happens in the creation script, which is called by icon_chooser_panel.cos!     todo: is the .cos still called this?
+*new: comp 1 1 64736 "WorldSwitcher_IconEditor_Controls" 1 45 2000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*creation script (so our scope has the appropriate OWNR, and we can use WAIT commands)
+
+scrp 1 1 64736 10
+
+	lock
+
+
+*wait a single tick so the slider manager scripts can fully load in
+	wait 1
+
+	inst
+
+*so other agents can refer to this if needed
+	seta game "IconEditor_Main" targ
+
+
+
+
+*listen for Mouse Wheel 32 (Brush Size Slider) + Mouse Move 4 (for the box that appears around the big Selected Colour when mouse is hovered)
+	imsk 36
+
+
+
+
+
+*floatable
+	attr 32
+
+
+**center it
+*
+*	setv va90 wndw
+*	divv va90 2
+*	setv va91 wndh
+*	divv va91 2
+*	setv va92 wdth
+*	divv va92 2
+*	setv va93 hght
+*	divv va93 2
+*
+*	subv va90 va92
+*	subv va91 va93
+*
+*	flto va90 va91
+
+	flto 225 93
+
+
+*lit icon preview (slightly darker bg)
+	pat: dull 1 "WorldSwitcher_IconEditor_Controls" 32 121 42 1
+
+	pat: fixd 2 "WorldSwitcher_IconEditor_Controls" 25 53 46 10 "whiteontransparentchars"
+	part 2
+	frmt 8 8 8 8 0 0 1
+*	ptxt "Lit:"
+	ptxt game "UI_LIT"
+
+
+*unlit icon preview (slightly brighter bg. darkened to match lighter bg using fake darkener below.)
+	pat: dull 3 "WorldSwitcher_IconEditor_Controls" 33 226 42 1
+
+	pat: fixd 4 "WorldSwitcher_IconEditor_Controls" 25 157 46 10 "whiteontransparentchars"
+	part 4
+	frmt 8 8 8 8 0 0 1
+*	ptxt "Unlit:"
+	ptxt game "UI_UNLIT"
+
+*fake darkener to preview unlit icon semi-accurately
+	pat: dull 100 "WorldSwitcher_IconEditor_Controls" 34 227 44 2500
+	part 100
+	alph 180 1
+
+
+
+
+
+
+
+
+
+
+*CONFIRM (TICK) BUTTON - Save this icon and set it as this worlds icon
+
+	pat: butt 5 "WorldSwitcher_IconEditor_Controls" 47 2 74 342 1 [] 3000 0
+
+
+*CANCEL (NO) BUTTON - Abort changes, keep using previous version of icon
+
+	pat: butt 6 "WorldSwitcher_IconEditor_Controls" 49 2 235 342 1 [] 4000 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	pat: fixd 101 "WorldSwitcher_IconEditor_Controls" 4 7 9 10 "whiteontransparentchars"
+	part 101
+*	ptxt "Icon Editor"
+	ptxt game "UI_APPNAME"
+
+
+
+
+*palette
+	pat: dull 7 "WorldSwitcher_IconEditor_Controls" 1 23 79 1
+
+*selected colour
+	pat: dull 8 "WorldSwitcher_IconEditor_Controls" 2 23 217 1
+
+
+*the canvas!
+	pat: dull 9 "WorldSwitcher_IconEditor_Controls" 24 72 79 1
+
+
+*divider :)
+	pat: dull 10 "WorldSwitcher_IconEditor_Controls" 46 14 338 1
+
+
+
+
+
+*Brush Size:
+	pat: fixd 102 "WorldSwitcher_IconEditor_Controls" 4 -30 311 10 "whiteontransparentchars"
+	part 102
+	frmt 8 8 8 8 0 0 1
+	ptxt game "UI_BRUSHSIZE"
+*	ptxt "Brush Size:"
+
+
+*Tip: Right-click with the fill tool to erase pixels (hidden by default) (moves to -97 319)
+	pat: fixd 103 "ds world switcher" 18 -9000 -9000 10 "whiteontransparentchars"
+	part 103
+	frmt 0 0 0 0 0 0 1
+	ptxt game "UI_RIGHTCLICKFILL"
+	show 1
+
+
+******************************************************************************
+***Brush Size slider
+******************************************************************************
+
+
+*X and Y position of slider
+	setv va00 118
+	setv va01 313
+
+
+*remember part numbers so slider script can refer to them
+	setv va02 7000
+	setv va03 7001
+	setv va04 7002
+
+*X offset of editable text component of slider
+	setv va05 va00
+	addv va05 game "WorldSwitcher_slider_TextboxXOffset"
+
+*Y offset of editable text component of slider
+	setv va06 va01
+	addv va06 game "WorldSwitcher_slider_TextboxYOffset"
+
+
+*button component of slider (backdrop of slider bar, clicking it makes the control active)
+	pat: butt va02 "WorldSwitcher_Slider" 0 0 VA00 VA01 2 [] 7000 0
+
+*playhead component of slider
+	pat: butt va03 "WorldSwitcher_Slider" 2 0 VA00 VA01 5 [] 7000 0
+
+*editable text component of slider
+	pat: text va04 "WorldSwitcher_Slider" 3 VA05 VA06 1 7001 "WhiteOnTransparentChars"
+	part va04
+	frmt 8 8 8 8 0 0 2
+
+
+
+*slider manager for Brush Size slider.
+	new: simp 1 1 64769 "blnk" 0 0 0
+
+*set a named variable on the compound object to point to this slider in particular
+	seta mame "BrushSizeSlider" targ
+
+*compound object this slider is part of
+	seta name "ParentObject" ownr
+
+
+*X/Y coords of top left corner of slider
+	setv name "X" va00
+	setv name "Y" va01
+
+*part numbers for each component of the slider
+	setv name "Slider_PartNumber" va02
+	setv name "Playhead_PartNumber" va03
+	setv name "Textbox_PartNumber" va04
+
+*default playhead and slider width can also be overridden here
+*    setv name "Slider_Width" 0
+*    setv name "Playhead_Width" 0
+
+
+*unique name for this slider (can be useful to kill all sliders with a certain name in a rscr, etc)
+	sets name "SliderName" "BrushSizeSlider"
+
+*minimum and maximum values our slider can display. can be negative.
+	setv name "MinValue" 1
+	setv name "MaxValue" 12
+
+*default/current value for our slider. must be between min and max.
+	setv name "Value" 1
+
+
+*number of digits after the decimal point. can be 0 for whole numbers.
+	setv name "DecimalPrecision" 0
+
+
+
+
+*show a + sign before the number when it's greater than 0?
+	setv name "ShowPlusSign" 0
+
+*script on Compound Object to run after setting the value (can be 0 to run no script)
+	setv name "ValueUpdateScript" 7002
+
+
+*INITIALIZE!
+	mesg writ targ 1005
+
+
+
+
+*target main Compound Object again
+	targ ownr
+
+*****************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+****************************************************************************
+*Rotate dropdown
+****************************************************************************
+
+*remember X and Y of dropdown to create list in the correct place when clicked!
+	setv va00 315
+	setv va01 201
+
+*remember part numbers so dropdown script can refer to them
+	setv va02 6001
+
+*name of sprite file to use when creating the dropdown
+	sets va05 "WorldSwitcher_IconEditor_Dropdown_Medium"
+
+
+*button component of dropdown
+	pat: butt va02 "WorldSwitcher_IconEditor_Controls" 35 0 va00 va01 1 [] 6001 0
+
+
+
+*dropdown manager for Create Action To Perform dropdown.
+	new: comp 1 1 64741 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+
+*set a named variable on the compound object to point to this dropdown in particular
+	seta mame "RotateDropdown" targ
+
+*OV00 - compound object this dropdown is part of
+	seta ov00 ownr
+
+*compound object this slider is part of
+	seta name "ParentObject" ownr
+
+*X/Y coords of top left corner of dropdown
+	setv name "X" va00
+	setv name "Y" va01
+
+*specific X/Y coords of top left corner of listbox component of dropdown can be specified here (still relative to the top left corner of the dropdown button)
+*if not set, it will appear just beneath your dropdown button (the height of one segment)
+	setv name "X_Offset" 24
+	setv name "Y_Offset" 0
+
+
+*part numbers for each component of the dropdown. if a textbox part isn't specified, the current dropdown text value won't be automatically put in the box.
+	setv name "Button_PartNumber" va02
+
+*name of sprite file to use when creating the dropdown (should usually match the file used when creating the parts)
+	sets name "Gallery" va05
+
+*dropdown width should match the width of your sprites.
+
+*here are the widths to use for the default sprites
+*WorldSwitcher_IconEditor_Dropdown_Long - 192
+*WorldSwitcher_IconEditor_Dropdown_Medium - 128
+*WorldSwitcher_IconEditor_Dropdown_Short - 102
+	setv name "Width" 128
+
+*default height (21) can also be overridden here. height is distance between entries in the listbox.
+*    setv name "Height" 0
+
+*maximum number of entries to display on screen at once can be overriden here. useful for menus near the bottom of the screen, for example.
+*	setv name "MaxNumItemsToDisplay" 0
+
+
+*script on Compound Object to run after selecting an item (can be 0 to run no script)
+	setv name "ValueUpdateScript" 6002
+
+
+*populate the dropdown with desired items. 1001 also acts as an initialization script.
+
+	mesg wrt+ targ 1001 game "UI_ROTATE90" 0 0
+	mesg wrt+ targ 1001 game "UI_ROTATEMINUS90" 0 0
+	mesg wrt+ targ 1001 game "UI_ROTATE180" 0 0
+
+
+*target main Compound Object again
+	targ ownr
+
+************************************************************************
+
+
+
+
+
+
+
+
+****************************************************************************
+*Flip dropdown
+****************************************************************************
+
+*remember X and Y of dropdown to create list in the correct place when clicked!
+	setv va00 315
+	setv va01 229
+
+*remember part numbers so dropdown script can refer to them
+	setv va02 6002
+
+*name of sprite file to use when creating the dropdown
+	sets va05 "WorldSwitcher_IconEditor_Dropdown_Medium"
+
+
+*button component of dropdown
+	pat: butt va02 "WorldSwitcher_IconEditor_Controls" 37 0 va00 va01 1 [] 6001 0
+
+
+
+*dropdown manager for Create Action To Perform dropdown.
+	new: comp 1 1 64741 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+
+*set a named variable on the compound object to point to this dropdown in particular
+	seta mame "FlipDropdown" targ
+
+*OV00 - compound object this dropdown is part of
+	seta ov00 ownr
+
+*compound object this slider is part of
+	seta name "ParentObject" ownr
+
+*X/Y coords of top left corner of dropdown
+	setv name "X" va00
+	setv name "Y" va01
+
+*specific X/Y coords of top left corner of listbox component of dropdown can be specified here (still relative to the top left corner of the dropdown button)
+*if not set, it will appear just beneath your dropdown button (the height of one segment)
+	setv name "X_Offset" 24
+	setv name "Y_Offset" 0
+
+
+*part numbers for each component of the dropdown. if a textbox part isn't specified, the current dropdown text value won't be automatically put in the box.
+	setv name "Button_PartNumber" va02
+
+*name of sprite file to use when creating the dropdown (should usually match the file used when creating the parts)
+	sets name "Gallery" va05
+
+*dropdown width should match the width of your sprites.
+
+*here are the widths to use for the default sprites
+*WorldSwitcher_IconEditor_Dropdown_Long - 192
+*WorldSwitcher_IconEditor_Dropdown_Medium - 128
+*WorldSwitcher_IconEditor_Dropdown_Short - 102
+	setv name "Width" 128
+
+*default height (21) can also be overridden here. height is distance between entries in the listbox.
+*    setv name "Height" 0
+
+*maximum number of entries to display on screen at once can be overriden here. useful for menus near the bottom of the screen, for example.
+*	setv name "MaxNumItemsToDisplay" 0
+
+
+*script on Compound Object to run after selecting an item (can be 0 to run no script)
+	setv name "ValueUpdateScript" 6003
+
+
+*populate the dropdown with desired items. 1001 also acts as an initialization script.
+
+	mesg wrt+ targ 1001 game "UI_FLIPHORIZONTAL" 0 0
+	mesg wrt+ targ 1001 game "UI_FLIPVERTICAL" 0 0
+
+
+*target main Compound Object again
+	targ ownr
+
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+****************************************************************************
+*Image Operations dropdown
+****************************************************************************
+
+*remember X and Y of dropdown to create list in the correct place when clicked!
+	setv va00 315
+	setv va01 257
+
+*remember part numbers so dropdown script can refer to them
+	setv va02 6003
+
+*name of sprite file to use when creating the dropdown
+	sets va05 "WorldSwitcher_IconEditor_Dropdown_Medium"
+
+
+*button component of dropdown
+	pat: butt va02 "WorldSwitcher_IconEditor_Controls" 39 0 va00 va01 1 [] 6001 0
+
+
+
+*dropdown manager for Create Action To Perform dropdown.
+	new: comp 1 1 64741 "blnk" 0 0 0
+
+*set a named variable on the compound object to point to this dropdown in particular
+	seta mame "ImageDropdown" targ
+
+*OV00 - compound object this dropdown is part of
+	seta ov00 ownr
+
+*compound object this slider is part of
+	seta name "ParentObject" ownr
+
+*X/Y coords of top left corner of dropdown
+	setv name "X" va00
+	setv name "Y" va01
+
+*specific X/Y coords of top left corner of listbox component of dropdown can be specified here (still relative to the top left corner of the dropdown button)
+*if not set, it will appear just beneath your dropdown button (the height of one segment)
+	setv name "X_Offset" 24
+	setv name "Y_Offset" 0
+
+
+*part numbers for each component of the dropdown. if a textbox part isn't specified, the current dropdown text value won't be automatically put in the box.
+	setv name "Button_PartNumber" va02
+
+*name of sprite file to use when creating the dropdown (should usually match the file used when creating the parts)
+	sets name "Gallery" va05
+
+*dropdown width should match the width of your sprites.
+
+*here are the widths to use for the default sprites
+*WorldSwitcher_IconEditor_Dropdown_Long - 192
+*WorldSwitcher_IconEditor_Dropdown_Medium - 128
+*WorldSwitcher_IconEditor_Dropdown_Short - 102
+	setv name "Width" 128
+
+*default height (21) can also be overridden here. height is distance between entries in the listbox.
+*    setv name "Height" 0
+
+*maximum number of entries to display on screen at once can be overriden here. useful for menus near the bottom of the screen, for example.
+*	setv name "MaxNumItemsToDisplay" 0
+
+
+*script on Compound Object to run after selecting an item (can be 0 to run no script)
+	setv name "ValueUpdateScript" 6004
+
+
+*populate the dropdown with desired items. 1001 also acts as an initialization script.
+
+	mesg wrt+ targ 1001 game "UI_INVERT" 0 0
+	mesg wrt+ targ 1001 game "UI_CLEAR" 0 0
+
+*target main Compound Object again
+	targ ownr
+
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+****************************************** PALETTE STUFF!!!!!!!! *****************************************
+
+
+
+
+
+*SELECTED COLOUR OUTLINE
+
+*Palette Index 436:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 2, as this is the third image set in the file (Palette sized)
+*do NOT add 1 so we start on the outline frame instead of the invisible frame
+
+	pat: dull 1000 "WorldSwitcher_IconEditor_Palette" 436 -1000 -1000 1
+
+
+
+
+
+*LARGE COLOUR PREVIEW (under palette)
+
+
+*Palette Index 655:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 3, as this is the fourth image set in the file (Preview sized)
+*add 1 so we start on the invisible frame instead of the outline frame
+
+*this will be targeted by the colour editor panel, later
+	setv mame "SelectedColourPreview_PartNumber" 1100
+
+	pat: dull mame "SelectedColourPreview_PartNumber" "WorldSwitcher_IconEditor_Palette" 655 25 220 1
+
+
+
+
+*LARGE COLOUR PREVIEW HOVER OUTLINE
+
+*Palette Index 654:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 3, as this is the fourth image set in the file (Preview sized)
+*do NOT add 1 so we start on the outline frame instead of the invisible frame
+
+	pat: butt 1101 "WorldSwitcher_IconEditor_Palette" 654 0 24 219 1 [] 1002 0
+	part 1101
+	pose 1
+
+*note: script 75 (mouse move) handles this becoming visible when hovered.
+
+
+
+
+
+****************************
+*   CREATE PALETTE PANEL   *
+****************************
+
+*x/y position, top left corner
+	setv va50 25
+	setv va51 82
+
+
+*all palette options call script 1000, the part number is used to determine which button was pressed
+
+
+
+*first part id
+	setv va40 1001
+
+
+*loop iteration counter starts at 1
+	setv va00 1
+
+*X horizontal rows of buttons
+	reps game "IconEditor_Palette_Rows"
+
+*Y vertical columns of buttons
+		reps game "IconEditor_Palette_Columns"
+
+
+*Palette Index 437:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 2, as this is the third image set in the file (Palette sized)
+*add 1 so we start on the invisible frame instead of the outline frame
+
+			pat: butt va40 "WorldSwitcher_IconEditor_Palette" 437 0 va50 va51 1 [] 1001 0
+
+*set up the name of the variable to write the palette entry to
+
+**palette_N"
+*sets va10 "palette_"
+*adds va10 vtos va00
+*
+**each entry has a different default colour:
+*doif va00 = 1
+*sets name va10 "111"
+
+
+*initialize button
+			call 1000 va40 0
+
+*adjust X coord
+			addv va50 16
+
+*increase part id
+			addv va40 1
+
+*increase loop iteration
+			addv va00 1
+
+		repe
+
+*adjust Y coord
+		addv va51 16
+
+*reset X coord
+		setv va50 25
+
+	repe
+
+
+
+
+**************************************************************
+
+
+
+*WE'RE MAKING PIXEL GRIDS!!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+****************************************************
+
+*               CURSOR              *
+
+****************************************************
+
+	new: simp 1 1 66650 "WorldSwitcher_IconEditor_Cursors" 0 0 9999
+
+	seta game "IconEditor_Cursor" targ
+
+*HOLODECK CURSOR MODES!
+*0 - none, default Pointer (unused)
+*1 - Brush Tool
+*2 - Eraser Tool
+*3 - Fill Can (unimplemented)
+*4 - Colour Picker
+
+	setv game "IconEditor_CursorMode" 0
+
+*floatable attribute, so it can follow the hand position in real time
+	attr 32
+
+
+
+
+****************************************************
+
+*               FULL SCALE PIXELGRIDS              *
+
+****************************************************
+
+
+
+*MAKE MAIN PIXEL GRID
+
+	new: comp 1 1 64742 "blnk" 0 0 2000
+
+*floatable. we are attached to the main icon editor "form"
+	attr 32
+
+*Listen for these events:
+* 8 Raw Mouse Down + 16 Raw Mouse Up + 4 Raw Mouse Move
+	imsk 28
+
+
+*create X by Y grid of parts, one for each pixel of the image
+*************************************************************
+
+*part number variable starts at 1 because 0 is the background
+	setv va00 1
+
+*X/Y offsets start at 1
+	setv va01 1
+	setv va02 1
+
+	reps game "IconEditor_NumPixelsY"
+
+		reps game "IconEditor_NumPixelsX"
+
+*Palette Index 219:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 1, as this is the second image set in the file (Palette sized)
+*add 1 so we start on the invisible frame instead of the outline frame
+
+			pat: dull va00 "WorldSwitcher_IconEditor_Palette" 219 va01 va02 1
+
+			addv va00 1
+
+			addv va01 game "IconEditor_PixelSize"
+
+		repe
+
+		setv va01 1
+
+		addv va02 game "IconEditor_PixelSize"
+
+	repe
+
+
+*cmrt 0
+
+
+*store main grid in a global variable so we can access it later
+	seta game "IconEditor_PixelGrid" targ
+
+
+
+
+
+
+
+
+
+
+*MAKE BRUSH PREVIEW OVERLAY GRID
+
+	new: comp 1 1 64742 "blnk" 0 0 2001
+
+*floatable. we are attached to the main icon editor "form"
+	attr 32
+
+*create X by Y grid of parts, one for each pixel of the image
+*************************************************************
+
+*part number variable starts at 1 because 0 is the background
+	setv va00 1
+
+*X/Y offsets start at 0
+	setv va01 0
+	setv va02 0
+
+	reps game "IconEditor_NumPixelsY"
+
+		reps game "IconEditor_NumPixelsX"
+
+*Palette Index 218:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 1, as this is the second image set in the file (Palette sized)
+*the first frame in each image set is the outline frame
+
+			pat: dull va00 "WorldSwitcher_IconEditor_Palette" 218 va01 va02 1
+
+*start on frame 1, invisible when not highlighted	
+			part va00
+			pose 1
+
+			addv va00 1
+
+			addv va01 game "IconEditor_PixelSize"
+
+		repe
+
+		setv va01 0
+
+		addv va02 game "IconEditor_PixelSize"
+
+	repe
+
+
+*create brush overlay grid 1 pixel to the top left of the main one
+	setv va50 game "IconEditor_PixelGrid_X"
+	setv va51 game "IconEditor_PixelGrid_X"
+
+	subv va50 1
+	subv va51 1
+
+
+
+*store main grid in a global variable so we can access it later
+	seta game "IconEditor_BrushPreview" targ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*****************************************************
+
+*                TINY SCALE PIXELGRIDS              *
+
+*****************************************************
+
+
+
+*set this to 0 and use it to count loop iterations.
+	setv va03 0
+
+*reps 3
+*2 Previews (Lit and Unlit), 1 Buffer (for transformations and snapshots)
+	reps 3
+
+		new: comp 1 1 64743 "blnk" 0 0 2000
+
+*floatable. we are attached to the main icon editor "form"
+		attr 32
+
+*create X by Y grid of parts, one for each pixel of the image
+*************************************************************
+
+*part number variable starts at 1 because 0 is the background
+		setv va00 1
+
+*X/Y offsets start at 0
+		setv va01 0
+		setv va02 0
+
+		reps game "IconEditor_NumPixelsY"
+
+			reps game "IconEditor_NumPixelsX"
+
+*Palette Index 1:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 0, as this is the first image set in the file (Palette sized)
+*add 1 so we start on the invisible frame instead of the outline frame
+
+				pat: dull va00 "WorldSwitcher_IconEditor_Palette" 1 va01 va02 1
+
+				addv va00 1
+
+				addv va01 game "IconEditor_PixelSizeTiny"
+
+			repe
+
+			setv va01 0
+
+			addv va02 game "IconEditor_PixelSizeTiny"
+
+		repe
+
+
+
+
+*store each frame in a specific game variable
+
+		addv va03 1
+
+		doif va03 = 1
+
+*preview frame
+			seta game "IconEditor_Preview" targ
+
+*darkened preview frame
+		elif va03 = 2
+			seta game "IconEditor_Preview_Darkened" targ
+
+*Buffer frame
+		elif va03 = 3
+			seta game "IconEditor_Buffer" targ
+			mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+		endi
+
+	repe
+
+
+
+
+
+
+
+
+
+
+
+******************************************************************************************
+
+
+
+
+
+
+
+
+
+*these are the coordinates for the main big pixel grid that you draw on
+	setv game "IconEditor_PixelGrid_X" 74
+	setv game "IconEditor_PixelGrid_Y" 81
+
+
+*these are the coordinates for the Lit preview image
+	setv game "IconEditor_PixelGridTiny_X" 132
+	setv game "IconEditor_PixelGridTiny_Y" 44
+
+
+*these are the coordinates for the Unlit preview image
+	setv game "IconEditor_PixelGridTiny2_X" 237
+	setv game "IconEditor_PixelGridTiny2_Y" 44
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*POSITION MAIN CANVAS
+
+	targ game "IconEditor_PixelGrid"
+
+	frel game "IconEditor_Main"
+
+
+
+	mvto 0 0
+
+	flto game "IconEditor_PixelGrid_X" game "IconEditor_PixelGrid_Y"
+
+
+
+
+
+
+
+
+
+*POSITION BRUSH PREVIEW OVERLAY GRID
+
+	targ game "IconEditor_BrushPreview"
+
+	frel game "IconEditor_Main"
+
+	flto game "IconEditor_PixelGrid_X" game "IconEditor_PixelGrid_Y"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*POSITION ICON PREVIEW IMAGE
+
+	targ game "IconEditor_Preview"
+
+	frel game "IconEditor_Main"
+
+	flto game "IconEditor_PixelGridTiny_X" game "IconEditor_PixelGridTiny_Y"
+
+
+
+
+
+
+*POSITION DARKENED ICON PREVIEW IMAGE
+
+	targ game "IconEditor_Preview_Darkened"
+
+	frel game "IconEditor_Main"
+
+	flto game "IconEditor_PixelGridTiny2_X" game "IconEditor_PixelGridTiny2_Y"
+
+
+
+
+
+
+
+
+
+	targ ownr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+****************
+* TOOL PANEL!! *
+****************
+
+*BRUSH TOOL
+	pat: butt 3001 "WorldSwitcher_IconEditor_Controls" 12 0 315 81 1 [] 3001 0
+*FILL TOOL
+	pat: butt 3003 "WorldSwitcher_IconEditor_Controls" 14 0 315 109 1 [] 3003 0
+*ERASER TOOL
+	pat: butt 3002 "WorldSwitcher_IconEditor_Controls" 16 0 315 137 1 [] 3002 0
+*PICKER TOOL
+	pat: butt 3004 "WorldSwitcher_IconEditor_Controls" 18 0 315 165 1 [] 3004 0
+
+
+
+
+
+
+*todo: this shit has to go.
+
+***************************
+* SAVE/LOAD IMAGE BUTTONS *
+***************************
+
+*SAVE IMAGE
+	pat: butt 5001 "a00d" 38 0 0 420 3 [] 5001 0
+
+*LOAD IMAGE (not implemented)
+	pat: butt 5002 "b00d" 40 0 40 420 3 [] 5002 0
+
+*mvto 101 101
+*mvto 7093 47789
+
+
+
+
+*brush tool by default
+call 3001 0 0
+
+*select palette index 0
+call 1001 1001 0
+
+
+
+
+
+*LOAD IN ALL EXISTING ICONS!
+	call 10000 0 0
+
+
+
+endm
+
+********************************
+
+* ?? END OF CREATION SCRIPT ?? *
+
+********************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+****************************************
+* PALETTE BUTTONS INITIALIZE SCRIPT *
+****************************************
+
+scrp 1 1 64736 1000
+
+
+
+	inst
+
+*convert part number to id number (bit hacky...)
+	setv va00 _p1_
+	subv va00 1000
+
+*"Default_Palette_N"
+	sets va01 "Default_Palette_"
+	adds va01 vtos va00
+
+*load up a palette entry (ie 503). default to "000" if palette entry not found.
+	doif type game va01 = 2
+		sets va30 game va01
+	else
+		sets va30 "000"
+	endi
+
+	gsub get_palette_index_from_string_va30_into_va31
+	setv name "SelectedPaletteIndex" va31
+*	sets name "SelectedPaletteRGB" va30
+
+*set colour pose to match loaded indexed colour
+	part _p1_
+	pose va31
+
+
+
+
+
+*todo: this subr is defined identically multiple times in this cos and others.
+*any changes to it will have to be reflected everywhere!
+*ideally, it would all be handled from a shared palette object
+
+*takes a three character input and calculates the index using the equation i*36 + j*6 + k
+	subr get_palette_index_from_string_va30_into_va31
+
+*convert each character of the string into its numerical equivalent by subtracting 48
+		setv va31 char va30 1
+		subv va31 48
+
+		setv va32 char va30 2
+		subv va32 48
+
+		setv va33 char va30 3
+		subv va33 48
+
+*The number 36 here is actually 6^2 (6 squared), and it helps in calculating the index of a three-digit string where each digit can range from 0-5,
+*similarly, the number 6 is 6^1 (6 to the power of 1).
+
+		mulv va31 36
+		mulv va32 6
+
+		addv va31 va32
+		addv va31 va33
+
+*add 2 to skip the outline frame and invisible frame.
+		addv va31 2
+
+*put us back in 0 - X space instead of 1 - X space...
+		subv va31 1
+
+	retn
+
+
+
+
+
+*todo: this subr is defined identically multiple times in this cos and others.
+*any changes to it will have to be reflected everywhere!
+*ideally, it would all be handled from a shared palette object
+
+*takes a palette index and calculates the corresponding rgb string
+	subr get_string_from_palette_index_va31_into_va30
+
+*the calculation here works on the same principle as get_palette_index_from_string but in the opposite direction -
+*converting from a base-10 number back to a base-6 three-digit number.
+
+*int i = index / 36;
+		setv va32 va31
+		divv va32 36
+
+*index %= 36;
+		modv va31 36
+
+*int j = index / 6;
+		setv va33 va31
+		divv va33 6
+
+*int k = index % 6;
+		setv va34 va31
+		modv va34 6
+
+
+*return $"ijk";
+		sets va30 vtos va32
+		adds va30 vtos va33
+		adds va30 vtos va34
+
+	retn
+
+
+
+
+endm
+
+
+
+
+
+
+*************************************
+* PALETTE BUTTONS SELECT COLOUR SCRIPT *
+*************************************
+
+scrp 1 1 64736 1001
+
+	inst
+
+*remember this as our selected colour index part number, so the colour editor can send the new colour back here!
+	setv name "SelectedPalettePart" _p1_
+
+	part _p1_
+	setv va00 pose
+
+
+	targ game "IconEditor_PixelGrid"
+
+	setv name "SelectedPaletteIndex" va00
+
+
+	targ ownr
+	part mame "SelectedColourPreview_PartNumber"
+	pose va00
+
+
+
+
+
+*put part number from 1000-1010 range into 0-10 range
+	setv va01 _p1_
+	subv va01 1000
+
+
+*x/y position, top left corner (-1 compared to the creation logic to account for the outline being 1px outside the actual palette entry)
+	setv va50 24
+	setv va51 81
+
+
+*loop iteration counter starts at 1
+	setv va00 1
+
+*8 horizontal rows of buttons
+	reps game "IconEditor_Palette_Rows"
+
+*2 vertical columns of buttons
+		reps game "IconEditor_Palette_Columns"
+
+
+			doif va00 = va01
+				pat: move 1000 va50 va51
+				part 0
+				part 1002
+
+
+				stop
+			endi
+
+*adjust X coord
+			addv va50 16
+
+*increase loop iteration
+			addv va00 1
+
+		repe
+
+*adjust Y coord
+		addv va51 16
+
+*reset X coord
+		setv va50 24
+
+	repe
+
+
+
+endm
+
+
+
+
+
+
+
+
+******************************
+* EDIT CURRENT COLOUR SCRIPT *
+******************************
+
+scrp 1 1 64736 1002
+
+	inst
+
+*move screen darkener just in front of the main panel, but still behind the newly opened colour editor panel
+	setv va00 plne
+	addv va00 1
+
+
+
+*if we managed to click it without mouse move script noticing we're hovering, manually highlight button
+	part 1101
+
+	pose 0
+
+
+
+	targ game "WorldSwitcher_ScreenFader"
+
+	doif targ <> null
+		plne va00
+	endi
+
+
+
+
+	targ game "IconEditor_PixelGrid"
+
+	mesg wrt+ game "ColourEditor" 1000 name "SelectedPaletteIndex" 0 0
+
+*wake up colour editor, you are needed. _P1_ is Index (for pose), _P2_ is RGB code (for editing)
+*	mesg wrt+ game "ColourEditor" 1000 name "SelectedPaletteIndex" name "SelectedPaletteRGB" 0
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+**************
+* TOOL MODES *
+**************
+
+*BRUSH TOOL
+scrp 1 1 64736 3001
+
+	inst
+
+	setv game "IconEditor_CursorMode" 1
+
+*set this button to ON and all other buttons to OFF
+	part 3001
+	pose 1
+	part 3002
+	pose 0
+	part 3003
+	pose 0
+	part 3004
+	pose 0
+
+*show Brush Size Slider
+	call 3501 0 0
+
+*hide Fill Tool Tip
+	pat: move 103 -9000 -9000
+
+endm
+
+
+
+*FILL TOOL
+scrp 1 1 64736 3002
+
+	inst
+
+	setv game "IconEditor_CursorMode" 2
+
+*set this button to ON and all other buttons to OFF
+	part 3001
+	pose 0
+	part 3002
+	pose 1
+	part 3003
+	pose 0
+	part 3004
+	pose 0
+
+*hide Brush Size Slider
+	call 3500 0 0
+
+*show Fill Tool Tip
+	pat: move 103 -97 319
+
+endm
+
+*ERASER TOOL
+scrp 1 1 64736 3003
+
+	inst
+
+	setv game "IconEditor_CursorMode" 3
+
+*set this button to ON and all other buttons to OFF
+	part 3001
+	pose 0
+	part 3002
+	pose 0
+	part 3003
+	pose 1
+	part 3004
+	pose 0
+
+*show Brush Size Slider
+	call 3501 0 0
+
+*hide Fill Tool Tip
+	pat: move 103 -9000 -9000
+
+endm
+
+*PICKER TOOL
+scrp 1 1 64736 3004
+
+	inst
+
+	setv game "IconEditor_CursorMode" 4
+
+*set this button to ON and all other buttons to OFF
+	part 3001
+	pose 0
+	part 3002
+	pose 0
+	part 3003
+	pose 0
+	part 3004
+	pose 1
+
+*hide Brush Size Slider
+	call 3500 0 0
+
+*hide Fill Tool Tip
+	pat: move 103 -9000 -9000
+
+endm
+
+
+
+*hide Brush Size Slider
+scrp 1 1 64736 3500
+
+	inst
+
+	pat: move 102 -9000 -9000
+	pat: move 7000 -9000 -9000
+	pat: move 7001 -9000 -9000
+	pat: move 7002 -9000 -9000
+
+endm
+
+
+*show Brush Size Slider
+scrp 1 1 64736 3501
+
+	inst
+
+*X and Y position of slider
+	setv va00 118
+	setv va01 313
+
+*X offset of editable text component of slider
+	setv va05 va00
+	addv va05 game "WorldSwitcher_slider_TextboxXOffset"
+
+*Y offset of editable text component of slider
+	setv va06 va01
+	addv va06 game "WorldSwitcher_slider_TextboxYOffset"
+
+*move stuff back where it's meant to be
+	pat: move 102 -30 311
+	pat: move 7000 va00 va01
+	pat: move 7001 va00 va01
+	pat: move 7002 va05 va06
+
+	targ mame "BrushSizeSlider"
+
+*(re) INITIALIZE!
+	mesg writ targ 1005
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*SAVE BUTTON (WIP)
+scrp 1 1 64736 5001
+
+	inst
+	lock
+
+*icon name
+*todo: this cuts a char off?
+	sets va69 "name:"
+
+	doif mame "IconName" = ""
+		sets mame "IconName" "New Icon"
+	endi
+
+
+	adds va69 mame "IconName"
+
+*newline char
+	adds va69 "\n"
+
+*write the corresponding palette index for every pixel in the grid
+	adds va69 "palette:"
+
+*todo: functional palette writing
+	gsub write_colours_from_palette_to_string_va30
+	adds va69 va30
+*	adds va69 "555,000,333,222,500,201,530,421,541,320,351,030,245,005,535,304,"
+
+*newline char
+	adds va69 "\n"
+
+*write the corresponding palette index for every pixel in the grid
+	adds va69 "imageData:"
+
+	gsub write_pixels_from_pixelgrid_to_string_va30
+	adds va69 va30
+	adds va69 "\n"
+
+
+	file oope 1 "testSprite2.icon" 0
+
+*write our data to the file and c lose
+	outs va69
+
+	file oclo
+
+
+	targ ownr
+
+*target and animate button (post-action)
+	wait 2
+	part 5001
+	pose 0
+
+
+
+
+
+
+
+	subr write_colours_from_palette_to_string_va30
+
+
+*init string
+		sets va30 ""
+
+		setv va10 game "IconEditor_Palette_Columns"
+		mulv va10 game "IconEditor_Palette_Rows"
+
+
+*palette entries start at 1001
+		setv va02 1001
+
+		reps va10
+
+*convert each palette entry pose id to an rgb string
+			part va02
+
+			setv va41 pose
+*fix off by 1 error caused by transparent colour
+			subv va41 1
+			gsub get_string_from_palette_index_va41_into_va40
+			adds va30 va40
+
+
+			addv va02 1
+
+*repe
+
+*add comma
+			adds va30 ","
+		repe
+
+
+
+
+*cut off the last character (a comma)
+		setv va04 strl va30
+		subv va04 1
+
+*todo: CURRENTLY NOT CUTTING OFF THE LAST CHAR AS A TEMP FIX TO THE LAST PIXEL BEING CORRUPTED
+*		sets va56 subs va56 1 va04
+
+*		targ ownr
+
+	retn
+
+
+
+
+
+
+*todo: this subr is defined identically multiple times in this cos and others.
+*any changes to it will have to be reflected everywhere!
+*ideally, it would all be handled from a shared palette object
+
+*todo: uses va40 instead of va30 to stop a variable conflict BLEHH!!
+
+*takes a palette index and calculates the corresponding rgb string
+	subr get_string_from_palette_index_va41_into_va40
+
+*the calculation here works on the same principle as get_palette_index_from_string but in the opposite direction -
+*converting from a base-10 number back to a base-6 three-digit number.
+
+*int i = index / 36;
+		setv va42 va41
+		divv va42 36
+
+*index %= 36;
+		modv va41 36
+
+*int j = index / 6;
+		setv va43 va41
+		divv va43 6
+
+*int k = index % 6;
+		setv va44 va41
+		modv va44 6
+
+
+*return $"ijk";
+		sets va40 vtos va42
+		adds va40 vtos va43
+		adds va40 vtos va44
+
+	retn
+
+
+
+
+
+
+
+
+
+	subr write_pixels_from_pixelgrid_to_string_va30
+
+
+*init string
+		sets va30 ""
+
+
+*pixel grid is 18x18
+		setv va00 game "IconEditor_NumPixelsX"
+		mulv va00 game "IconEditor_NumPixelsY"
+
+
+
+		setv va01 0
+
+		reps va00
+
+			addv va01 1
+
+*target main canvas and store pose for each pixel
+			targ game "IconEditor_PixelGrid"
+			part va01
+
+
+			setv va03 pose
+
+
+
+
+
+
+*locate the corresponding palette entry for each pixel, and write the index
+
+			setv va05 0
+
+			targ game "IconEditor_Main"
+
+			setv va10 game "IconEditor_Palette_Columns"
+			mulv va10 game "IconEditor_Palette_Rows"
+
+
+*palette entries start at 1001
+			setv va02 1001
+
+			reps va10
+
+
+*if this palette entry already exists, simply select it
+				part va02
+
+				doif pose = va03
+
+					setv va06 va02
+					subv va06 1000
+					setv va05 va06
+
+				endi
+
+				addv va02 1
+
+			repe
+
+
+
+
+
+
+
+
+
+
+
+*add the stored pose for each pixel to the string we're gonna write.
+			adds va30 vtos va05
+			adds va30 ","
+		repe
+
+
+
+
+*cut off the last character (a comma)
+		setv va04 strl va30
+		subv va04 1
+
+*todo: CURRENTLY NOT CUTTING OFF THE LAST CHAR AS A TEMP FIX TO THE LAST PIXEL BEING CORRUPTED
+*		sets va56 subs va56 1 va04
+
+*		targ ownr
+
+	retn
+
+
+
+endm
+
+
+
+
+
+
+
+
+*LOAD BUTTON (WIP)
+scrp 1 1 64736 5002
+
+	inst
+
+	call 10001 "testSprite2.icon" 1
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*todo: move these scripts to appropriate place!
+
+
+
+
+****************************************************************************************
+******************************* SHARED SLIDER SCRIPT ***********************************
+****************************************7000********************************************
+
+scrp 1 1 64736 7000
+
+	inst
+
+*targer Brush Size Slider
+	targ mame "BrushSizeSlider"
+*check if (slider back piece) or (slider playhead) is under the mouse cursor
+	doif name "Slider_PartNumber" = _p1_ or name "Playhead_PartNumber" = _p1_
+		mesg writ targ 1000
+	endi
+
+
+
+endm
+
+
+
+
+
+****************************************************************************************
+************************** BRUSH SLIDER TEXT INPUT SCRIPT ******************************
+****************************************7001********************************************
+
+scrp 1 1 64736 7001
+
+	inst
+
+	targ null
+
+	fcus
+
+
+*run "get text from textbox" script on the slider
+	mesg writ mame "BrushSizeSlider" 1006
+
+endm
+
+
+
+
+
+****************************************************************************************
+************************* BRUSH SLIDER VALUE CHANGED SCRIPT ****************************
+****************************************7002********************************************
+
+*this is called by our slider (name "ValueUpdateScript")
+
+scrp 1 1 64736 7002
+
+	inst
+
+*get current Brush Size Value from Slider
+	setv va00 name "BrushSize"
+	targ mame "BrushSizeSlider"
+	setv va00 name "Value"
+
+
+
+
+
+***************
+* BRUSH SIZES *
+***************
+
+*note: It's recommended you use a square font such as "Inversions" when editing the brushes.
+*It will be much easier to see the shapes.
+
+*Brush Width and Height are determined by the position of the first comma.
+
+*It will crash if you make a brush that isn't the same Height as Width!!!
+
+*the center of the brush is automatically calculated as Brush Width / 2 (rounded down) - 1 * PixelWidth (8)
+
+
+	doif va00 = 1
+
+		sets game "IconEditor_BrushSize" "X,"
+
+	elif va00 = 2
+
+		sets game "IconEditor_BrushSize" "XX,"
+		adds game "IconEditor_BrushSize" "XX,"
+
+	elif va00 = 3
+
+		sets game "IconEditor_BrushSize" " X ,"
+		adds game "IconEditor_BrushSize" "XXX,"
+		adds game "IconEditor_BrushSize" " X ,"
+
+	elif va00 = 4
+
+		sets game "IconEditor_BrushSize" "XXX,"
+		adds game "IconEditor_BrushSize" "XXX,"
+		adds game "IconEditor_BrushSize" "XXX,"
+
+	elif va00 = 5
+
+		sets game "IconEditor_BrushSize" " XX ,"
+		adds game "IconEditor_BrushSize" "XXXX,"
+		adds game "IconEditor_BrushSize" "XXXX,"
+		adds game "IconEditor_BrushSize" " XX ,"
+
+	elif va00 = 6
+
+		sets game "IconEditor_BrushSize" " XXX ,"
+		adds game "IconEditor_BrushSize" "XXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXX,"
+		adds game "IconEditor_BrushSize" " XXX ,"
+
+	elif va00 = 7
+
+		sets game "IconEditor_BrushSize" " XXXX ,"
+		adds game "IconEditor_BrushSize" "XXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXX,"
+		adds game "IconEditor_BrushSize" " XXXX ,"
+
+	elif va00 = 8
+
+		sets game "IconEditor_BrushSize" "  XXX  ,"
+		adds game "IconEditor_BrushSize" " XXXXX ,"
+		adds game "IconEditor_BrushSize" "XXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXX,"
+		adds game "IconEditor_BrushSize" " XXXXX ,"
+		adds game "IconEditor_BrushSize" "  XXX  ,"
+
+	elif va00 = 9
+
+		sets game "IconEditor_BrushSize" "  XXXX  ,"
+		adds game "IconEditor_BrushSize" " XXXXXX ,"
+		adds game "IconEditor_BrushSize" "XXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXX,"
+		adds game "IconEditor_BrushSize" " XXXXXX ,"
+		adds game "IconEditor_BrushSize" "  XXXX  ,"
+
+	elif va00 = 10
+
+		sets game "IconEditor_BrushSize" "  XXXXX  ,"
+		adds game "IconEditor_BrushSize" " XXXXXXX ,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXX,"
+		adds game "IconEditor_BrushSize" " XXXXXXX ,"
+		adds game "IconEditor_BrushSize" "  XXXXX  ,"
+
+	elif va00 = 11
+
+		sets game "IconEditor_BrushSize" "   XXXX   ,"
+		adds game "IconEditor_BrushSize" " XXXXXXXX ,"
+		adds game "IconEditor_BrushSize" " XXXXXXXX ,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" " XXXXXXXX ,"
+		adds game "IconEditor_BrushSize" " XXXXXXXX ,"
+		adds game "IconEditor_BrushSize" "   XXXX   ,"
+
+	elif va00 = 12
+
+		sets game "IconEditor_BrushSize" "     XXXXX     ,"
+		adds game "IconEditor_BrushSize" "   XXXXXXXXX   ,"
+		adds game "IconEditor_BrushSize" "  XXXXXXXXXXX  ,"
+		adds game "IconEditor_BrushSize" " XXXXXXXXXXXXX ,"
+		adds game "IconEditor_BrushSize" " XXXXXXXXXXXXX ,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" "XXXXXXXXXXXXXXX,"
+		adds game "IconEditor_BrushSize" " XXXXXXXXXXXXX ,"
+		adds game "IconEditor_BrushSize" " XXXXXXXXXXXXX ,"
+		adds game "IconEditor_BrushSize" "  XXXXXXXXXXX  ,"
+		adds game "IconEditor_BrushSize" "   XXXXXXXXX   ,"
+		adds game "IconEditor_BrushSize" "     XXXXX     ,"
+
+	endi
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+*RAW MOUSE WHEEL SCRIPT
+
+scrp 1 1 64736 78
+
+
+*mousewheel controls BrushSize slider :)
+
+*The delta value is sent in _P1_ - 120 units per 'click'.
+
+
+	inst
+
+
+*check if we're hovering over the canvas using ov03
+	targ game "IconEditor_PixelGrid"
+
+*OV03 is set to 1 if we are in bounds
+	setv va00 ov03
+
+
+
+*target Brush Size Slider
+	targ mame "BrushSizeSlider"
+*check if any part of this slider is under the mouse cursor, OR if our cursor is over the canvas itself
+	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp or va00 = 1
+*send slider a message telling it to increase or decrease our value via _p1_
+		mesg wrt+ targ 1004 _p1_ 0 0
+
+
+*force an update on overlay pixel grid so user can tell brush size changed
+		wait 1
+		mesg writ game "IconEditor_BrushPreview" 75
+
+	endi
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+*RAW MOUSE MOVE SCRIPT
+
+scrp 1 1 64736 75
+
+	part 1101
+
+*animate hover over Edit Colour button
+
+	doif hotp = 1101
+
+		doif hots = game "IconEditor_Main"
+
+			pose 0
+
+		endi
+
+	else
+
+		pose 1
+
+	endi
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*apply transformation to pixelgrid
+
+*_P1_ is transformation type
+
+scrp 1 1 64736 6000
+
+
+	inst
+
+*******************
+**** ROTATE 90 ****
+*******************
+
+	doif _p1_ = 1
+
+*Transpose main pixelgrid to buffer
+		seta mame "Transform_Source" game "IconEditor_PixelGrid"
+		seta mame "Transform_Target" game "IconEditor_Buffer"
+
+		gsub Transpose
+
+		slow
+		inst
+
+*Flip Horizontal buffer to main pixelgrid
+		seta mame "Transform_Source" game "IconEditor_Buffer"
+		seta mame "Transform_Target" game "IconEditor_PixelGrid"
+
+		gsub Flip_Horizontal
+
+********************
+**** ROTATE -90 ****
+********************
+
+	elif _p1_ = 2
+
+*Flip Horizontal main pixelgrid to buffer
+		seta mame "Transform_Source" game "IconEditor_PixelGrid"
+		seta mame "Transform_Target" game "IconEditor_Buffer"
+
+		gsub Flip_Horizontal
+
+		slow
+		inst
+
+*Transpose buffer to main pixelgrid
+		seta mame "Transform_Source" game "IconEditor_Buffer"
+		seta mame "Transform_Target" game "IconEditor_PixelGrid"
+
+		gsub Transpose
+
+********************
+**** ROTATE 180 ****
+********************
+
+	elif _p1_ = 3
+
+*Rotate 180 main pixelgrid to buffer
+		seta mame "Transform_Source" game "IconEditor_PixelGrid"
+		seta mame "Transform_Target" game "IconEditor_Buffer"
+
+		gsub Rotate_180
+
+		slow
+		inst
+
+*Copy buffer to main pixelgrid
+		seta mame "Transform_Source" game "IconEditor_Buffer"
+		seta mame "Transform_Target" game "IconEditor_PixelGrid"
+
+		gsub Copy
+
+*************************
+**** FLIP HORIZONTAL ****
+*************************
+
+	elif _p1_ = 4
+
+*Flip Horizontal main pixelgrid to buffer
+		seta mame "Transform_Source" game "IconEditor_PixelGrid"
+		seta mame "Transform_Target" game "IconEditor_Buffer"
+
+		gsub Flip_Horizontal
+
+		slow
+		inst
+
+*Copy buffer to main pixelgrid
+		seta mame "Transform_Source" game "IconEditor_Buffer"
+		seta mame "Transform_Target" game "IconEditor_PixelGrid"
+
+		gsub Copy
+
+***********************
+**** FLIP VERTICAL ****
+***********************
+
+	elif _p1_ = 5
+
+*Rotate 180 main pixelgrid to buffer
+		seta mame "Transform_Source" game "IconEditor_PixelGrid"
+		seta mame "Transform_Target" game "IconEditor_Buffer"
+
+		gsub Rotate_180
+
+		slow
+		inst
+
+*Flip Horizontal buffer to main pixelgrid
+		seta mame "Transform_Source" game "IconEditor_Buffer"
+		seta mame "Transform_Target" game "IconEditor_PixelGrid"
+
+		gsub Flip_Horizontal
+
+****************
+**** INVERT ****
+****************
+
+	elif _p1_ = 6
+
+*Rotate 180 main pixelgrid to buffer
+		seta mame "Transform_Source" game "IconEditor_PixelGrid"
+		seta mame "Transform_Target" game "IconEditor_Buffer"
+
+		gsub Rotate_180
+
+		slow
+		inst
+
+*Flip Horizontal buffer to main pixelgrid
+		seta mame "Transform_Source" game "IconEditor_Buffer"
+		seta mame "Transform_Target" game "IconEditor_PixelGrid"
+
+		gsub Flip_Horizontal
+
+***************
+**** CLEAR ****
+***************
+
+	elif _p1_ = 7
+
+*todo: add an "are you sure you want to clear the canvas?" dialog
+		dbg: asrt "are you" = "sure?"
+
+*Clear main pixelgrid
+		seta mame "Transform_Target" game "IconEditor_PixelGrid"
+
+		gsub Clear
+
+	endi
+
+
+
+
+
+
+*Copy main pixelgrid to both previews
+	seta mame "Transform_Source" game "IconEditor_PixelGrid"
+
+	seta mame "Transform_Target" game "IconEditor_Preview"
+
+	gsub Copy
+
+	seta mame "Transform_Target" game "IconEditor_Preview_Darkened"
+
+	gsub Copy
+
+
+
+
+** TRANSPOSE **
+
+*swaps X and Y coordinates
+
+	subr Transpose
+
+*iterates over each part/pixel in the grid
+		setv va01 1
+*iterates over each part/pixel on the buffer grid
+		setv va02 1
+*row counter
+		setv va04 1
+
+
+		reps game "IconEditor_NumPixelsX"
+			reps game "IconEditor_NumPixelsY"
+
+*target main canvas and store pose for current pixel
+				targ mame "Transform_Source"
+				part va01
+				setv va03 pose
+
+*target Transformation Buffer and apply stored pose for current pixel
+				targ mame "Transform_Target"
+				part va02
+				pose va03
+
+*add 1 to iteration counter
+				addv va01 1
+
+*add length of a row to buffer grid tracking variable, so we place a transformed pixel from va01s position in a row to the equivalent va02 position in a column
+				addv va02 game "IconEditor_NumPixelsX"
+			repe
+
+*add 1 to start of row counter, so we process the next column of pixels
+			addv va04 1
+
+			setv va02 va04
+		repe
+
+	retn
+
+
+
+
+
+
+
+*** FLIP HORIZONTAL ***
+
+*flips each row of pixels
+
+	subr Flip_Horizontal
+
+*iterates over each part/pixel in the current row FORWARDS, specified by va04
+		setv va01 1
+
+*iterates over each part/pixel in the current row BACKWARDS, specified by va04
+		setv va02 game "IconEditor_NumPixelsX"
+*		subv va02 1
+
+*row counter
+		setv va04 1
+
+
+*loop over entire grid
+		reps game "IconEditor_NumPixelsX"
+			reps game "IconEditor_NumPixelsY"
+
+*target main canvas and store pose for current pixel
+				targ mame "Transform_Source"
+				part va01
+				setv va03 pose
+
+*target Transformation Buffer and apply stored pose for current pixel
+				targ mame "Transform_Target"
+				part va02
+				pose va03
+
+*move each pixel tracking variable in the opposite direction from each other
+				addv va01 1
+				subv va02 1
+			repe
+
+
+*add the length of a row to va04 to put us onto the next row
+			addv va04 game "IconEditor_NumPixelsX"
+
+*reset FORWARD pixel tracking variable to the start of the next row
+			setv va01 va04
+
+*reset BACKWARD pixel tracking variable to the end of the next row
+			setv va02 va04
+			addv va02 game "IconEditor_NumPixelsX"
+			subv va02 1
+
+		repe
+
+	retn
+
+
+
+
+
+
+
+*** ROTATE 180 ***
+
+*reverses the entire part array, effectively rotating our image 180 degrees
+
+	subr Rotate_180
+
+*get pixel grid size
+		setv va00 game "IconEditor_NumPixelsX"
+		mulv va00 game "IconEditor_NumPixelsY"
+
+		setv va01 1
+
+*this number will run down from the max loops instead of up from 0.
+*this means it will be the opposite pixel, effectively rotating the image 180 degrees by reversing the entire array.
+		setv va02 va00
+*		addv va02 1
+
+		reps va00
+
+*target main canvas and store pose for each pixel
+			targ mame "Transform_Source"
+			part va01
+			setv va03 pose
+
+*target Transformation Buffer and apply stored pose for each pixel
+			targ mame "Transform_Target"
+			part va02
+			pose va03
+
+			addv va01 1
+			subv va02 1
+
+		repe
+
+	retn
+
+
+
+
+*** COPY ***
+
+*copies all pixel poses from source to target
+
+	subr Copy
+
+*get pixel grid size
+		setv va00 game "IconEditor_NumPixelsX"
+		mulv va00 game "IconEditor_NumPixelsY"
+
+		setv va01 1
+
+		reps va00
+
+*target main canvas and store pose for each pixel
+			targ mame "Transform_Source"
+			part va01
+			setv va03 pose
+
+*target Transformation Buffer and apply stored pose for each pixel
+			targ mame "Transform_Target"
+			part va01
+			pose va03
+
+			addv va01 1
+
+		repe
+
+	retn
+
+
+
+
+
+*** CLEAR ***
+
+*set all pixels on target to pose 0
+
+	subr Clear
+
+*get pixel grid size
+		setv va00 game "IconEditor_NumPixelsX"
+		mulv va00 game "IconEditor_NumPixelsY"
+
+		setv va01 1
+
+		reps va00
+
+
+*target Transformation Buffer and apply stored pose for each pixel
+			targ mame "Transform_Target"
+			part va01
+			pose 0
+
+			addv va01 1
+
+		repe
+
+	retn
+
+
+
+endm
+
+
+
+
+***************************************************************************************
+****************************** SHARED DROPDOWN SCRIPT *********************************
+***************************************************************************************
+
+
+
+scrp 1 1 64736 6001
+
+	inst
+
+*target Rotate Dropdown
+	targ mame "RotateDropdown"
+*check if the correct button part number for this dropdown was sent
+	doif name "Button_PartNumber" = _p1_
+		mesg writ targ 1000
+		stop
+	endi
+
+*target Flip Dropdown
+	targ mame "FlipDropdown"
+*check if the correct button part number for this dropdown was sent
+	doif name "Button_PartNumber" = _p1_
+		mesg writ targ 1000
+		stop
+	endi
+
+*target Flip Dropdown
+	targ mame "ImageDropdown"
+*check if the correct button part number for this dropdown was sent
+	doif name "Button_PartNumber" = _p1_
+		mesg writ targ 1000
+		stop
+	endi
+
+endm
+
+
+
+
+
+***************************************************************************************
+****************************** Rotate Dropdown Value Changed *********************************
+***************************************************************************************
+
+
+
+scrp 1 1 64736 6002
+
+	inst
+
+*target Rotate Dropdown
+	targ mame "RotateDropdown"
+
+*Rotate 90
+	doif name "Index" = 0
+		call 6000 1 0
+*Rotate -90
+	elif name "Index" = 1
+		call 6000 2 0
+*Rotate 180
+	elif name "Index" = 2
+		call 6000 3 0
+	endi
+
+endm
+
+
+
+
+***************************************************************************************
+****************************** Flip Dropdown Value Changed *********************************
+***************************************************************************************
+
+
+
+scrp 1 1 64736 6003
+
+	inst
+
+*target Flip Dropdown
+	targ mame "FlipDropdown"
+
+*Flip Horizontal
+	doif name "Index" = 0
+		call 6000 4 0
+*Flip Vertical
+	elif name "Index" = 1
+		call 6000 5 0
+	endi
+
+endm
+
+
+
+
+
+
+***************************************************************************************
+****************************** Image Operations Dropdown Value Changed *********************************
+***************************************************************************************
+
+
+
+scrp 1 1 64736 6004
+
+	inst
+
+*target Image Operations Dropdown
+	targ mame "ImageDropdown"
+
+*Invert
+	doif name "Index" = 0
+		call 6000 6 0
+*Clear
+	elif name "Index" = 1
+		call 6000 7 0
+	endi
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*LOAD ALL EXISTING ICONS!
+
+scrp 1 1 64736 10000
+
+	inst
+	lock
+
+	file glob 1 "*.icon"
+
+*check how many "*.icon" were found
+
+*this line should work, but it doesn't read the entire line.
+*setv va50 inni
+
+*so we just read the whole line and convert that to a number instead.
+	setv va60 stoi innl
+
+	dbg: outv va60
+
+*loop iteration counter
+	setv va90 0
+
+	reps va60
+
+		sets va01 innl
+
+		dbg: outs va01
+
+*get length of globbed file string...	
+		setv va08 strl va01
+
+*globbed files start with ".", so we remove 11 (number of characters forward we are looking from va02 (number of characters to read in total))
+*this stops it reading past the end of the string and causing an error.
+		subv va08 11
+*+1 because we need to read from AFTER that character.
+		addv va08 1
+
+*and then just return the last bit of the name such as "testworld.icon"
+		sets name va90 subs va01 11 va08
+
+		addv va90 1
+	repe
+
+
+
+
+*todo: real class number, real plane
+
+*the darkener!!
+*	new: simp 1 1 654321 "WorldSwitcher_IconEditor_Controls" 1 34 9000
+*	alph 180 1
+
+	targ game "IconEditor_Buffer"
+	part -1
+
+*run the loop again, this time to load up each file pointed to by the previous input stream (from globbing the directory)
+
+*loop iteration counter
+	setv va90 0
+
+	reps va60
+
+*load currently named icon into buffer
+*		call something va90 0
+
+		call 10001 mame va90 0
+
+
+		sets va00 mame "IconName"
+
+		sets va98 va00
+		sets va99 va00
+
+		adds va98 "_icon_lit"
+		adds va99 "_icon_unlit"
+
+*take an icon sized screenshot using the buffer room
+		snap va98 1024 1014 48 29 0
+
+*		show 1
+		alph 75 1
+
+*take a DARKENED icon sized screenshot using the buffer room
+		snap va99 1024 1014 48 29 0
+
+		alph 255 0
+*		show 0
+
+		addv va90 1
+
+	repe
+
+
+
+
+
+
+*TODO: THIS IS UNUSED? REMOVE IT?
+
+	subr load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+		sets va02 va31
+
+*read from position 7 (length of string "frame0:") (VA03) to the END OF STRING. calculated by subtracting VA03 from the length of the current string (VA02).
+		setv va03 strl va32
+*this was off by 1 and we were reading the first pixel as ":10" instead of "10"
+		addv va03 1
+		setv va04 strl va02
+		subv va04 va03
+*  	      vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+		sets va30 subs va02 va03 va04
+*  	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+	retn
+
+
+
+
+endm
+
+
+
+
+
+*load icon script
+
+*_P1_ - file name, relative to journal folder
+*_P2_ - 0 = load into buffer, 1 = load into all visible pixelgrids
+
+scrp 1 1 64736 10001
+
+	inst
+
+	lock
+
+
+
+	file iope 1 _p1_
+
+
+
+*get every necessary value from every necessary key
+
+*todo: if you can't find ANY of these keys, or a bunch of other possible errors happen, you should recover from the error!!!
+
+	loop
+		sets va00 innl
+		sets va00 lowa va00
+
+		sets va32 "name:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va00
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			sets mame "IconName" va30
+
+		endi
+
+		sets va32 "palette:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va00
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			gsub load_string_of_rgbs_va30_into_palette
+
+		endi
+
+
+		sets va32 "imagedata:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va00
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+*(also load the image data into the pixelgrid)
+			gsub load_string_of_indexes_va30_into_pixelgrid
+
+		endi
+
+
+
+
+
+	untl inok = 0
+
+
+
+
+
+
+	file iclo
+
+
+
+
+
+
+
+*load every comma seperated palette entry into our palette
+
+	subr load_string_of_rgbs_va30_into_palette
+
+*todo: if any key you're trying to load from doesn't exist, throw a general error that stops the loading process
+
+		wait 1
+		inst
+
+		sets va31 ","
+		gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+		setv name "counting" 0
+
+*the value returned by the subroutine is off by 1 (323 instead of 324)
+*NOTE: currently not true. attempting to fix this by not cutting off the bracket at the end of the string... for now
+*		addv va32 1
+
+		setv name "max_count" va32
+
+*		inst
+
+		loop
+*			wait 1
+*			inst
+			addv name "counting" 1
+
+
+*todo: somewhere around here you could put the fix for the last pixel not reading properly from the string unless the string ends with a , comma ,
+
+			setv va32 name "counting"
+			gsub set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
+
+
+*convert rgb string to palette index
+			sets va40 va33
+
+			gsub get_palette_index_from_string_va40_into_va41
+
+
+*select part number corresponding with the palette entry number we're reading...
+			setv va01 name "counting"
+			addv va01 1000
+
+			doif part va01 = 1
+*todo: for some reason the top left (1st) and bottom right (Last) pixel are being cut off
+				part va01
+				pose va41
+			endi
+
+
+		untl name "max_count" eq name "counting"
+
+
+	retn
+
+
+
+
+
+
+
+
+*todo: this subr is defined identically multiple times in this cos and others.
+*any changes to it will have to be reflected everywhere!
+*ideally, it would all be handled from a shared palette object
+
+*NOTE: this one is edited from get_palette_index_from_string_va40_into_va41 to fix a subr variable naming conflict...
+
+*takes a three character input and calculates the index using the equation i*36 + j*6 + k
+	subr get_palette_index_from_string_va40_into_va41
+
+*convert each character of the string into its numerical equivalent by subtracting 48
+		setv va41 char va40 1
+		subv va41 48
+
+		setv va42 char va40 2
+		subv va42 48
+
+		setv va43 char va40 3
+		subv va43 48
+
+*The number 36 here is actually 6^2 (6 squared), and it helps in calculating the index of a three-digit string where each digit can range from 0-5,
+*similarly, the number 6 is 6^1 (6 to the power of 1).
+
+		mulv va41 36
+		mulv va42 6
+
+		addv va41 va42
+		addv va41 va43
+
+*add 2 to skip the outline frame and invisible frame.
+		addv va41 2
+
+*put us back in 0 - X space instead of 1 - X space...
+		subv va41 1
+
+
+
+	retn
+
+
+
+
+
+
+
+
+
+	subr load_string_of_indexes_va30_into_pixelgrid
+
+*todo: if any key you're trying to load from doesn't exist, throw a general error that stops the loading process
+
+*		wait 1
+*		inst
+
+
+*_p2_ = 1, so hide all visible pixelgrids to prepare for loading data in
+		doif _p2_ = 1
+*hide our grids while we slowly load
+			targ game "IconEditor_PixelGrid"
+			show 0
+			targ game "IconEditor_Preview"
+			show 0
+			targ game "IconEditor_Preview_Darkened"
+			show 0
+		endi
+
+
+
+		sets va31 ","
+		gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+		setv mame "counting" 0
+
+*the value returned by the subroutine is off by 1 (323 instead of 324)
+*NOTE: currently not true. attempting to fix this by not cutting off the bracket at the end of the string... for now
+*		addv va32 1
+
+		setv mame "max_count" va32
+
+
+		loop
+			addv mame "counting" 1
+
+
+*todo: somewhere around here you could put the fix for the last pixel not reading properly from the string unless the string ends with a , comma ,
+
+			setv va32 mame "counting"
+			gsub set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
+
+*			doif va33 = ""
+*				sets va33 "error loading byte "
+*				adds va33 vtos va32
+*				dbg: outs va33
+*			endi
+
+*			doif va34 = game "IconEditor_Preview_7"
+*				dbg: outs va33
+*			endi
+
+*sloppy protection for attempting to run more than 1,000,000 instructions in a single tick
+			doif va99 = 15
+				setv va99 0
+				slow
+				inst
+			endi
+
+			addv va99 1
+
+
+*convert pixel colour ID string to number
+			setv va05 stoi va33
+
+*select part number corresponding with the pixel number we're reading...
+
+*todo: for some reason the top left (1st) and bottom right (Last) pixel are being cut off todo: investigate if there is still any truth to this?
+			doif part mame "counting" = 1
+
+*get the corresponding colour palette index from the palette, and apply that colour pose to the specified pixel. to all relevant copies of the pixelgrid.
+				targ game "IconEditor_Main"
+
+				addv va05 1000
+
+				part va05
+
+				setv va06 pose
+
+*_p2_ = 1, so load data into all visible pixelgrids
+				doif _p2_ = 1
+
+					targ game "IconEditor_PixelGrid"
+
+					part mame "counting"
+
+					pose va06
+
+					targ game "IconEditor_Preview"
+
+					part mame "counting"
+
+					pose va06
+
+					targ game "IconEditor_Preview_Darkened"
+
+					part mame "counting"
+
+					pose va06
+
+					targ game "IconEditor_PixelGrid"
+*_p2_ = 0, so load data into the buffer
+				else
+
+					targ game "IconEditor_Buffer"
+
+					part mame "counting"
+
+					pose va06
+
+				endi
+
+			endi
+
+		untl mame "max_count" eq mame "counting"
+
+
+*_p2_ = 1, unhide our loaded grids :)
+		doif _p2_ = 1
+			targ game "IconEditor_PixelGrid"
+			show 1
+			targ game "IconEditor_Preview"
+			show 1
+			targ game "IconEditor_Preview_Darkened"
+			show 1
+		endi
+
+
+	retn
+
+
+
+
+
+
+
+	subr load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+		sets va02 va31
+
+*read from position 7 (length of string "frame0:") (VA03) to the END OF STRING. calculated by subtracting VA03 from the length of the current string (VA02).
+		setv va03 strl va32
+
+		setv va04 strl va02
+		subv va04 va03
+
+*fix off by 1 errorz
+		addv va03 1
+
+*  	      vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+		sets va30 subs va02 va03 va04
+*  	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+	retn
+
+
+
+
+
+
+
+
+*thanks Amaikokonut/Aiko for this awesome function!
+
+
+	subr set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+
+		wait 1
+
+		inst
+
+*in string va30, where the splitting character is va31, va32 is the number of
+*words/items in said string.
+		setv va32 0
+		setv va39 1
+		loop
+*if the first character is the delimiter, skip it 
+			doif sins va30 va39 va31 ne -1
+				doif subs va30 1 1 eq va31 and va39 eq 1
+					addv va39 1
+				endi
+				setv va38 sins va30 va39 va31
+				subv va38 va39
+				sets va37 subs va30 va39 va38
+			else
+				sets va37 subs va30 va39 -1
+				setv va39 -99
+			endi
+			doif va37 ne ""
+*             vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+				addv va32 1
+*             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+			endi
+			addv va39 va38
+			addv va39 1
+		untl va39 lt 1
+	retn
+
+
+
+	subr set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
+*in string va30, where the splitting charater is va31 and va32 is the index 
+* (indicies start at 1) of the thing you want, va33 is the item, or "" if it
+* doesn't exist
+		setv va39 1
+		setv va36 0
+		sets va33 ""
+		loop
+*if the first character is the delimiter, skip it 
+			doif sins va30 va39 va31 ne -1
+				doif subs va30 1 1 eq va31 and va39 eq 1
+					addv va39 1
+				endi
+				setv va38 sins va30 va39 va31
+				subv va38 va39
+				sets va37 subs va30 va39 va38
+			else
+				sets va37 subs va30 va39 -1
+				setv va39 -999999
+			endi
+			doif va37 ne ""
+				addv va36 1
+				doif va36 eq va32
+*                     vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+					sets va33 va37
+*                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+					setv va39 -999999
+				endi
+			endi
+			addv va39 va38
+			addv va39 1
+		untl va39 lt 1
+	retn
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+*CONFIRM (TICK) BUTTON - Save this icon and set it as this worlds icon
+
+scrp 1 1 64736 3000
+
+	lock
+
+	part 5
+
+	pose 1
+	wait 3
+	pose 0
+
+	inst
+
+*call close script on icon panel first
+	mesg writ game "WorldSwitcher_IconPanel" 4000
+
+	call 8000 0 0
+
+endm
+
+
+
+*CANCEL (NO) BUTTON - Abort changes, keep using previous version of icon
+
+scrp 1 1 64736 4000
+
+	lock
+
+	part 6
+
+	pose 1
+	wait 3
+	pose 0
+
+	inst
+
+	targ game "WorldSwitcher_IconPanel"
+
+	paus 0
+
+	call 8000 0 0
+
+endm
+
+
+
+
+
+
+
+
+***************************************************************************
+************************** CLOSE MAIN FORM ********************************
+***************************************************************************
+
+
+
+scrp 1 1 64736 8000
+
+
+
+*shove it way out of bounds
+*	mvto -5000 -5000
+
+
+*alternate implementation if we wanted to destroy and recreate the panel each time we need it
+
+*kill everything, kill everything, kill everything
+	kill mame "BrushSizeSlider"
+	kill mame "RotateDropdown"
+	kill mame "FlipDropdown"
+	kill mame "ImageDropdown"
+
+	kill game "IconEditor_Cursor"
+	kill game "IconEditor_BrushPreview"
+	kill game "IconEditor_Buffer"
+	kill game "IconEditor_Preview"
+	kill game "IconEditor_Preview_Darkened"
+	kill game "IconEditor_PixelGrid"
+
+	kill game "IconEditor_Main"
+*
+*
+**todo: this doesnt do a lot of the stuff it needs to do lol... should we clear up all the variables??
+
+endm

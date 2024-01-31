@@ -1,0 +1,310 @@
+*NOTE: THIS FILE ONLY RUNS ONCE, WHEN CREATING THE WORLD! of course!!
+
+
+inst
+
+new: simp 3 14 50203 "blnk" 0 0 0
+
+mesg writ targ 1000
+
+
+
+
+
+
+scrp 3 14 50203 1000
+
+inst
+
+lock
+
+	file iope 0 "addons"
+
+	doif inok = 1
+
+		loop
+
+			sets va99 innl
+
+*			dbg: outs va99
+
+*crazy fix for rooms being created in non-existent room slot 2000. we re-base the rooms back to 0 before every attempt at injecting a chunk.
+*			brmi 10 0
+
+			gsub inject_it
+
+*hardcoded fix for C2toDS progress bar.
+*waiting 50 ticks allows the C2toDS map to inject in its entirety before the C12DS 
+*(or any other theoretical addon) attempts to install its own map.
+
+*todo: something more flexible?
+			doif va99 = "C2 to DS Refresh"
+				wait 50
+			else
+				wait 1
+			endi
+
+		untl inok = 0
+
+	endi
+
+*dbg: outs "done!! :)"
+
+	kill ownr
+
+
+
+
+*todo: should we be rewriting this to actually report errors to the user??
+
+	subr inject_it
+
+*test the chunk exists first
+		setv va00 pray test va99
+
+*	Inject the chunk
+		doif va00 <> 0
+			setv va00 pray injt va99 1 va01
+			doif va00 <> 0
+				outs "There was an error injecting '"
+				outs va99
+				outs "'.\n"
+				outs "Error: "
+				outv va00
+				outs "\n"
+			else
+				outs "Agent '"
+				outs va99
+				outs "' injected successfully."
+			endi
+		endi
+	retn
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*todo: clear out the crap!!
+
+*doif game "C1_to_DS_Loaded" = 1 or eame "C1_to_DS_Loaded" = 1
+*
+*	sets va99 "C1 to DS"
+*	gsub inject_it
+*
+*endi
+
+
+
+*TODO: clear out the crap
+
+*
+*rscr
+** C1 to DS Remover
+*
+*inst
+*
+** find the metaroom number
+*setv va02 gmap 0 10000
+*
+** Remove the favorite place icon
+*enum 1 4 64401
+*	kill targ
+*next
+*
+** Remove the 'C1 to DS is loaded' variable
+*delg "C1_to_DS_Loaded"
+*
+** Get a safe spot
+*doif type game "ds_game_type" ne 2
+*	setv va00 5440
+*	setv va01 3580
+*else
+*	doif game "ds_game_type" eq "undocked"
+*		setv va00 6100
+*		setv va01 9200
+*	elif game "ds_game_type" eq "docked"
+*		setv va00 6100
+*		setv va01 9200
+*	endi
+*endi
+*
+** move the camera to the safe spot
+*cmrp va00 va01 0
+*
+** Remove teleporters to prevent movement in and out of the room
+*enum 3 2 64401
+*	kill targ
+*next
+*enum 3 2 32318
+*	kill targ
+*next
+*enum 3 2 32319
+*	kill targ
+*next
+*
+** Move all creatures and eggs from the metaroom
+*enum 4 0 0
+*	setv va03 gmap posl post
+*	doif va03 = va02
+*		loop
+*			doif movs = 3
+*				rpas carr targ
+*			endi
+*		untl movs = 0
+*		mvsf va00 va01
+*	endi
+*next
+*enum 3 4 0
+*	setv va03 gmap posl post
+*	doif va03 = va02
+*		loop
+*			doif movs = 3
+*				rpas carr targ
+*			endi
+*		untl movs = 0
+*		mvsf va00 va01
+*	endi
+*next
+*
+** Move DS teleporters in the metaroom to the safe spot
+*enum 3 2 3
+*	doif gmap posx posy = va02
+*		mvsf va00 va01
+*	endi
+*next
+*
+** Move C3 teleporters in the metaroom to the safe spot
+*enum 3 2 1
+*	doif gmap posx posy = va02
+*		mvsf va00 va01
+*	endi
+*next
+*
+*
+** move any random teleporters in the metaroom 
+*enum 3 2 4
+*	doif gmap posx posy = va02
+*		mvsf va00 va01
+*	endi
+*next
+*
+** move any DS cameras
+*enum 3 8 50
+*	doif gmap posx posy = va02
+*		mvsf va00 va01
+*	endi
+*next
+*
+** move any C3 cameras
+*enum 3 3 34
+*	doif gmap posx posy = va02
+*		mvsf va00 va01
+*	endi
+*next
+*
+*
+** Move portals to safe spot
+*enum 3 9 1
+*	doif gmap posx posy = va02
+*		mvsf va00 va01
+*		doif ov03 eq 1 or ov03 eq 2
+** 			Close portal
+*			lock
+*			bhvr 0
+*			setv ov03 0
+*			pose 0
+*			attr 199
+*			clac 2
+*		endi
+*	endi
+*next
+*
+** remove all agents in the metaroom
+*enum 0 0 0
+*	doif gmap posx posy = va02
+*		kill targ
+*	endi
+*next
+*
+** get all rooms in metaroom
+*sets va03 erid va02
+*
+** get the first room in the list
+*setv va04 sins va03 2 " "
+*
+** now iterate through all remaining rooms 
+*loop
+**	get room number
+*	subv va04 1
+*	sets va05 subs va03 2 va04
+*
+** 	got room number, now delete
+*	delr stoi va05
+*
+**	get the next room
+*	setv va06 strl va03
+*	subv va06 va04
+*	addv va04 1
+*	sets va05 subs va03 va04 va06
+*	sets va03 va05
+*	setv va04 sins va03 2 " "
+*untl va04 eq -1
+*
+** Delete the last room
+*delr stoi va03
+*
+** Delete the metaroom
+*delm va02
+*
+** Find a safe spot for the camera
+*doif type game "ds_game_type" ne 2
+*	setv va00 2873
+*	setv va01 1000
+*else
+*	doif game "ds_game_type" eq "undocked"
+*		setv va00 523
+*		setv va01 9200
+*	elif game "ds_game_type" eq "docked"
+*		setv va00 523
+*		setv va01 9200
+*	endi
+*endi
+*cmrp va00 va01 0
+*
+** Remove the favorite place icon and reorder the rest
+*rtar 1 4 64401
+*setv va00 ov50
+*enum 1 4 0
+*	doif ov50 > va00
+*		setv va10 fltx
+*		subv ov50 1
+*		mesg wrt+ targ 1000 ov50 0 0
+*		subv va10 50
+*		flto va10 flty
+*	endi
+*next
+*subv game "ds_favourites" 1
+*rtar 1 4 64401
+*doif targ <> null
+*	kill targ
+*endi
+*rtar 1 3 64401
+*doif targ <> null
+*	setv ov00 0
+*	setv ov50 0
+*endi

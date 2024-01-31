@@ -1,0 +1,722 @@
+inst
+
+setv game "WorldSwitcher_slider_Width" 140
+setv game "WorldSwitcher_slider_Height" 23
+
+
+setv game "WorldSwitcher_slider_TextboxXOffset" 148
+setv game "WorldSwitcher_slider_TextboxYOffset" -1
+
+setv game "WorldSwitcher_slider_PlayheadWidth" 10
+
+
+***********************************
+********* OBJECT VARIABLES *********
+***********************************
+
+
+*todo: re-do this list by copy pasting the example again
+
+*todo: put them here. they are in pixelgridscontrols script.
+*todo: replace all OVs with name variables.
+
+
+*
+*
+**compound object this slider is part of
+*seta name "ParentObject" ownr
+*
+**X/Y coords of top left corner of slider
+*setv name "X" 294
+*setv name "Y" 316
+*
+**part numbers to use when creating the slider
+*setv name "Slider_PartNumber" 7000
+*setv name "Playhead_PartNumber" 7001
+*setv name "Textbox_PartNumber" 7002
+*
+**sprite file and frame number for slider (background element)
+*sets name "Slider_Image" "WorldSwitcher_Slider"
+*setv name "Slider_ImageIndex" 0
+*
+**sprite file and frame number for playhead
+*sets name "Playhead_Image" "WorldSwitcher_Slider"
+*setv name "Playhead_ImageIndex" 2
+*
+**sprite file and frame number for editable text component
+*sets name "Textbox_Image" "WorldSwitcher_Slider"
+*setv name "Textbox_ImageIndex" 3
+*
+**offset of editable text component
+*setv name "Textbox_OffsetX" game "WorldSwitcher_slider_TextboxXOffset"
+*setv name "Textbox_OffsetY" game "WorldSwitcher_slider_TextboxYOffset"
+
+
+
+
+
+
+
+*todo: this is really poorly explained? it essentially converts a 0.0 to 1.0 range value into a valid number between MinValue and MaxValue 
+*then it does some operations to limit it to the specified number of decimal places.
+*it then sets the textbox to that value, and writes it to the specified output variable
+*it then does some further maths to put it back into a range between LeftPosition And RightPosition, and positions the slider there.
+
+
+*set textbox text from _P1_ into a number between -1.0 and +1.0 (including the + sign)
+*and then put the result (editable text part number) of (compound object this slider is attached to).
+*input values (_P1_) must be in 0.0 - 1.0 range!
+
+scrp 1 1 64769 1002
+
+	inst
+
+*store MinValue and MaxValue of slider manager
+	setv va50 name "MinValue"
+	setv va51 name "MaxValue"
+
+
+**where are we writing our result to?
+*	sets va10 name "SliderOutput"
+
+*script on main object to run after setting the value
+	setv va15 name "ValueUpdateScript"
+
+
+*move _p1_ into va00
+	setv va00 _p1_
+
+
+*convert it to a float (whole numbers want to be ints)
+	mulv va00 1.00000
+
+
+
+
+*LERP our value from a 0.00 - 1.00 range to a range between MinValue and MaxValue
+
+*start + (end - start) * t
+
+* (end - start)
+	setv va53 va51
+	subv va53 va50
+
+* * t
+	mulv va00 va53
+
+* + start
+	addv va00 va50
+
+
+
+
+
+
+**clamp value between -1.0 and 1.0
+*	doif va00 < name "MinValue"
+*		setv va00 name "MinValue"
+*	endi
+*
+*	doif va00 > name "MaxValue"
+*		setv va00 name "MaxValue"
+*	endi
+
+
+
+
+
+
+
+*number of characters after decimal place calculation
+
+
+	doif name "DecimalPrecision" = 0
+		sets va01 vtos ftoi va00
+	else
+
+		sets va01 vtos va00
+
+
+*start with the number of characters before the decimal point...
+		setv va99 strl vtos ftoi va00
+
+*add our number of digits after decimal place
+		addv va99 name "DecimalPrecision"
+
+*add 1 to the total number of characters to account for the decimal
+		addv va99 1
+
+*add 1 to the total number of characters if we have a + or - sign
+		doif va00 > 0.0 and name "ShowPlusSign" = 1
+
+			addv va99 1
+
+		elif va00 < 0.0
+
+			addv va99 1
+
+		endi
+
+
+*trim that string
+		sets va01 subs va01 1 va99
+
+	endi
+
+
+*and put our nicely rounded number string back into a float!
+	setv va00 stof va01
+
+
+**************************************************************************
+
+
+
+
+*target the editable text part (pat: text) linked to this slider and put the text there!!
+	targ name "ParentObject"
+	part mame "Textbox_PartNumber"
+	ptxt va01
+
+**put output into named variable on main object
+*	setv name va10 va00
+
+*store our new Value
+	setv mame "Value" va00
+
+
+
+
+*************************************************************************
+
+
+
+*get left coord of slider
+	setv va60 mame "X"
+*get right coord of slider
+	setv va61 va60
+	addv va61 mame "Slider_Width"
+
+
+
+*our input value
+	setv va02 va00
+
+*make sure it's a float
+	mulv va02 1.0
+
+
+*inverse LERP our value from a MinValue to MaxValue range to a 0.0 - 1.0 range
+
+*Calculate the difference between the start and end values       
+	setv va55 va51
+	subv va55 va50
+
+
+*Calculate the difference between the target value and the start value
+	subv va02 va50
+
+*divide by 0 fix...
+*	doif va02 <= 0
+*Calculate the interpolation factor by dividing the target difference by the overall difference  
+	divv va02 va55
+*	else
+*		setv va02 0
+*	endi
+
+*clamp it
+	doif va02 < 0.0
+		setv va02 0.0
+	endi
+
+	doif va02 > 1.0
+		setv va02 1.0
+	endi
+
+
+
+*LERP our value from a 0.00 - 1.00 range to a range between POSL and POSL+SLIDER_WIDTH
+
+*start + (end - start) * t
+
+* (end - start)
+	setv va53 va61
+	subv va53 va60
+
+* * t
+	mulv va02 va53
+
+* + start
+	addv va02 va60
+
+
+
+*************************************************************************
+
+
+
+
+
+
+
+
+
+************************
+*POSITION THE SLIDER!!!*
+************************
+
+*store slider_PlayheadWidth / 2 in va05
+	setv va05 game "WorldSwitcher_slider_PlayheadWidth"
+	divv va05 2
+
+*subtract it from the position to correctly center the Playhead
+	subv va02 va05
+
+
+*position slider playhead part (pat: dull).
+	pat: move mame "Playhead_PartNumber" va02 mame "Y"
+
+
+
+
+*if non-zero, run the script with this number on the main object
+	doif va15 <> 0
+		mesg writ targ va15
+	endi
+
+
+endm
+
+
+
+
+
+****************************************
+*           SLIDER CLICKED             *
+**************** 1000 ******************
+****************************************
+
+*called from external compound object when clicking anywhere on the bar or playhead
+
+scrp 1 1 64769 1000
+
+
+*get us out of any text boxes
+	targ null
+	fcus
+
+	targ ownr
+
+*listen for mouse moves and mouse release
+	imsk 20
+
+*call the Move Slider Head to Pointer Position script
+	call 1001 0 0
+
+endm
+
+
+
+
+
+
+
+
+****************************************
+*      RAW MOUSE MOVE (mouse move)     *
+****************  75  ******************
+****************************************
+
+*(only enabled when clicking and holding the pat: butt)
+
+scrp 1 1 64769 75
+
+*call the Move Slider Head to Pointer Position script
+	call 1001 0 0
+
+endm
+
+
+
+****************************************
+*     RAW MOUSE UP (mouse release)     *
+****************  77  ******************
+****************************************
+
+*(only enabled when clicking and holding the pat: butt)
+
+scrp 1 1 64769 77
+
+*disable listening for any further input (mouse moves)
+	imsk 0
+
+endm
+
+
+
+
+
+
+
+
+****************************************
+* MOVE SLIDER HEAD TO SPECIFIED POSITION *
+**************** 1003 ******************
+****************************************
+
+
+scrp 1 1 64769 1003
+
+
+	inst
+
+
+*store MinValue and MaxValue of slider manager
+	setv va50 mame "MinValue"
+	setv va51 mame "MaxValue"
+
+
+*our input value
+	setv va02 _p1_
+
+*make sure it's a float
+	mulv va02 1.0
+
+
+*inverse LERP our value from a MinValue to MaxValue range to a 0.0 - 1.0 range
+
+*Calculate the difference between the start and end values       
+	setv va55 va51
+	subv va55 va50
+
+
+*Calculate the difference between the target value and the start value
+	subv va02 va50
+
+*divide by 0 fix...
+*	doif va02 <= 0
+*Calculate the interpolation factor by dividing the target difference by the overall difference  
+	divv va02 va55
+*	else
+*		setv va02 0
+*	endi
+
+*clamp it
+	doif va02 < 0.0
+		setv va02 0.0
+	endi
+
+	doif va02 > 1.0
+		setv va02 1.0
+	endi
+
+
+
+
+
+*call function that targets editable text part of this slider, properly formats the number and sets it as the ptxt.
+	call 1002 va02 1
+
+
+*
+**store slider_PlayheadWidth / 2 in va05
+*	setv va05 game "WorldSwitcher_slider_PlayheadWidth"
+*	divv va05 2
+*
+**subtract it from the position to correctly center the Playhead
+*	subv va02 va05
+*
+*
+*
+*
+**position slider playhead part (pat: dull).
+*	pat: move name "Playhead_PartNumber" va02 mv02
+
+
+
+
+
+endm
+
+
+
+
+
+
+****************************************
+* MOVE SLIDER HEAD TO HAND POSITION AND UPDATE *
+**************** 1001 ******************
+****************************************
+
+scrp 1 1 64769 1001
+
+	inst
+
+*get Hand position
+	setv va00 mopx
+	setv va01 mopy
+
+*subtract X and Y of parent compound object from Hand position to get the position relative to the compound object.
+	targ mame "ParentObject"
+
+	subv va00 posl
+	subv va01 post
+
+*clamp slider to values inside the bar
+
+
+
+
+	doif va00 < mame "X"
+		setv va00 mame "X"
+	endi
+
+	setv va03 mame "X"
+	addv va03 mame "Slider_Width"
+
+	doif va00 > va03
+		setv va00 va03
+	endi
+
+
+
+
+*************************
+
+**set va02 to a copy of va00 and do some maths to put it in the 0.0 to 1.0 range
+	setv va02 va00
+
+	subv va02 mame "X"
+
+	divv va02 mame "Slider_Width"
+
+*************************
+
+
+*call function that targets editable text part of this slider, properly formats the number and sets it as the ptxt.
+	call 1002 va02 1
+
+**store slider_PlayheadWidth / 2 in va05
+*	setv va05 game "WorldSwitcher_slider_PlayheadWidth"
+*	divv va05 2
+*
+**subtract it from the position to correctly center the Playhead
+*	subv va00 va05
+*
+*
+**position slider playhead part (pat: dull).
+*	pat: move mame "Playhead_PartNumber" va00 mv02
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+*RAW MOUSE WHEEL SCRIPT
+
+*1004
+
+scrp 1 1 64769 1004
+
+*The delta value is sent in _P1_ - 120 units per 'click'.
+
+	inst
+
+
+
+
+
+*reuse near-zero tolerance value calculated earlier for a nice smooth scroll increment.
+
+
+*SCROLLED DOWN
+	doif _p1_ < -110
+
+		addv mame "Value" mame "ZeroTolerance-"
+
+
+*SCROLLED UP
+	elif _p1_ > 110
+
+		addv mame "Value" mame "ZeroTolerance+"
+
+	endi
+
+
+
+
+
+*store MinValue and MaxValue of slider manager
+	setv va50 mame "MinValue"
+	setv va51 mame "MaxValue"
+
+
+*our input value
+	setv va02 mame "Value"
+
+*make sure it's a float
+	mulv va02 1.0
+
+
+*inverse LERP our value from a MinValue to MaxValue range to a 0.0 - 1.0 range
+
+*Calculate the difference between the start and end values       
+	setv va55 va51
+	subv va55 va50
+
+
+*Calculate the difference between the target value and the start value
+	subv va02 va50
+
+*divide by 0 fix...
+*	doif va02 <= 0
+*Calculate the interpolation factor by dividing the target difference by the overall difference  
+	divv va02 va55
+*	else
+*		setv va02 0
+*	endi
+
+*clamp it
+	doif va02 < 0.0
+		setv va02 0.0
+	endi
+
+	doif va02 > 1.0
+		setv va02 1.0
+	endi
+
+
+
+
+
+*call function that targets editable text part of this slider, properly formats the number and sets it as the ptxt.
+	call 1002 va02 1
+
+
+endm
+
+
+
+
+
+*1005
+
+
+*this is essentially our initialization script!
+
+
+scrp 1 1 64769 1005
+
+	inst
+
+
+*if no valid slider width specified, use default
+	doif name "Slider_Width" <= 0
+		setv mame "Slider_Width" game "WorldSwitcher_slider_Width"
+	endi
+
+*if no valid playhead width specified, use default
+	doif name "Playhead_Width" <= 0
+		setv mame "Playhead_Width" game "WorldSwitcher_slider_PlayheadWidth"
+	endi
+
+
+
+
+*this calculates a tolerance value based on the amount of decimal places.
+*if the number is between N and -N, it is automatically rounded to 0.00
+
+*	input: 1
+*	tolerance: -0.1 - 0.1
+*	
+*	input: 2
+*	tolerance: -0.01 - 0.01
+*	
+*	input: 3
+*	tolerance: -0.001 - 0.001
+*
+*etc
+
+
+
+
+	doif mame "DecimalPrecision" <> 0
+
+		setv va60 mame "DecimalPrecision"
+
+		subv va60 1
+
+		sets va70 "0."
+
+*loop for as many times as we need 0 in the decimal.
+		doif va60 > 0
+			reps va60
+
+				adds va70 "0"
+
+			repe
+		endi
+
+		adds va70 "1"
+
+		setv va70 stof va70
+
+		setv mame "ZeroTolerance+" va70
+
+		negv va70
+
+		setv mame "ZeroTolerance-" va70
+
+	else
+
+		setv mame "ZeroTolerance+" 1
+		setv mame "ZeroTolerance-" -1
+
+	endi
+
+
+
+
+
+
+
+
+*set slider to our initial value
+
+	call 1003 mame "Value" 0
+
+endm
+
+
+
+
+*1006
+
+
+*get text from textbox and set slider to that value!
+
+
+scrp 1 1 64769 1006
+
+	inst
+
+	targ mame "ParentObject"
+
+	part mame "Textbox_PartNumber"
+
+	setv va00 stof ptxt
+
+*set slider to our new value
+
+	call 1003 va00 0
+
+endm

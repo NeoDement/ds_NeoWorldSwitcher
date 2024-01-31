@@ -1,0 +1,26 @@
+# ============================================ #
+# C2toDS WorldSwitcher Icon Editor Strings     #
+# ============================================ #
+
+TAG "WorldSwitcher_IconEditor_Text"
+# 0
+"Icon Editor"
+"Brush Size:"
+"Unlit:"
+"Lit:"
+"New"
+# 5
+"Delete"
+"Rename"
+"Copy"
+"Rotate 90"
+"Rotate -90"
+# 10
+"Rotate 180"
+"Flip Horizontal"
+"Flip Vertical"
+"Invert"
+"Clear"
+# 15
+"Edit Colour"
+"Tip: Right-click with the fill tool to erase pixels"

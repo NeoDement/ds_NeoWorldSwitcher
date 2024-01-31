@@ -1,0 +1,8 @@
+//display name of Icon Set
+displayName:Creatures 0
+
+//name of sprite file
+spriteFile:worldswitcher_icons_C0
+
+//this number will be equal to the number of images in the sprite file divided by 2
+iconCount:6

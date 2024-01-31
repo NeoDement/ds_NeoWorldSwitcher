@@ -1,0 +1,4235 @@
+* C2toDS Refresh World Switcher add-on
+*original by Cyberlife (duh), edits by Chicken for C12DS, further edits by NeoDement
+
+
+
+*todo: you gotta add --compress to the build instructions hahaha uhhggh!
+
+
+*icons are loaded from 
+
+
+*for icons you're gonna want to have:
+
+*state_dim
+*state_highlighted
+*state_flashing
+
+*and control all the rendering in a separate script
+
+
+
+*big todo: workaround for this nonsense in the src code!
+
+*		// if this is the start up world then load the start up world
+*		if(worldName == "Startup")
+*				
+*			CosInstaller scripts;
+*			
+*			worldHasLoaded = true;
+*			MoveFilesToBasement();
+*			ProcessFilesInPorch();
+*		
+
+*we will need to generate an icon each time it is needed to bypass them getting moved to the basement folder.
+*store an icon filename named after the world in the journal folder.
+
+
+
+*todo: move this crapola elsewhere, add to rscr, etc
+setv game "button_width" 48
+setv game "button_height" 29
+
+
+*the DS engine can't create more than 2000 rooms in a world, so we need to make sure users can't select addons that would push them over that limit.
+setv game "WorldSwitcher_CurrentRooms" 0
+setv game "WorldSwitcher_EngineMaxRooms" 2000
+
+
+*blank string that will be filled with a list of chunk names to be saved to an "addons" file, to be injected when the world is launched
+sets game "WorldSwitcher_CurrentWorld_ChunkNames" ""
+
+
+
+******* ALL NEW WORLD CREATION SCREEN RELATED STRINGS *******
+
+inst
+
+*catalogue tag to read strings from
+sets va20 "WorldSwitcher_CreationScreen_Text"
+
+*might as well reload catalogue files
+reaf
+
+*read in strings from specified catalogue file
+doif reaq va20 = 1
+
+	sets game "UI_CHOOSENAME" read va20 0
+	sets game "UI_CHOOSECONTENT" read va20 1
+	sets game "UI_ROOMCOUNT" read va20 2
+	sets game "UI_CHOOSENAME_PASSWORDSCREEN" read va20 5
+	sets game "UI_MODIFYSELECTEDWORLD" read va20 6
+
+*plain english fallback in case the catalogue file is missing
+else
+
+	sets game "UI_CHOOSENAME" "Please choose a name and icon for your new world:"
+	sets game "UI_CHOOSECONTENT" "Please decide which content you want to dock with the\nDocking Station Capillata using the checklist below."
+	sets game "UI_ROOMCOUNT" "Room Count:"
+	sets game "UI_CHOOSENAME_PASSWORDSCREEN" "Please choose a new name and icon for your world:"
+	sets game "UI_MODIFYSELECTEDWORLD" "Modify\nSelected World"
+
+endi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+***************************************************************************
+* Begin install
+***************************************************************************
+
+inst
+lock
+
+
+*todo: don't do this... eventually
+
+*to catch errors, disable autokill
+SETV VA00 WOLF 7 0
+
+*remove the original C1 switcher via its RSCR script
+*ject "DS world switcherC1.cos" 1
+
+*remove the original C1 switcher via this copy of its RSCR script
+*(this should be safe to do whether it's installed or not :) )
+enum 1 2 1000
+	kill targ
+next
+enum 1 2 1001
+	kill targ
+next
+scrx 1 2 1000 2000
+scrx 1 2 1000 800
+scrx 1 1 32302 301
+enum 1 1 32302
+	kill targ
+next
+ject "DS world switcher.cos" 7
+
+
+
+
+
+*kill these scripts on the original world switcher
+
+*todo: add more here i guess...
+
+** World Type Button: Docked or Undocked?
+scrx 1 2 1000 800
+** and here are the make routines
+scrx 1 2 1000 2000
+** This script is called by the "Select world" buttons (The nobbly bits)
+scrx 1 2 1000 450
+
+*kill this script on the world info switcher agent
+
+** World Switcher Info Agent - reinject world switcher
+scrx 1 2 1001 1000
+
+
+*inject our EVENT scripts
+ject "DS world switcherC2.cos" 2
+
+*target original world switcher
+
+
+
+rtar 1 2 1001
+doif targ <> null
+* ov00 == 3    The parts for the "worldswitcher" set
+	setv ov00 3
+*fire up world switcher screen via info agent
+	mesg writ targ 1000
+else
+*	Ok, it doesn't exist yet. Let's make one!	
+** 	make new world switcher monitor
+	new: comp 1 2 1001 "ds world switcher" 30 0 0
+
+* ov00 == 3    The parts for the "worldswitcher" set
+	setv ov00 3
+*setv name "waiting" 0 (same as above)
+	mesg writ targ 1001
+*mesg writ targ 1000
+endi
+
+*************************************
+**if c12ds is enabled, do something**
+*************************************
+*
+*doif totl 1 1 32302 <> 0
+*	new: simp 3 15 50200 "C1Enabled" 1 0 0
+*
+***set some variable, use it later when populating world addons screen :)**
+*
+*	attr 0
+*	mvto 100 0
+*	tick 40
+*	mesg writ targ 301
+*endi
+
+doif totl 1 1 32302 <> 1
+	enum 1 1 32302
+		kill targ
+	next
+	new: simp 1 1 32302 "C1Enabled" 1 0 0
+	attr 0
+	mvto 460 0
+	tick 40
+	mesg writ targ 301
+endi
+
+
+*todo: crappy fix!
+
+
+
+***************************************************************************
+* End install
+***************************************************************************
+
+**(from original c1 world injector script, we probably don't need it)
+*scrp 1 1 32302 301
+*
+*	dbg: asrt 5 = 7
+*
+**	Make C1 Enabled Sound
+*	inst
+*	lock
+*	stpc
+*	snde "C102"
+*
+*	setv game "button_width" 48
+*	setv game "button_height" 29
+*
+**target world switcher screen, listen for raw mouse movements
+*	enum 1 2 1001
+*		imsk 4
+*	next
+*endm
+
+
+
+
+
+
+
+
+
+
+*todo: can we delete this?
+
+scrp 1 2 1001 1001
+	dbg: asrt ov00 = 3
+	rtar 1 2 1000
+	setv name "waiting" 0
+	kill ownr
+endm
+
+
+
+
+****MOUSE MOVE ON MAIN WORLDSWITCHER WINDOW*****
+
+*(also manually called a few times to update icons at appropriate times)
+
+
+scrp 1 2 1000 75
+
+	inst
+	lock
+
+
+*VA50 button part number
+*VA61 - left 
+*VA62 - right
+*VA71 - top
+*VA72 - bottom
+
+	setv va01 12
+
+	loop
+
+
+
+*target the part we're working on
+		part va01
+
+
+*12_x
+		sets va02 vtos va01
+		adds va02 "_x"
+		setv va61 game va02
+
+*12_x + button_width
+		setv va62 va61
+		addv va62 game "button_width"
+
+
+*12_y
+		sets va02 vtos va01
+		adds va02 "_y"
+		setv va71 game va02
+
+*12_y + button_height
+		setv va72 va71
+		addv va72 game "button_height"
+
+
+*12_lit
+		sets va02 vtos va01
+		adds va02 "_lit"
+		setv va50 game va02
+
+
+*12_icon_type
+		sets va02 vtos va01
+		adds va02 "_icon_type"
+		sets va83 game va02
+
+
+
+		doif va83 = "custom"
+
+*12_icon_on
+			sets va02 vtos va01
+			adds va02 "_icon_on"
+			sets va81 game va02
+
+*12_icon_off
+			sets va02 vtos va01
+			adds va02 "_icon_off"
+			sets va82 game va02
+
+		else
+
+*12_spritename
+			sets va02 vtos va01
+			adds va02 "_spritename"
+			sets va81 game va02
+
+*12_firstframe
+			sets va02 vtos va01
+			adds va02 "_firstframe"
+			setv va82 game va02
+
+		endi
+
+
+
+
+
+
+		setv va99 0
+
+		doif _p1_ > va61 and _p1_ < va62 and _p2_ > va71 and _p2_ < va72
+*		doif mopx > va61 and mopx < va62 and mopy > va71 and mopy < va72
+			setv va99 1
+		endi
+
+		doif va50 = 1
+			setv va99 1
+		endi
+
+**put va99 in a state where it won't get changed by the code below
+*		doif va50 = 2
+*			setv va99 2
+*		endi
+
+
+
+*if we were told to highlight it, change us to the appropriate gallery
+		doif va99 = 1
+
+
+*are we a custom icon?
+			doif va83 = "custom"
+
+
+				doif gall <> va81
+					gall va81 0
+				endi
+
+			else
+
+*				doif gall <> va81 and base <> va82
+				addv va82 1
+
+*todo: here: add doif. don't set gall if we're already on this frame.
+				gall "blnk" 0
+				gall va81 va82
+
+			endi
+
+*if we were told to unhighlight it, change us to the appropriate gallery
+		elif va99 = 0
+
+			doif va83 = "custom"
+
+				doif gall <> va82
+					gall va82 0
+				endi
+
+			else
+
+*todo: here: add doif. don't set gall if we're already on this frame.
+				gall "blnk" 0
+				gall va81 va82
+
+			endi
+
+		else
+			dbg: asrt "what" = "hh"
+*
+*todo: here: this needs patching up. non-custom icons are non-functional.
+*			pose 1
+
+		endi
+
+
+
+
+
+
+
+
+		subv va01 1
+	untl va01 = 6
+
+endm
+
+
+*endi
+
+
+
+
+
+
+
+scrp 1 2 1001 1000
+
+	doif ov00 = 1
+		gsub reinject
+	elif ov00 = 2
+		gsub dock_this
+	elif ov00 = 3
+		rtar 1 2 1000
+		kill targ
+		gsub reinject
+	endi
+	subr reinject
+** 		destroy existing world switcher
+		enum 1 2 1000
+			kill targ
+		next
+		mesg wrt+ targ 300 0 0 2
+		tick 40
+		mesg writ targ 301
+
+		inst
+
+*todo: this should only appear if some option is checked
+		doif totl 1 1 32302 <> 1
+			enum 1 1 32302
+				kill targ
+			next
+			new: simp 1 1 32302 "C1Enabled" 1 0 0
+			attr 0
+			mvto 460 0
+		endi
+
+
+
+** 		Reinject the World Switcher
+		new: comp 1 2 1000 "ds world switcher" 30 0 0
+
+*don't ask me how, don't ask me why, but this code is now part of big fat script 2000 - the screen change script.
+*		seta game "WorldSwitcher_Main" targ
+
+		part -1
+* 		Invisible ready for fade in 
+		alph 256 1
+		part 0
+		pose 29
+
+* 		Set current configuration of the screen to "none"
+		setv ov00 0
+
+		mvto 115 92
+
+		setv ov02 nwld
+		setv ov03 0
+
+		setv ov04 -1
+		file iope 0 "World Switcher Persistent State Entries"
+		doif inok = 1
+			setv ov04 wnti innl
+			setv ov02 nwld
+			setv ov03 ov04
+			modv ov03 6
+			subv ov03 ov04
+			negv ov03
+		endi
+		file iclo
+* 		Tell ourselves to calculate and enter an initial state (scripted for use after delete etc)
+
+*		imsk 64
+
+*+4, mouse move
+*		imsk 68
+
+
+		mesg wrt+ targ 300 0 0 2
+		tick 40
+		mesg writ targ 301
+
+*		C1 to DS Custom reinject stuff
+
+*todo: this should only appear if some option is checked
+		inst
+		doif totl 1 1 32302 <> 1
+			enum 1 1 32302
+				kill targ
+			next
+			new: simp 1 1 32302 "C1Enabled" 1 0 0
+			attr 0
+			mvto 460 0
+		endi
+
+** 		Weird! :O) If I don't have the wait 1 here then the tick 40 is never set (it seems).
+** 		And if the mesg wrt+ has a delay then it is never sent (the OWNR gets killed).
+		wait 1
+		tick 40
+		kill ownr
+	retn
+	subr dock_this
+** 		ov04 contains the world to be docked
+*		hide dialog and hand
+		mvto -1000 -1000
+		targ pntr
+		pose 19
+		targ ownr
+* 		write to this new world's directory to show whether docked or undocked
+		sets va00 wrld ov04
+		sets game "engine_other_world" va00
+		file oope 2 "wtype" 0
+		outs "docked"
+		file oclo
+** 		set the EAME and then load
+		setv eame "engine_no_auxiliary_bootstrap_1" 0
+		load wrld ov04
+		kill ownr
+	retn
+endm
+
+
+scrp 1 2 1000 2000
+
+* This is the configuration entry..
+* ov00 is current configuration of the screen
+* ov00 == 0    No parts defined
+* ov00 == 1    The parts for the "create new world" set
+* ov00 == 2    The parts for the "create first world" set
+* ov00 == 3    The parts for the "worldswitcher" set
+* ov00 == 4    The parts for the "enter password" set (To load a world)
+* ov00 == 5    The parts for the "delete world" set
+* ov00 == 6    The parts for the "loading world" set
+* ov00 == 7    The parts for the "change password" set (To change pwd and load world)
+
+* ov01 is the desired state to be in
+* We can't be having with our relocation code interruptednessity
+	inst
+	lock
+	tick 0
+
+
+*it would be better to do this when we create it, but this works good.
+	seta game "WorldSwitcher_Main" targ
+
+
+
+* Remembering that switching into the same mode re-initialises (e.g. the UI)
+
+* Right then, first of all, destroy current state...
+	gsub kill_parts
+* next we have to define ourselves..
+
+	setv ov00 ov01
+
+	doif ov00 = 3
+		imsk 68
+	else
+		imsk 64
+
+	endi
+
+	doif ov00 = 1
+		gsub make_new_world
+	elif ov00 = 2
+		gsub make_first_world
+	elif ov00 = 3
+		gsub make_switcher
+		tick 20
+	elif ov00 = 4 or ov00 = 7
+		gsub make_password
+	elif ov00 = 5
+		gsub make_delete_screen
+	elif ov00 = 6
+		gsub make_loading_screen
+	endi
+
+	part 0
+	pose 0
+
+* Fade in
+	doif ov74 = 0
+		lock
+		part -1
+		setv va00 256
+		buzz 25
+		loop
+			alph va00 1
+			wait 1
+			inst
+			subv va00 16
+		untl va00 <= 0
+		buzz 50
+		alph va00 0
+		setv ov74 1
+	endi
+
+* All done - so let's stop here
+	stop
+
+* and here are the kill routines
+
+* Generic kill routine for the parts
+
+	subr kill_parts
+**		If you make parts above 100 - please let me know...
+*		setv va99 100
+*		loop
+*			pat: kill va99
+*			subv va99 1
+*		untl va99 = 0
+
+*we need to kill parts above 100. here's a more industrial grade part killin' routine.
+
+		setv va00 -1
+		loop
+
+			setv va00 pnxt va00
+
+*don't delete part -1		
+			doif va00 <> -1
+				pat: kill va00
+			endi
+
+*setv va00 va01
+
+		untl va00 = -1
+
+
+	retn
+
+
+
+* and here are the make routines
+
+
+	subr make_delete_screen
+*		Here we make the screen for deleting world in ov04
+*		Make the Dull Background from the Blank Page
+		pat: dull 1 "ds world switcher" 19 22 20 0
+
+		pat: fixd 2 "ds world switcher" 26 45 120 0 "whiteontransparentchars"
+		part 2
+		frmt 0 0 0 0 2 0 2
+		sets va00 read "World Switcher" 3
+		adds va00 wrld ov04
+		adds va00 read "World Switcher" 4
+		ptxt va00
+*		Continue (I.E. Yes)
+		pat: butt 4 "ds world switcher" 22 2 125 232 0 [0] 3000 0
+*		Back (I.E. return to switcher)
+		pat: butt 5 "ds world switcher" 24 2 374 232 0 [0] 502 0
+	retn
+
+	subr make_loading_screen
+
+**********
+***** ADDED FOR DOCKING STATION - ARH
+
+
+* Is this a Docked world or not?
+* read from the world's journal directory what type of world it is
+		sets game "engine_other_world" wrld ov04
+		file iope 2 "wtype"
+		sets va00 innl
+		doif va00 = ""
+* possibly a c3 world
+			sets va00 "c3"
+* write build number
+			file oope 2 "build" 0
+			outs read "build_number" 0
+			file oclo
+		endi
+		file iclo
+
+
+** Then check to see if Creatures 3 is installed
+		doif reaq "patch_level" = 1
+			setv va33 1
+		else
+			setv va33 0
+		endi
+
+** Check build number
+		setv va88 0
+		sets va44 ""
+		sets game "engine_other_world" wrld ov04
+		file iope 2 "build"
+		sets va44 innl
+		doif va44 = ""
+* Build number unknown, definitely needs to be warned of possible problems.
+			sets va44 read "World Switcher old build" 3
+			setv va88 1
+		elif va44 < "144"
+* Build was before 144 - definitely needs to be warned of possible problems
+			setv va88 1
+		else
+			setv va45 stoi va44
+			doif va45 < 144
+				setv va88 1
+			else
+* Build is 144 or above, and so *should* be fine with new style world-updating... *gulp*
+				setv va88 0
+			endi
+		endi
+		file oclo
+
+		doif va88 = 1
+			doif va00 <> "c3" and stoi va44 <> stoi read "build_number" 0
+				inst
+				new: comp 1 2 1001 "useful_screen" 0 0 5
+				mvto 250 150
+				pat: fixd 1 "useful_screen" 1 25 59 0 "whiteontransparentchars"
+				pat: butt 2 "useful_screen" 16 2 57 290 0 [1] 1001 0
+				pat: butt 4 "useful_screen" 18 2 201 290 0 [1] 1000 0
+* the name of agent text
+				pat: fixd 3 "useful_screen" 12 39 22 1 "WhiteOnTransparentChars"
+				part 2
+				anim [0]
+				part 4
+				anim [0]
+** ov00 tells the info agent what it is here for
+				setv ov00 3
+** display info text
+				sets va45 read "World Switcher old build" 0
+				adds va45 va44
+				adds va45 read "World Switcher old build" 1
+				adds va45 read "build_number" 0
+				adds va45 read "World Switcher old build" 2
+
+				part 1
+				frmt 7 8 7 0 3 0 0
+				ptxt va45
+				part 3
+				frmt 0 8 0 0 0 0 2
+				ptxt read "World Switcher - Extra" 3
+
+				targ ownr
+				flto -1000 -1000
+
+				setv name "waiting" 1
+				loop
+					wait 1
+				untl name "waiting" = 0
+			endi
+		endi
+
+
+
+
+
+
+*todo: ? this code is unmodified from how it appears in c12ds. i got a headache trying to work it out.
+
+
+** ==================		
+** C3 / Docked Checks
+** ==================
+* How this world is treated depends on a number of factors:
+* > Undocked DS Worlds load with no problems no matter what.
+* > Undocked C3 Worlds can load if C3 is installed but must be Docked.
+* > Docked DS/C3 Worlds can only load if C3 is still installed.
+
+		doif va00 = "c1"
+** This world is a C1 to DS world. This world is OK to load.
+*		hide dialog and hand
+			mvto -1000 -1000
+			targ pntr
+			pose 19
+			targ ownr
+** set the EAME and then load
+			setv eame "engine_no_auxiliary_bootstrap_1" 1
+			setv eame "C1_to_DS_Loaded" 1
+			load wrld ov04
+			kill ownr
+
+		elif va00 = "c1c3" and va33 = 1
+** This world is a C1 to DS world plus C3. C3 is loaded. This world is OK to load.
+*		hide dialog and hand
+			mvto -1000 -1000
+			targ pntr
+			pose 19
+			targ ownr
+** set the EAME and then load
+			setv eame "engine_no_auxiliary_bootstrap_1" 0
+			setv eame "C1_to_DS_Loaded" 1
+			load wrld ov04
+			kill ownr
+		elif va00 = "c1c3" and va33 = 0
+** This world is a C1 to DS world plus C3. C3 is not loaded This world is NOT OK to load.
+** this world can be loaded again. Inform the user.
+			inst
+			setv eame "C1_to_DS_Loaded" 0
+			new: comp 1 2 1001 "useful_screen" 0 0 5
+			mvto 250 150
+			pat: fixd 1 "useful_screen" 1 25 59 0 "whiteontransparentchars"
+			pat: butt 2 "useful_screen" 13 2 122 290 0 [1] 1000 0
+* the name of agent text
+			pat: fixd 3 "useful_screen" 12 39 22 1 "WhiteOnTransparentChars"
+			part 2
+			anim [0]
+** ov00 tells the info agent what it is here for
+			setv ov00 1
+** display info text
+			sets va00 read "World Switcher" 19
+			part 1
+			frmt 7 8 7 0 3 0 0
+			ptxt va00
+			part 3
+			frmt 0 8 0 0 0 0 2
+			ptxt read "World Switcher - Extra" 2
+			kill ownr
+
+		elif va00 = "docked" and va33 = 1
+** C3 is installed and this world is docked. This world is OK to load.
+*		hide dialog and hand
+			mvto -1000 -1000
+			targ pntr
+			pose 19
+			targ ownr
+** set the EAME and then load
+			setv eame "engine_no_auxiliary_bootstrap_1" 0
+			setv eame "C1_to_DS_Loaded" 0
+			load wrld ov04
+			kill ownr
+		elif va00 = "undocked"
+** This world is an undocked DS world. This world is OK to load.
+*		hide dialog and hand
+			mvto -1000 -1000
+			targ pntr
+			pose 19
+			targ ownr
+** set the EAME and then load
+			setv eame "engine_no_auxiliary_bootstrap_1" 1
+			setv eame "C1_to_DS_Loaded" 0
+			load wrld ov04
+			kill ownr
+		elif va00 = "docked" and va33 = 0
+** C3 is not installed and this world is docked. C3 will need to be reinstalled before
+** this world can be loaded again. Inform the user.
+			inst
+			setv eame "C1_to_DS_Loaded" 0
+			new: comp 1 2 1001 "useful_screen" 0 0 5
+			mvto 250 150
+			pat: fixd 1 "useful_screen" 1 25 59 0 "whiteontransparentchars"
+			pat: butt 2 "useful_screen" 13 2 122 290 0 [1] 1000 0
+* the name of agent text
+			pat: fixd 3 "useful_screen" 12 39 22 1 "WhiteOnTransparentChars"
+			part 2
+			anim [0]
+** ov00 tells the info agent what it is here for
+			setv ov00 1
+** display info text
+			sets va00 read "World Switcher" 19
+			part 1
+			frmt 7 8 7 0 3 0 0
+			ptxt va00
+			part 3
+			frmt 0 8 0 0 0 0 2
+			ptxt read "World Switcher - Extra" 2
+			kill ownr
+		elif va00 = "c3" and va33 = 0
+** C3 is not installed and this world was made in C3 which
+** will need to be reinstalled and then this world needs to be docked. Inform the user.
+			inst
+			setv eame "C1_to_DS_Loaded" 0
+			new: comp 1 2 1001 "useful_screen" 0 0 5
+			mvto 250 150
+			pat: fixd 1 "useful_screen" 1 25 59 0 "whiteontransparentchars"
+			pat: butt 2 "useful_screen" 13 2 122 290 0 [1] 1000 0
+* the name of agent text
+			pat: fixd 3 "useful_screen" 12 39 22 1 "WhiteOnTransparentChars"
+			part 2
+			anim [0]
+** ov00 tells the info agent what it is here for
+			setv ov00 1
+** display info text
+			sets va00 read "World Switcher" 20
+			part 1
+			frmt 7 8 7 0 3 0 0
+			ptxt va00
+			part 3
+			frmt 0 8 0 0 0 0 2
+			ptxt read "World Switcher - Extra" 2
+			kill ownr
+		elif va00 = "c3" and va33 = 1
+** C3 is installed and this world was made in C3 and must be docked before loading. Inform the user.
+* save the world! ;)
+			setv va04 ov04
+			inst
+			setv eame "C1_to_DS_Loaded" 0
+			new: comp 1 2 1001 "useful_screen" 0 0 5
+			mvto 250 150
+			pat: fixd 1 "useful_screen" 1 25 59 0 "whiteontransparentchars"
+			pat: butt 2 "useful_screen" 13 2 122 290 0 [1] 1000 0
+* the name of agent text
+			pat: fixd 3 "useful_screen" 12 39 22 1 "WhiteOnTransparentChars"
+			part 2
+			anim [0]
+** ov00 tells the info agent what it is here for
+			setv ov00 2
+** display info text
+			sets va00 read "World Switcher - Extra" 0
+			part 1
+			frmt 7 8 7 0 3 0 0
+			ptxt va00
+** save the world again! ;)
+			setv ov04 va04
+			part 3
+			frmt 0 8 0 0 0 0 2
+			ptxt read "World Switcher - Extra" 1
+			kill ownr
+		else
+			dbg: asrt "something is" = "wrong"
+			setv eame "C1_to_DS_Loaded" 0
+		endi
+*****
+**********
+	retn
+
+	subr make_new_world
+		gsub make_first_world
+
+*		Also we need a back button to return to the switcher, not to quit....
+		pat: kill 6
+** Cancel making New World
+		pat: butt 6 "WorldSwitcher_WorldCreation" 6 2 461 292 0 [1] 502 0
+		part 6
+		anim [0]
+
+
+
+************************
+
+	retn
+
+	subr make_first_world
+
+
+
+
+
+
+* Here we make the parts necessary for the "first world" display
+		part 0
+
+** Background Image
+*		pat: dull 1 "ds world switcher" 19 22 20 0
+
+*new totally blank bg image
+*todo: this makes our other script that watches for this exact bg image number a little hard to follow...
+		pat: dull 1 "WorldSwitcher_WorldCreation" 0 22 20 0
+
+
+
+
+
+
+
+
+
+
+** World Name TEXT part
+		pat: text 3 "ds world switcher" 17 182 99 2 503 "whiteontransparentchars"
+		part 3
+		ptxt ""
+		fcus
+
+** Text entry DULL part
+		pat: dull 8 "WorldSwitcher_WorldCreation" 1 107 96 0
+
+
+
+** Select Icon BUTTON part
+		pat: butt 7 "WorldSwitcher_WorldCreation" 2 1 418 96 0 [] 200 0
+
+** Select Icon ICON PREVIEW DULL part
+		pat: dull 9 "blnk" 0 418 96 5
+
+		setv game "WorldSwitcher_WorldCreation_IconPreviewPart" 9
+
+
+
+*all new worlds should do auto-icon!!
+		setv game "WorldSwitcher_WorldCreation_AutoIcon" 1
+
+
+
+
+
+
+*** World Type Button: Docked or Undocked World?
+*		pat: butt 7 "ds world switcher" 30 23 254 228 2 [] 800 0
+*		part 7
+*		pose 2
+*
+*** World Type display
+*		pat: fixd 9 "ds world switcher" 18 80 315 1 "whiteontransparentchars"
+
+
+
+
+
+
+
+
+*set a default world type.
+		sets name "wtype" "undocked"
+
+
+
+** Addon List DULL background part
+		pat: dull 100 "WorldSwitcher_WorldCreation" 3 143 181 0
+
+
+
+*create ROOM COUNT info text box. it will be updated whenever an addon is checked on or off.
+
+		pat: fixd 99 "WorldSwitcher_WorldCreation" 12 145 341 1 "whiteontransparentchars"
+		part 99
+		frmt 0 0 0 0 0 0 10
+*		ptxt "Room Count: <tint 255 0 0>2700<tint>/2000"
+
+
+
+
+
+***** load in data from each .addon file !!!
+
+
+
+		call 10000 0 0
+
+
+
+
+
+
+
+
+*TODO: find the code that deletes all part numbers under 100 and adjust it to delete ALL part numbers.
+
+
+
+
+
+
+
+
+
+
+** Is C3 Installed?
+*		reaf
+*		doif reaq "patch_level" = 1
+*** 			Set WTYP Name Variable
+*			sets name "wtype" "undocked"
+*
+**(this is a c12ds variable and simply seems to mean "is c3 NOT installed?"
+**todo: can we make this not needed entirely?
+*			setv name "dsc1" 0
+*
+*** 			Show World Type Button
+*			part 7
+*			pose 1
+*
+**patch isn't installed, but c12ds enabled sign is present			
+*		elif reaq "patch_level" <> 1 and totl 1 1 32302 > 0
+**			DS with NO C3, but may have C1
+*** 			Set WTYP Name Variable
+*			sets name "wtype" "undocked"
+*
+*			setv name "dsc1" 1
+*
+*** 			Show World Type Button
+*			part 7
+*			pose 1
+*
+*		else
+*** 			Creatures 3 is not installed and neither is C1.
+*			sets name "wtype" "undocked"
+*
+*			setv name "dsc1" 0
+*
+*** 			Kill the World Type Toggle button
+*			pat: kill 7
+*** 			Recreate it as a dull part
+*			pat: dull 7 "ds world switcher" 30 254 228 2
+*			part 7
+*			pose 1
+*
+*		endi
+*
+*** 		Update Display
+*		part 9
+*		frmt 0 0 0 0 0 0 2
+*		ptxt read "World Switcher" 23
+
+
+
+
+
+
+** Welcome to Docking Station!
+		pat: fixd 4 "WorldSwitcher_WorldCreation" 11 106 40 1 "whiteontransparentchars"
+		part 4
+		frmt 0 8 0 0 2 0 2
+		ptxt read "World Switcher" 1
+
+** Please choose a name and icon for your new world:
+		pat: fixd 10 "WorldSwitcher_WorldCreation" 11 106 68 1 "whiteontransparentchars"
+		part 10
+		frmt 0 8 0 0 2 0 2
+		ptxt game "UI_CHOOSENAME"
+
+** Please decide which content you want to dock with the Station Capillata using the checklist below.
+		pat: fixd 11 "WorldSwitcher_WorldCreation" 11 106 141 1 "whiteontransparentchars"
+		part 11
+		frmt 0 8 0 0 2 0 2
+		ptxt game "UI_CHOOSECONTENT"
+
+
+
+*******************************
+******************************
+
+*		Cancel / Quit
+		pat: butt 6 "WorldSwitcher_WorldCreation" 6 2 461 292 0 [1] 500 0
+
+		part 6
+		anim [0]
+
+*		Create World (tick)
+		pat: butt 5 "WorldSwitcher_WorldCreation" 4 2 55 292 0 [1] 503 0
+		part 5
+		anim [0]
+
+
+	retn
+
+	subr make_password
+*		Two cases:
+*			1. This world is password protected, please enter password to continue
+*			2. Please enter the desired password to continue...
+*				(Needs pwd and confirm boxes)
+
+		doif ov00 = 4
+** This World is Password Protected
+** "Dull" Background
+			pat: dull 1 "ds world switcher" 19 22 20 0
+** What is current password? "dull" part
+			pat: dull 15 "ds world switcher" 46 134 171 0
+
+			pat: fixd 6 "ds world switcher" 18 150 161 0 "whiteontransparentchars"
+			part 6
+			frmt 0 8 0 0 2 0 0
+			ptxt read "World Switcher" 5
+
+			pat: text 7 "ds world switcher" 17 145 182 0 700 "whiteontransparentpasswordchars"
+			part 7
+			ptxt ""
+
+			fcus
+
+			pat: fixd 8 "ds world switcher" 26 45 40 0 "whiteontransparentchars"
+			part 8
+			frmt 0 8 0 0 4 0 2
+			ptxt read "World Switcher" 6
+		else
+** This World is not Password Protected
+
+
+
+
+
+
+
+*** "Dull" Background
+*			pat: dull 1 "ds world switcher" 19 22 20 0
+
+
+
+*new totally blank bg image
+			pat: dull 1 "WorldSwitcher_WorldCreation" 0 22 20 0
+
+
+
+
+
+
+** Welcome to Docking Station!
+			pat: fixd 11 "WorldSwitcher_WorldCreation" 11 106 40 1 "whiteontransparentchars"
+			part 11
+			frmt 0 8 0 0 2 0 2
+			ptxt read "World Switcher" 1
+
+** Please choose a name and icon for your new world:
+			pat: fixd 12 "WorldSwitcher_WorldCreation" 11 106 68 1 "whiteontransparentchars"
+			part 12
+			frmt 0 8 0 0 2 0 2
+			ptxt game "UI_CHOOSENAME_PASSWORDSCREEN"
+
+
+
+
+** Text entry DULL part
+			pat: dull 14 "WorldSwitcher_WorldCreation" 1 107 96 0
+
+
+** World Name TEXT part
+			pat: text 13 "ds world switcher" 17 182 99 2 503 "whiteontransparentchars"
+			part 13
+
+
+*if world name override is present, set our world name textbox to that
+			sets game "engine_other_world" wrld ov04
+			file iope 2 "name_override"
+			sets va25 innl
+
+			doif va25 <> ""
+				ptxt va25
+			else
+				ptxt wrld ov04
+			endi
+			file iclo
+
+
+			fcus
+
+
+
+
+
+
+
+
+
+
+
+
+
+** Select Icon ICON PREVIEW DULL part
+			pat: dull 16 "blnk" 0 418 96 5
+
+			setv game "WorldSwitcher_WorldCreation_IconPreviewPart" 16
+
+** Select Icon BUTTON part
+			pat: butt 15 "WorldSwitcher_WorldCreation" 2 1 418 96 0 [] 200 0
+
+
+
+*load world icon if it exists. if not...
+			gsub load_icon_from_world_journal
+
+
+
+			part 16
+
+			gall "blnk" 0
+
+
+
+			doif va11 <> ""
+
+				addv va12 1
+
+				gall va11 va12
+
+
+*no icon defined, calculate it from wtype
+			else
+
+
+
+				file iope 2 "wtype"
+				sets va64 innl
+				file iclo
+
+
+
+
+** 			Docked DS/C3
+				doif va64 = "docked"
+					setv va60 8
+				elif va64 = "undocked"
+**			Undocked DS
+					setv va60 0
+				elif va64 = "c3"
+**			Undocked C3 World (needs to be docked)
+					setv va60 2
+				elif va64 = "c1"
+**			Undocked DS/C1
+					setv va60 10
+				elif va64 = "c1c3"
+**			Docked DS/C1/C3
+					setv va60 12
+
+** default state looks like undocked DS, too
+				else
+
+					setv va60 0
+				endi
+
+*fix off by 1 showing us dimmed icons instead of light.
+				addv va60 1
+
+*set our gall!!
+				gall "WorldSwitcher_Icons_Default" va60
+
+
+			endi
+
+
+
+
+
+
+
+
+
+
+*todo: COMMENT THIS OUTT, FIND A SOLUTION!!!!
+
+
+*all new worlds should do auto-icon!!
+*			setv game "WorldSwitcher_WorldCreation_AutoIcon" 1
+
+
+
+
+
+*Enter access codes pre-amble
+			pat: fixd 8 "ds world switcher" 26 40 138 0 "whiteontransparentchars"
+			part 8
+			frmt 0 8 0 0 4 0 2
+			ptxt read "World Switcher" 8
+
+
+
+
+*** Confirm Password "Dull" part
+*		pat: dull 15 "ds world switcher" 45 134 103 0
+
+
+
+
+
+
+
+
+
+
+
+*Enter Access Code:
+			pat: fixd 4 "ds world switcher" 18 148 189 0 "whiteontransparentchars"
+			part 4
+			frmt 0 8 0 0 2 0 0
+			ptxt read "World Switcher" 5
+
+*dull textbox
+			pat: dull 17 "WorldSwitcher_WorldCreation" 15 142 211 0
+
+*text textbox			
+			pat: text 5 "ds world switcher" 17 217 214 0 701 "whiteontransparentpasswordchars"
+			part 5
+			ptxt ""
+*			fcus
+
+
+
+*Confirm Access Code:
+			pat: fixd 6 "ds world switcher" 18 148 258 0 "whiteontransparentchars"
+			part 6
+			frmt 0 8 0 0 2 0 0
+			ptxt read "World Switcher" 7
+
+*dull textbox
+			pat: dull 18 "WorldSwitcher_WorldCreation" 16 142 280 0
+
+*text textbox
+			pat: text 7 "ds world switcher" 17 217 283 0 700 "whiteontransparentpasswordchars"
+			part 7
+			ptxt ""
+
+
+
+*old "World must be loaded" text. I'm gonna just assume people will work it out.
+
+*			pat: fixd 9 "ds world switcher" 26 45 310 0 "whiteontransparentchars"
+*			part 9
+*			frmt 0 8 0 0 4 0 2
+*			ptxt read "World Switcher" 16
+
+
+		endi
+
+
+
+
+*		Cancel from Password Screen  (Return to Main Menu)
+		pat: butt 2 "WorldSwitcher_WorldCreation" 6 2 461 292 0 [1] 502 0
+		part 2
+		anim [0]
+*		Accept Password (automatically loads world)
+
+*(call script 699 which processes any changes to the icon and name)
+*		pat: butt 3 "WorldSwitcher_WorldCreation" 4 2 55 292 0 [1] 700 0
+		pat: butt 3 "WorldSwitcher_WorldCreation" 4 2 55 292 0 [1] 699 0
+		part 3
+		anim [0]
+
+
+
+	retn
+
+	subr make_switcher
+****
+
+
+
+
+		pat: dull 35 "ds world switcher" 0 0 0 0
+
+		pat: fixd 100 "ds world switcher" 18 45 34 0 "WhiteOnTransparentChars"
+		part 100
+		ptxt read "World Switcher" 9
+
+* 		Complexity Galore in making the switcher
+
+*		The first thing to do is to decide the number of world entries to make
+*		We make a maximum of 6
+		setv va00 nwld
+		doif va00 > 6
+			setv va00 6
+		endi
+*		If we are not making the full 6, then we dump small dull parts of nothingness in to placehold the ids
+
+*		Next stage is to ensure that we coerce the ov's to our will
+		doif ov02 ne nwld
+			setv ov02 nwld
+			setv va01 nwld
+			subv va01 ov03
+			doif va01 < 6
+				setv ov03 0
+			endi
+		endi
+
+** this changes it back to the page it was on when you deleted a world
+		doif name "post-deletion_refresh" = 1
+			setv name "post-deletion_refresh" 0
+** If the deleted world was not the first world shown on the page, then all we
+** need to do is reset the first world shown back to the one that was showing
+** before the deletion..  otherwise we have do be a bit more cunning! :-)
+			doif name "deleted_world" <> name "first_world"
+				setv ov03 name "first_world"
+			else
+** if there are other worlds on that page, display that page... otherwise go back a page.
+				setv va84 name "deleted_world"
+				addv va84 1
+** if there are definitely other worlds after the deleted world then it should be okay to try and display
+** that page. Otherwise, find the page to show by subtracting 1 from the deleted world number until it
+** finds another first world to show :-)
+				doif va84 <= nwld
+					setv ov03 name "first_world"
+				else
+					setv va85 name "deleted_world"
+					loop
+						subv va85 1
+						setv va86 va85
+						modv va86 6
+					untl va86 = 0
+					setv ov03 va85
+				endi
+			endi
+		endi
+
+
+
+
+*initialize icon highlight coords out of bounds before we set them for each valid world icon. also set all icons to unlit so the script below can set whichever is selected.
+		setv game "12_x" -100
+		setv game "12_y" -100
+		setv game "12_lit" 0
+
+		setv game "11_x" -100
+		setv game "11_y" -100
+		setv game "11_lit" 0
+
+		setv game "10_x" -100
+		setv game "10_y" -100
+		setv game "10_lit" 0
+
+		setv game "9_x" -100
+		setv game "9_y" -100
+		setv game "9_lit" 0
+
+		setv game "8_x" -100
+		setv game "8_y" -100
+		setv game "8_lit" 0
+
+		setv game "7_x" -100
+		setv game "7_y" -100
+		setv game "7_lit" 0
+
+**special variables to control if we should draw icons at all.
+*		setv game "12_VISIBLE" 0
+*		setv game "11_VISIBLE" 0
+*		setv game "10_VISIBLE" 0
+*		setv game "9_VISIBLE" 0
+*		setv game "8_VISIBLE" 0
+*		setv game "7_VISIBLE" 0
+
+
+*here: we are creating all the necessary world icons on the world selection screen
+** make the switcher entries
+		loop
+			gsub make_one_switcher_entry
+			subv va00 1
+		untl va00 = 0
+
+		call 75 mopx mopy
+
+
+
+
+*		Now if we need to make the pageup and pagedown, do so
+		doif ov02 > 6
+** This is the first page!
+			doif ov03 = 0
+*				We are definitely at the top of the list
+				pat: kill 25
+				pat: dull 25 "ds world switcher" 1 510 69 0
+				doif ov02 > 6
+					pat: kill 26
+					pat: butt 26 "ds world switcher" 3 2 510 130 0 [1] 400 0
+					part 26
+					anim [0]
+				endi
+** Otherwise this is another page!
+			else
+** Definitely create the Up button!
+				pat: kill 25
+				pat: butt 25 "ds world switcher" 1 2 510 69 0 [1] 400 0
+				part 25
+				anim [0]
+** Only create the down button if there are more to show on another page!
+				doif ov02 < 6
+** there are less than 6 worlds showing, so there can't be another page.
+					pat: kill 26
+					pat: dull 26 "ds world switcher" 3 510 130 0
+					part 26
+					anim [0]
+				else
+** Otherwise there are 6 entries showing! But how do we know this isn't just one last page of 6?
+** 					> Find the first world on display..
+					setv va00 ov03
+**					> Add 7 to it...
+					addv va00 7
+**					> If va00 is greater than NWLD, this must be the last page! *fingers crossed* :))
+					doif va00 <= nwld
+						pat: kill 26
+						pat: butt 26 "ds world switcher" 3 2 510 130 0 [1] 400 0
+						part 26
+						anim [0]
+					else
+						pat: kill 26
+						pat: dull 26 "ds world switcher" 3 510 130 0
+						part 26
+						anim [0]
+					endi
+				endi
+			endi
+		endi
+
+*		Create World
+		pat: butt 28 "ds world switcher" 14 2 167 275 0 [0] 501 0
+		part 28
+		anim [0]
+*		Quit Docking Station
+		pat: butt 33 "ds world switcher" 43 2 345 276 0 [0] 500 0
+		part 33
+		anim [0]
+
+*		Button Texts coming up...
+*		load text
+		pat: fixd 29 "ds world switcher" 17 40 232 0 "WhiteOnTransparentChars"
+		part 29
+		frmt 0 0 0 0 2 0 2
+		ptxt read "World Switcher" 11
+
+*		password / MODIFY World (you can change icon, display name, and password!! :) )
+
+		pat: fixd 30 "ds world switcher" 17 219 232 0 "WhiteOnTransparentChars"
+		part 30
+		frmt 0 0 0 0 2 0 2
+*		ptxt read "World Switcher" 12
+		ptxt game "UI_MODIFYSELECTEDWORLD"
+
+*		delete
+		pat: fixd 31 "ds world switcher" 17 398 232 0 "WhiteOnTransparentChars"
+		part 31
+		frmt 0 0 0 0 2 0 2
+		ptxt read "World Switcher" 13
+*		create
+		pat: fixd 32 "ds world switcher" 17 127 338 0 "WhiteOnTransparentChars"
+		part 32
+		frmt 0 0 0 0 2 0 2
+		ptxt read "World Switcher" 14
+*		exit
+		pat: fixd 34 "ds world switcher" 17 308 338 0 "WhiteOnTransparentChars"
+		part 34
+		frmt 0 0 0 0 2 0 2
+		ptxt read "World Switcher" 15
+	retn
+
+	subr make_one_switcher_entry
+*		At this point, va00 is the entry to make.
+*		As we can make parts in any order, we are allowed to do it this way :)
+
+		setv va01 va00
+
+*		Now the world name is placed at va50 va51
+		doif va00 = 1 or va00 = 3 or va00 = 5
+			setv va50 70
+		else
+			setv va50 304
+		endi
+		doif va00 = 1 or va00 = 2
+			setv va51 74
+		elif va00 = 3 or va00 = 4
+			setv va51 101
+		else
+			setv va51 127
+		endi
+		setv va30 nwld
+		subv va30 ov03
+		doif va00 > ov02 or va00 > va30
+			pat: dull va01 "ds world switcher" 16 va50 va51 0
+		else
+			setv va53 va00
+			subv va53 1
+			addv va53 ov03
+
+*here: va52 is world name as a string
+			sets va52 wrld va53
+
+			addv va50 15
+			pat: fixd va01 "ds world switcher" 16 va50 va51 0 "whiteontransparentchars"
+			part va00
+			frmt 8 0 8 0 1 0 8
+
+
+
+
+*NEW: if world name override is present, set our display name!
+			sets game "engine_other_world" wrld va53
+			file iope 2 "name_override"
+			sets va25 innl
+
+			doif va25 <> ""
+				ptxt va25
+			else
+				ptxt va52
+			endi
+			file iclo
+
+
+
+
+
+		endi
+
+		doif va00 = 1 or va00 = 3 or va00 = 5
+			setv va50 42
+		else
+			setv va50 278
+		endi
+		doif va00 = 1 or va00 = 2
+			setv va51 70
+		elif va00 = 3 or va00 = 4
+			setv va51 96
+		else
+			setv va51 123
+		endi
+
+		addv va01 6
+		doif va00 > ov02 or va00 > va30
+** No world found
+
+** adjust coordinates for larger icons
+			subv va50 6
+
+			pat: dull va01 "ds world switcher" 5 va50 va51 0
+
+*cancel out the data for our non-existent icon. todo: get this working?
+			gsub blank_out_icon
+
+		else
+
+********* UPDATED FOR DOCKING STATION
+			sets game "engine_other_world" wrld va53
+			file iope 2 "wtype"
+			sets va64 innl
+			doif va64 = ""
+				sets va64 "c3"
+			endi
+			file iclo
+
+
+
+
+
+*looks for a file called "icon" in the "journal" folder, and reads the following values from it:
+
+*VA10 - type (file or custom)
+*VA11 - filename
+*VA12 - frame
+
+			gsub load_icon_from_world_journal
+
+
+
+** adjust coordinates for larger icons
+			subv va50 6
+
+
+*here: originally this is where the buttons were to animate the hover-over with [1]. it is now in the mouse move script.
+
+*** 			Docked DS/C3 and No Password
+*			doif va64 = "docked" and pswd va53 = ""
+*				pat: butt va01 "ds world switcher" 40 2 va50 va51 0 [] 450 0
+*** 			Docked DS/C3 and Password Protected
+*			elif va64 = "docked" and pswd va53 <> ""
+*				pat: butt va01 "ds world switcher" 42 2 va50 va51 0 [] 450 0
+*			elif va64 = "undocked" and pswd va53 = ""
+***			Undocked DS and No Password
+*				pat: butt va01 "ds world switcher" 36 2 va50 va51 0 [] 450 0
+*			elif va64 = "undocked" and pswd va53 <> ""
+***			Undocked DS and Password Protected
+*				pat: butt va01 "ds world switcher" 38 2 va50 va51 0 [] 450 0
+*			elif va64 = "c3"
+***			Undocked C3 World (needs to be docked)
+*				pat: butt va01 "ds world switcher" 34 6 va50 va51 0 [] 450 0
+*			elif va64 = "c1" and pswd va53 = ""
+***			Undocked DS/C1 and No Password
+*				pat: butt va01 "ds world switcher" 49 2 va50 va51 0 [] 450 0
+*			elif va64 = "c1" and pswd va53 <> ""
+***			Undocked DS/C1 and Password Protected
+*				pat: butt va01 "ds world switcher" 51 2 va50 va51 0 [] 450 0
+*
+*			elif va64 = "c1c3" and pswd va53 = ""
+***			Undocked DS/C1 and No Password
+*				pat: butt va01 "ds world switcher" 54 2 va50 va51 0 [] 450 0
+*			elif va64 = "c1c3" and pswd va53 <> ""
+***			Undocked DS/C1 and Password Protected
+*				pat: butt va01 "ds world switcher" 56 2 va50 va51 0 [] 450 0
+*
+*			endi
+
+
+
+*** 			Docked DS/C3 and No Password
+*			doif va64 = "docked" and pswd va53 = ""
+*				setv va60 8
+*
+**				8
+*
+*** 			Docked DS/C3 and Password Protected
+*			elif va64 = "docked" and pswd va53 <> ""
+*				setv va60 8
+*
+**				8 + lock
+*
+*			elif va64 = "undocked" and pswd va53 = ""
+***			Undocked DS and No Password
+*				setv va60 6
+*
+**				6
+*
+*			elif va64 = "undocked" and pswd va53 <> ""
+***			Undocked DS and Password Protected
+*				setv va60 6
+*
+**				6 + lock
+*
+*			elif va64 = "c3"
+***			Undocked C3 World (needs to be docked)
+*				setv va60 4
+*
+**				4 (do we need to add lockability?)
+*
+*			elif va64 = "c1" and pswd va53 = ""
+***			Undocked DS/C1 and No Password
+*				setv va60 10
+*
+**				10
+*
+*			elif va64 = "c1" and pswd va53 <> ""
+***			Undocked DS/C1 and Password Protected
+*				setv va60 10
+*
+**				10 + lock
+*
+*			elif va64 = "c1c3" and pswd va53 = ""
+***			Docked DS/C1/C3 and No Password
+*				setv va60 12
+*
+**				12
+*
+*			elif va64 = "c1c3" and pswd va53 <> ""
+***			Docked DS/C1/C3 and Password Protected
+*				setv va60 12
+*
+**				12 + lock
+*
+*			endi
+*
+*
+*			pat: butt va01 "ds world switcher" va60 2 va50 va51 0 [] 450 0
+
+			pat: butt va01 "ds world switcher" 12 2 va50 va51 0 [] 450 0
+
+*sets up all the necessary values for each icon:
+*"N_x"
+*"N_y"
+*"N_icon_on"
+*"N_icon_off"
+
+			gsub initialize_icon
+
+
+
+
+			doif ov04 = va53
+
+*here: when drawing the list of worlds, this is where the icons can be set to highlighted or not
+*todo: re-enable
+*				tino 128 128 128 128 128
+
+				doif va01 = 12
+
+					setv game "12_lit" 1
+
+				elif va01 = 11
+
+					setv game "11_lit" 1
+
+				elif va01 = 10
+
+					setv game "10_lit" 1
+
+				elif va01 = 9
+
+					setv game "9_lit" 1
+
+				elif va01 = 8
+
+					setv game "8_lit" 1
+
+				elif va01 = 7
+
+					setv game "7_lit" 1
+				endi
+
+
+
+*				wait 1
+
+*manually update all the icons
+*				call 75 0 0
+
+*				inst
+
+**************
+
+
+*				Load World
+				pat: butt 95 "ds world switcher" 8 2 76 166 0 [0] 600 0
+				part 95
+				anim [0]
+*				Delete world
+				pat: butt 96 "ds world switcher" 12 2 435 166 0 [0] 1100 0
+				part 96
+				anim [0]
+*				Lock controller
+				pat: butt 97 "ds world switcher" 10 2 257 166 0 [0] 608 0
+				part 97
+				anim [0]
+
+*				mesg writ targ 75
+			endi
+		endi
+	retn
+
+
+
+
+
+
+
+
+
+
+
+
+
+*these are the part numbers that appear when you refresh the world list. each number corresponds to a world icons part number.
+*12
+*11
+*10
+*9
+*8
+*7
+
+
+*sets up all the necessary values for each icon:
+*"N_x"
+*"N_y"
+*"N_icon_type"
+
+*(if N_icon_type = "custom")
+*"N_icon_on"
+*"N_icon_off"
+
+*(if N_icon_type = "file")
+*"N_icon"
+*"N_firstframe"
+
+
+
+
+*VA10 - type (normal or custom)
+*VA11 - filename
+*VA12 - frame
+
+
+
+	subr initialize_icon
+
+
+		setv va80 va01
+
+
+*if there is a button with a part number matching our loop iteration
+		doif part va80 = 1
+
+*"12"
+			sets va81 vtos va80
+
+*"12_x"
+			sets va82 va81
+			adds va82 "_x"
+			setv game va82 va50
+			addv game va82 posl
+
+*"12_y"
+			sets va82 va81
+			adds va82 "_y"
+			setv game va82 va51
+			addv game va82 post
+
+*(did you fail to load the icon? you should switch to "from existing sprite file" mode
+
+*"12_icon_type"
+			sets va82 va81
+			adds va82 "_icon_type"
+			sets game va82 va10
+
+
+
+*"normal" - ICON WILL BE ANIMATED USING POSE COMMANDS (todo: not true, it uses some hacky gallery shiz)
+			doif va10 = "custom"
+
+*				dbg: asrt 1 = 5
+
+*****custom icons are are all loaded from files in the journal directory into temporary s16 files at the start.
+*this means all we need for custom icons is a file name, no need for any frame numbers. we automatically append _lit or _unlit as appropriate.
+
+
+
+
+*put "myCustomIcon_icon_lit" into GAME "12_icon_on"
+				sets va82 va81
+				adds va82 "_icon_on"
+				sets game va82 va11
+				adds game va82 "_icon_lit"
+
+
+*				no icon specified or couldn't find the specified icon
+				doif snax game va82 = 0
+*					delete gallery icons, they're no longer needed
+					sets va82 va81
+					adds va82 "_icon_lit"
+					delg va82
+
+					sets va82 va81
+					adds va82 "_icon_unlit"
+					delg va82
+
+*icon_type must be normal, so we can use pose commands
+					sets va82 va81
+					adds va82 "_icon_type"
+					sets game va82 "normal"
+
+*						set us to whatever icon you would have been if the default game had to work it out
+					sets va82 va81
+					adds va82 "_spritename"
+					sets game va82 "WorldSwitcher_Icons_Default"
+
+					sets va82 va81
+					adds va82 "_firstframe"
+*						sets va82 va13
+
+*this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
+*and return it to va60 as a number!
+					gsub get_firstframe_for_default_style_world
+					setv game va82 va60
+
+
+
+				endi
+
+*check again, we may have just changed it in a failure state. if we did, we don't need to try and set an _unlit icon here.
+				doif va10 = "custom"
+
+
+*put "myCustomIcon_icon_unlit" into GAME "12_icon_off"
+					sets va82 va81
+					adds va82 "_icon_off"
+					sets game va82 va11
+					adds game va82 "_icon_unlit"
+
+
+*					no icon specified or couldn't find the specified icon
+					doif snax game va82 = 0
+*						delete gallery icons, they're no longer needed
+						sets va82 va81
+						adds va82 "_icon_lit"
+						delg va82
+
+						sets va82 va81
+						adds va82 "_icon_unlit"
+						delg va82
+
+*icon_type must be normal, so we can use pose commands
+						sets va82 va81
+						adds va82 "_icon_type"
+						sets game va82 "normal"
+
+*						set us to whatever icon you would have been if the default game had to work it out
+						sets va82 va81
+						adds va82 "_spritename"
+						sets game va82 "WorldSwitcher_Icons_Default"
+
+						sets va82 va81
+						adds va82 "_firstframe"
+*							sets va82 va13
+
+*this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
+*and return it to va60 as a number!
+						gsub get_firstframe_for_default_style_world
+						setv game va82 va60
+
+
+
+					endi
+
+				endi
+
+
+
+
+
+*"custom" - LOAD ICON FROM A COMMA SEPARATED ARRAY OF PIXELS (todo: not even slightly true?)
+			elif va10 = "normal"
+
+
+*				set us to whatever icon you would have been if the default game had to work it out
+				sets va82 va81
+				adds va82 "_spritename"
+				sets game va82 va11
+
+				sets va82 va81
+				adds va82 "_firstframe"
+				setv game va82 va12
+
+			else
+
+
+*icon_type must be normal, so we can use pose commands
+				sets va82 va81
+				adds va82 "_icon_type"
+				sets game va82 "normal"
+
+*				set us to whatever icon you would have been if the default game had to work it out
+				sets va82 va81
+				adds va82 "_spritename"
+				sets game va82 "WorldSwitcher_Icons_Default"
+*				sets game va82 "worldswitcher_icons_X"
+
+				sets va82 va81
+				adds va82 "_firstframe"
+*				sets va82 va13
+
+*this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
+*and return it to va60 as a number!
+				gsub get_firstframe_for_default_style_world
+				setv game va82 va60
+
+
+*rng icon fun
+*				setv va14 rand 0 20
+*				mulv va14 2
+*
+*				setv game va82 va14
+
+
+
+
+			endi
+
+		endi
+
+*		subv va80 1
+*repe
+
+	retn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*this is a fix for our icons trying to draw over invisible parts.
+
+	subr blank_out_icon
+
+		setv va80 va01
+
+
+*if there is a button with a part number matching our loop iteration
+		doif part va80 = 1
+
+*"12"
+			sets va81 vtos va80
+
+*"12_x"
+			sets va82 va81
+			adds va82 "_x"
+			setv game va82 va50
+			addv game va82 posl
+
+*"12_y"
+			sets va82 va81
+			adds va82 "_y"
+			setv game va82 va51
+			addv game va82 post
+
+*using special blank override to avoid drawing this icon later.
+
+*"12_icon_type"
+			sets va82 va81
+			adds va82 "_icon_type"
+			sets game va82 "normal"
+
+*12_spritename
+			sets va82 va81
+			adds va82 "_spritename"
+			sets game va82 "blnk"
+
+*12_firstframe
+			sets va82 va81
+			adds va82 "_firstframe"
+			setv game va82 0
+
+		endi
+
+
+	retn
+
+
+
+
+
+
+
+
+
+*todo: get icons from worldswitcher_icons_Standard instead (or rename that to this and etc)
+
+
+*this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
+*and return it to va60 as a number!
+
+	subr get_firstframe_for_default_style_world
+
+
+
+
+*todo: DELETE ME, newer code is below!!
+*
+*
+** 			Docked DS/C3 and No Password
+*		doif va64 = "docked" and pswd va53 = ""
+*			setv va60 8
+** 			Docked DS/C3 and Password Protected
+*		elif va64 = "docked" and pswd va53 <> ""
+*			setv va60 8
+*		elif va64 = "undocked" and pswd va53 = ""
+**			Undocked DS and No Password
+*			setv va60 0
+*		elif va64 = "undocked" and pswd va53 <> ""
+**			Undocked DS and Password Protected
+*			setv va60 0
+*		elif va64 = "c3"
+**			Undocked C3 World (needs to be docked)
+*			setv va60 2
+*		elif va64 = "c1" and pswd va53 = ""
+**			Undocked DS/C1 and No Password
+*			setv va60 10
+*		elif va64 = "c1" and pswd va53 <> ""
+**			Undocked DS/C1 and Password Protected
+*			setv va60 10
+*		elif va64 = "c1c3" and pswd va53 = ""
+**			Docked DS/C1/C3 and No Password
+*			setv va60 12
+*		elif va64 = "c1c3" and pswd va53 <> ""
+**			Docked DS/C1/C3 and Password Protected
+*			setv va60 12
+*		endi
+
+
+
+
+
+
+
+** 			Docked DS/C3
+		doif va64 = "docked"
+			setv va60 8
+		elif va64 = "undocked"
+**			Undocked DS
+			setv va60 0
+		elif va64 = "c3"
+**			Undocked C3 World (needs to be docked)
+			setv va60 2
+		elif va64 = "c1"
+**			Undocked DS/C1
+			setv va60 10
+		elif va64 = "c1c3"
+**			Docked DS/C1/C3
+			setv va60 12
+		endi
+
+
+**			Password Protected! Add padlock icon.
+		doif pswd va53 <> ""
+*todo: as separate icon on top of main icon.
+			setv va60 22
+		endi
+
+
+	retn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*looks for a file called "icon" in the "journal" folder, and reads the following values from it:
+
+*VA10 - type (file or custom)
+*VA11 - filename
+*VA12 - frame
+
+	subr load_icon_from_world_journal
+
+*default values
+		sets va10 ""
+		sets va11 ""
+		setv va12 -1
+
+*open icon file
+		file iope 2 "icon"
+
+		doif inok = 1
+
+*load in all the necessary data
+			sets va35 "icontype:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			sets va10 va30
+
+			sets va35 "spritename:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			sets va11 va30
+
+			sets va35 "spriteframe:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			setv va12 stoi va30
+
+		endi
+
+		file iclo
+
+
+
+	retn
+
+
+
+
+
+
+*the subroutine that makes it happen!
+
+	subr load_value_from_key_named_va35_into_string_va30
+
+*init keyName string
+		sets va21 ""
+
+*var to track how many times we've ran through the file. we give up if we hit inok = 0 twice.
+		setv va36 0
+
+		loop
+			sets va20 innl
+
+			sets va22 lowa va20
+
+			doif sins va22 1 va35 = -1
+				adds va21 va20
+			endi
+
+*if we hit file end twice we give up
+			doif inok = 0
+				addv va36 1
+			endi
+
+
+		untl sins va22 1 va35 <> -1 or va36 = 2
+
+
+*	setv va23 strl va22
+*	subv va23 sins va22 1 "frame0: "
+
+*	sets va99 subs va22 sins va22 1 "frame0: " va23
+
+
+*read from position N (length of keyName string) (va23) to the END OF STRING. calculated by subtracting va23 from the length of the current string (va22).
+		setv va23 strl va35
+*this way off by 1 and we were reading the first pixel with as ":10" instead of "10"
+		addv va23 1
+		setv va24 strl va22
+		subv va24 va23
+
+
+*new fix, todo, might be dodgy. stops it cutting off the last character of eggs...
+		addv va24 1
+
+
+*return an empty string if we didn't manage to find the key we were looking for...
+		doif va36 = 2
+
+			sets va30 ""
+
+		else
+
+*  	vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+			sets va30 subs va22 va23 va24
+*  	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+		endi
+
+
+	retn
+
+
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+*
+**todo: original world type select button. delete this.
+*
+*** World Type Button: Docked or Undocked or C1?
+*scrp 1 2 1000 800
+*	inst
+*	lock
+*	snde "2bep"
+*** 	Check current World Type
+*
+**DS -> DS+C3
+*	doif name "wtype" = "undocked" and name "dsc1" = 0
+*** 		Change to Docked
+*		sets name "wtype" "docked"
+*		part 7
+*		pose 2
+*** 		Update Display
+*		part 9
+*		frmt 0 0 0 0 0 0 2
+*		ptxt read "World Switcher" 22
+*		dbg: outs "5"
+*
+**DS+C3 -> DS+C1
+*	elif name "wtype" = "docked"
+*** 		Change to Undocked
+*		sets name "wtype" "c1"
+*		part 7
+*		pose 17
+*** 		Update Display
+*		part 9
+*		frmt 0 0 0 0 0 0 2
+*		ptxt read "World SwitcherC1" 0
+*		dbg: outs "1"
+*
+**DS+C1 -> DS+C1+C3
+*	elif name "wtype" = "c1" and name "dsc1" = 0
+*** 		Change to Docked
+*		sets name "wtype" "c1c3"
+*		part 7
+*		pose 22
+*** 		Update Display
+*		part 9
+*		frmt 0 0 0 0 0 0 2
+*		ptxt read "World SwitcherC1" 1
+*		dbg: outs "2"
+*
+**DS+C1+C3 -> DS ONLY
+*	elif name "wtype" = "c1c3" and name "dsc1" = 0
+*** 		Change to Docked
+*		sets name "wtype" "undocked"
+*		part 7
+*		pose 1
+*** 		Update Display
+*		part 9
+*		frmt 0 0 0 0 0 0 2
+*		ptxt read "World Switcher" 23
+*		dbg: outs "4"
+*
+*
+*
+**if C3 isn't installed:
+*
+**DS+C1 -> DS ONLY
+*	elif name "wtype" = "c1" and name "dsc1" = 1
+*** 		Change to Undocked
+*		sets name "wtype" "undocked"
+*		part 7
+*		pose 1
+*** 		Update Display
+*		part 9
+*		frmt 0 0 0 0 0 0 2
+*		ptxt read "World Switcher" 23
+*		dbg: outs "3"
+*
+**DS ONLY -> DS+C1
+*	elif name "wtype" = "undocked" and name "dsc1" = 1
+*** 		Change to Docked
+*		sets name "wtype" "c1"
+*		part 7
+*		pose 17
+*** 		Update Display
+*		part 9
+*		frmt 0 0 0 0 0 0 2
+*		ptxt read "World SwitcherC1" 0
+*		dbg: outs "6"
+*	endi
+*
+*endm
+
+
+
+
+scrp 1 2 1000 450
+*	This script is called by the "Select world" buttons (The nobbly bits)
+	lock
+
+*the original one has some delay from not using inst, so we keep a bit of delay to make it feel a bit more like the OG.
+	wait 3
+
+	inst
+
+
+	setv va01 ov04
+	subv va01 ov03
+	doif va01 >= 0 and va01 < nwld
+		addv va01 7
+		doif va01 < 13
+			part va01
+			doif va01 = _p1_
+* Do load instead?
+				unlk
+				slow
+				mesg wrt+ ownr 600 95 0 0
+			endi
+*			anim [0]
+*here: reset to unhighlighted whenever you refresh the icons
+*todo: re-enable
+*			tino 90 90 90 128 128
+
+
+*reset all icons highlight state to 0
+			setv game "12_lit" 0
+			setv game "11_lit" 0
+			setv game "10_lit" 0
+			setv game "9_lit" 0
+			setv game "8_lit" 0
+			setv game "7_lit" 0
+
+*manually update all the icons
+			call 75 0 0
+
+*ucln
+		endi
+	endi
+
+	part _p1_
+	setv va00 _p1_
+	subv va00 7
+	addv va00 ov03
+	setv ov04 va00
+	file oope 0 "World Switcher Persistent State Entries" 0
+	outs wrld ov04
+	file oclo
+
+
+
+
+****** CHANGED FOR DOCKING STATION
+
+
+
+
+
+**************************************************************
+*this is a recreation of anim [1 0 1 0 1 0 1 0], over, pose 0*
+**************************************************************
+
+	setv va40 0
+
+	setv va45 0
+
+	reps 9
+
+*				wait 1
+
+		inst
+
+
+		doif va40 = 1
+*every even frame, set "N_lit" to 0
+*			setv va40 0
+*			gall "world_icon_lit" 0
+*			gall va81 0
+*		else
+*every odd frame, set "N_lit" to 1
+*			setv va40 1
+*			gall "world_icon_unlit" 0
+*			gall va82 0
+
+
+			setv va40 0
+
+			doif _p1_ = 12
+
+				setv game "12_lit" 0
+
+			elif _p1_ = 11
+
+				setv game "11_lit" 0
+
+			elif _p1_ = 10
+
+				setv game "10_lit" 0
+
+			elif _p1_ = 9
+
+				setv game "9_lit" 0
+
+			elif _p1_ = 8
+
+				setv game "8_lit" 0
+
+			elif _p1_ = 7
+
+				setv game "7_lit" 0
+
+			endi
+
+		else
+
+			setv va40 1
+
+			doif _p1_ = 12
+
+				setv game "12_lit" 1
+
+			elif _p1_ = 11
+
+				setv game "11_lit" 1
+
+			elif _p1_ = 10
+
+				setv game "10_lit" 1
+
+			elif _p1_ = 9
+
+				setv game "9_lit" 1
+
+			elif _p1_ = 8
+
+				setv game "8_lit" 1
+
+			elif _p1_ = 7
+
+				setv game "7_lit" 1
+
+			endi
+
+		endi
+
+
+
+
+		doif va45 <> 9
+
+			wait 1
+			inst
+*			rtar 1 2 555
+*			anim [0]
+*			over
+*			targ ownr
+		endi
+
+		call 75 0 0
+		dbg: outv game "12_lit"
+
+		addv va45 1
+
+	repe
+
+	doif _p1_ = 12
+
+		setv game "12_lit" 1
+
+	elif _p1_ = 11
+
+		setv game "11_lit" 1
+
+	elif _p1_ = 10
+
+		setv game "10_lit" 1
+
+	elif _p1_ = 9
+
+		setv game "9_lit" 1
+
+	elif _p1_ = 8
+
+		setv game "8_lit" 1
+
+	elif _p1_ = 7
+
+		setv game "7_lit" 1
+
+	endi
+
+
+
+*manually re-draw all the icons
+	call 75 mopx mopy
+
+
+*******
+
+	inst
+
+** Remove / Re-create Load, Delete and Lock Buttons
+**    Load Button
+	pat: kill 95
+	pat: butt 95 "ds world switcher" 8 2 76 166 0 [0] 600 0
+	part 95
+**	Delete Button
+	pat: kill 96
+	pat: butt 96 "ds world switcher" 12 2 435 166 0 [0] 1100 0
+	part 96
+	anim [0]
+**	Lock Button
+	pat: kill 97
+	pat: butt 97 "ds world switcher" 10 2 257 166 0 [0] 608 0
+	part 97
+	anim [0]
+	slow
+	part 95
+	over
+	anim [0]
+endm
+
+
+
+
+
+************************
+* CLICKED ADDON BUTTON *
+************************
+
+*script 100 is for clicking Addons. _p1_ will be the ID of the button pressed.
+
+*_p2_ is used to turn a checkbox on permanently (should only be used for DS)
+
+scrp 1 2 1000 100
+
+	inst
+
+*get text from part. for a bunch of hard-coded shenanigans.
+	setv va00 _p1_
+	addv va00 1
+	part va00
+	sets va09 ptxt
+
+*get the RoomCount linked to this checkbox part number
+	sets va10 vtos _p1_
+	adds va10 "_RoomCount"
+
+*get the ChunkName linked to this checkbox part number
+	sets va11 vtos _p1_
+	adds va11 "_ChunkName"
+
+
+
+*add 3 to _p1_ to target the checkbox part. if it's on, turn it off, and vice versa. if it's greyed out make an error sound.
+	setv va00 _p1_
+	addv va00 3
+	part va00
+
+
+
+*set our checkbox to always-on if _p2_ was specified
+	doif _p2_ = 1
+		pose 2
+		addv game "WorldSwitcher_CurrentRooms" game va10
+
+
+*****CHECK*****
+
+	elif pose = 0
+		pose 1
+		snde "2bep"
+		addv game "WorldSwitcher_CurrentRooms" game va10
+
+
+*if this "addon" is actually creatures 3, skip the usual logic and just set world type to docked.
+
+*if it's C1 or C2, set up variables used to automatically determine the icon.
+		doif va09 = "Creatures 3"
+
+			sets name "wtype" "docked"
+
+			setv game "WorldSwitcher_C3" 1
+
+		elif va09 = "C12DS"
+
+			setv game "WorldSwitcher_C1" 1
+
+		elif va09 = "C2toDS"
+
+			setv game "WorldSwitcher_C2" 1
+
+		else
+
+			adds game "WorldSwitcher_CurrentWorld_ChunkNames" game va11
+			adds game "WorldSwitcher_CurrentWorld_ChunkNames" ","
+
+*		dbg: outs "tried to add this addon:"
+*		dbg: outs game "WorldSwitcher_CurrentWorld_ChunkNames"
+
+		endi
+
+
+*****UNCHECK*****
+
+	elif pose = 1
+		pose 0
+		snde "2bep"
+		subv game "WorldSwitcher_CurrentRooms" game va10
+
+
+*if this "addon" is actually creatures 3, skip the usual logic and just set world type to undocked.
+
+*if it's C1 or C2, set up variables used to automatically determine the icon.
+		doif va09 = "Creatures 3"
+
+			sets name "wtype" "undocked"
+
+			setv game "WorldSwitcher_C3" 0
+
+		elif va09 = "C12DS"
+
+			setv game "WorldSwitcher_C1" 0
+
+		elif va09 = "C2toDS"
+
+			setv game "WorldSwitcher_C2" 0
+
+		else
+
+*ATTEMPT TO REMOVE THE ADDON NAME FROM OUR COMMA SEPARATED LIST OF ADDONS
+
+*todo: this is really unsafe. just do it some other way.
+*(for example, if you had a chunk named "", and then tried to remove that chunk...
+*it would just find the first comma and delete it and that proably wouldn't be good.)
+			setv va20 sins game "WorldSwitcher_CurrentWorld_ChunkNames" 1 game va11
+
+
+
+			doif va20 <> -1
+
+*sub 1 from our found string position. otherwise we read 1 too many characters.
+				setv va25 va20
+				subv va25 1
+
+*first half of string
+				sets va21 subs game "WorldSwitcher_CurrentWorld_ChunkNames" 1 va25
+
+*need the length of what we're searching for
+				setv va22 va20
+				addv va22 strl game va11
+*+1 for the ,
+				addv va22 1
+
+*second half of string
+				sets va23 subs game "WorldSwitcher_CurrentWorld_ChunkNames" va22 -1
+
+				sets va24 va21
+				adds va24 va23
+
+*				dbg: outs "tried to remove this addon:"
+*				dbg: outs va24
+
+				sets game "WorldSwitcher_CurrentWorld_ChunkNames" va24
+			endi
+
+		endi
+
+	else
+		snde "no__"
+	endi
+
+*select part 99 and modify it to display how many rooms we are attempting to inject.
+	part 99
+
+*Room Count:
+	sets va99 game "UI_ROOMCOUNT"
+	adds va99 " "
+	doif game "WorldSwitcher_CurrentRooms" > game "WorldSwitcher_EngineMaxRooms"
+		adds va99 "<tint 255 0 0>"
+		adds va99 vtos game "WorldSwitcher_CurrentRooms"
+		adds va99 "<tint>"
+	else
+		adds va99 vtos game "WorldSwitcher_CurrentRooms"
+	endi
+	adds va99 "/"
+	adds va99 vtos game "WorldSwitcher_EngineMaxRooms"
+	ptxt va99
+
+
+
+
+	call 4500 0 0
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*************************
+* CLICKED ICON SELECTOR *
+*************************
+
+*script 200 is for activating the ICON CHOOSER PANEL!
+
+scrp 1 2 1000 200
+
+	inst
+
+*pause main panel (so we can't press ESC!!)
+	paus 1
+
+	new: comp 1 1 34543 "WorldSwitcher_IconPanel" 1 0 1000
+
+endm
+
+
+
+
+
+*LOAD ADDONS FROM JOURNAL FOLDER!
+
+scrp 1 2 1000 10000
+
+	inst
+	lock
+
+
+
+*reset our checkbox vars
+	setv game "WorldSwitcher_C3" 0
+	setv game "WorldSwitcher_C1" 0
+	setv game "WorldSwitcher_C2" 0
+
+
+
+
+	file glob 1 "*.addon"
+
+*check how many "*.addon" were found
+
+*this line should work, but it doesn't read the entire line.
+*setv va50 inni
+
+*so we just read the whole line and convert that to a number instead.
+	setv va40 stoi innl
+
+	dbg: outv va40
+
+
+*loop iteration counter
+	setv va90 0
+
+
+	reps va40
+
+		sets va01 innl
+
+		dbg: outs va01
+
+*get length of globbed file string...	
+		setv va08 strl va01
+
+*globbed files start with ".", so we remove 11 (number of characters forward we are looking from va02 (number of characters to read in total))
+*this stops it reading past the end of the string and causing an error.
+		subv va08 11
+*+1 because we need to read from AFTER that character.
+		addv va08 1
+
+*and then just return the last bit of the name such as "WorldSwitcher_Addon_C12DS.addon"
+		sets name va90 subs va01 11 va08
+
+		addv va90 1
+
+	repe
+
+
+
+
+*run the loop again, this time to load up each file pointed to by the previous input stream (from globbing the directory)
+
+*loop iteration counter
+	setv va90 0
+
+
+
+
+
+
+
+*let's make addons to populate our addon list.
+
+*addons start at part 101. each addon is 26 pixels below the previous one.
+*each addon is made of 4 (!!) parts:
+*-a clickable button part
+*-a fixd text part which uses the same image as the button part. 40 pixels of padding on the left and and 28 pixels of padding on the right.
+*-a checkbox part 269 pixels to the right and 6 pixels below the button part
+*-an icon part 4 pixels to the right of the button part
+
+
+
+
+
+
+*initial part number
+	setv va01 101
+	setv va00 va01
+
+*X/Y of initial addon.
+	setv va50 145
+	setv va51 184
+
+
+
+*DOCKING STATION AND CREATURES 3 HARD CODED ENTRIES HERE!!!
+
+
+
+
+
+
+	sets va60 "WorldSwitcher_Addons"
+	setv va61 0
+
+	sets va70 "Docking Station"
+
+*DS is 122 rooms and doesn't need a ChunkName.
+	setv va80 122
+	sets va81 ""
+
+
+	gsub make_addon_entry
+
+*turn on the DS checkbox permanently using the 2nd param
+	call 100 va01 1
+
+
+
+
+* Is C3 Installed?
+	reaf
+	doif reaq "patch_level" = 1
+		sets va60 "WorldSwitcher_Addons"
+		setv va61 1
+
+		sets va70 "Creatures 3"
+
+*C3 is 508 rooms and uses special behaviour based off its name
+		setv va80 508
+		sets va81 ""
+
+
+		gsub make_addon_entry
+	endi
+
+
+	reps va40
+
+		call 10001 mame va90 0
+
+
+
+
+
+
+
+
+
+
+
+*		sets va60 "WorldSwitcher_Addons"
+*		setv va61 stoi "0"
+*
+*		sets va70 "Docking Station"
+
+
+		sets va60 mame "IconFile"
+		setv va61 stoi mame "IconFrame"
+
+		sets va70 mame "AddonName"
+
+		setv va80 stoi mame "RoomCount"
+		sets va81 mame "ChunkName"
+
+
+
+*test the chunk exists first
+		setv va10 pray test va81
+
+*	if the chunk exists, add an addon entry!
+		doif va10 <> 0
+
+
+			gsub make_addon_entry
+
+
+		endi
+
+
+
+
+		addv va90 1
+
+
+
+	repe
+
+
+
+
+	subr make_addon_entry
+
+
+
+*use the button part number to store a linked RoomCount and ChunkName
+		sets va10 vtos va00
+		sets va11 va10
+		adds va10 "_RoomCount"
+		adds va11 "_ChunkName"
+
+
+*todo: clear up these values RoomCount and ChunkName values when we close the world creation screen!
+
+
+
+		setv game va10 va80
+		sets game va11 va81
+
+
+
+
+*button part
+		pat: butt va00 "WorldSwitcher_WorldCreation" 12 1 va50 va51 1 [] 100 0
+
+*fixed text part
+		addv va00 1
+		pat: fixd va00 "WorldSwitcher_WorldCreation" 12 va50 va51 2 "whiteontransparentchars"
+		part va00
+		frmt 40 10 28 0 0 0 0
+		ptxt va70
+
+*icon dull part
+		addv va00 1
+		addv va50 4
+		pat: dull va00 va60 va61 va50 va51 4
+
+*checkbox dull part
+		addv va00 1
+		addv va50 265
+		setv va52 va51
+		addv va52 6
+		pat: dull va00 "WorldSwitcher_WorldCreation" 8 va50 va52 3
+		part va00
+
+*set up our initial values for the next piece
+		addv va00 1
+		setv va50 145
+		addv va51 26
+
+
+
+	retn
+
+
+
+
+endm
+
+
+
+
+
+*load addon script
+
+*_P1_ - file name, relative to journal folder
+
+scrp 1 2 1000 10001
+
+	inst
+
+	lock
+
+
+
+	file iope 1 _p1_
+
+
+
+*get every necessary value from every necessary key
+
+*todo: if you can't find ANY of these keys, or a bunch of other possible errors happen, you should recover from the error!!!
+
+	loop
+		sets va00 innl
+
+*va00 is lowercase version of the string for search purposes. va01 is original case, for display purposes.
+		sets va01 va00
+		sets va00 lowa va00
+
+		sets va32 "addonname:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va01
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			sets mame "AddonName" va30
+
+		endi
+
+		sets va32 "iconfile:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va01
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			sets mame "IconFile" va30
+
+		endi
+
+		sets va32 "iconframe:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va01
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			sets mame "IconFrame" va30
+
+		endi
+
+
+
+
+		sets va32 "roomcount:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va01
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			sets mame "RoomCount" va30
+
+		endi
+
+
+		sets va32 "chunkname:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va01
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			sets mame "ChunkName" va30
+
+		endi
+
+
+
+
+
+	untl inok = 0
+
+
+
+
+
+
+	file iclo
+
+
+
+
+
+
+
+
+
+
+
+
+
+	subr load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+		sets va02 va31
+
+*read from position 7 (length of string "frame0:") (VA03) to the END OF STRING. calculated by subtracting VA03 from the length of the current string (VA02).
+		setv va03 strl va32
+
+		setv va04 strl va02
+		subv va04 va03
+
+*fix off by 1 errorz
+		addv va03 1
+
+*  	      vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+		sets va30 subs va02 va03 va04
+*  	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+	retn
+
+
+
+
+
+
+
+
+*thanks Amaikokonut/Aiko for this awesome function!
+
+
+	subr set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+
+		wait 1
+
+		inst
+
+*in string va30, where the splitting character is va31, va32 is the number of
+*words/items in said string.
+		setv va32 0
+		setv va39 1
+		loop
+*if the first character is the delimiter, skip it 
+			doif sins va30 va39 va31 ne -1
+				doif subs va30 1 1 eq va31 and va39 eq 1
+					addv va39 1
+				endi
+				setv va38 sins va30 va39 va31
+				subv va38 va39
+				sets va37 subs va30 va39 va38
+			else
+				sets va37 subs va30 va39 -1
+				setv va39 -99
+			endi
+			doif va37 ne ""
+*             vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+				addv va32 1
+*             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+			endi
+			addv va39 va38
+			addv va39 1
+		untl va39 lt 1
+	retn
+
+
+
+	subr set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
+*in string va30, where the splitting charater is va31 and va32 is the index 
+* (indicies start at 1) of the thing you want, va33 is the item, or "" if it
+* doesn't exist
+		setv va39 1
+		setv va36 0
+		sets va33 ""
+		loop
+*if the first character is the delimiter, skip it 
+			doif sins va30 va39 va31 ne -1
+				doif subs va30 1 1 eq va31 and va39 eq 1
+					addv va39 1
+				endi
+				setv va38 sins va30 va39 va31
+				subv va38 va39
+				sets va37 subs va30 va39 va38
+			else
+				sets va37 subs va30 va39 -1
+				setv va39 -999999
+			endi
+			doif va37 ne ""
+				addv va36 1
+				doif va36 eq va32
+*                     vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+					sets va33 va37
+*                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+					setv va39 -999999
+				endi
+			endi
+			addv va39 va38
+			addv va39 1
+		untl va39 lt 1
+	retn
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+***********************
+* CREATE WORLD BUTTON *
+***********************
+
+scrp 1 2 1000 503
+*	This script is used to actually Make a world and then return to the switcher
+	part 3
+	doif ptxt = ""
+		lock
+		part 5
+		anim [1 0 1 0 1 0]
+		over
+		anim [0]
+		stop
+	endi
+
+*also error out and buzz if we're attempting to create a world with too many rooms
+	doif game "WorldSwitcher_CurrentRooms" > game "WorldSwitcher_EngineMaxRooms"
+		lock
+		snde "buzz"
+		part 5
+		anim [1 0 1 0 1 0]
+		over
+		anim [0]
+		stop
+	endi
+
+	doif wnti ptxt <> -1
+		snde "buzz"
+		part 5
+		anim [ 1 0 1 0 1 0]
+		over
+		anim [0]
+		stop
+	endi
+	lock
+	part 5
+	anim [1 1 1 1 1 0 0 0 0]
+	over
+	part 3
+	sets va00 fvwm ptxt
+	doif ptxt <> va00
+		ptxt va00
+		part 5
+		anim [0]
+		stop
+	endi
+	doif va00 = ""
+		ptxt ""
+		part 5
+		anim [0]
+		stop
+	endi
+* force update prior to pulling index out :)
+	setv va99 nwld
+	doif wnti va00 <> -1
+		snde "buzz"
+		part 5
+		anim [0]
+		stop
+	endi
+	wrld va00
+******************************************************
+******************************************************
+
+* write to this new world's directory to show whether docked or undocked
+	sets game "engine_other_world" va00
+	file oope 2 "wtype" 0
+	outs name "wtype"
+	file oclo
+* write build number
+	sets game "engine_other_world" va00
+	file oope 2 "build" 0
+	outs read "build_number" 0
+	file oclo
+
+*NEW: write addons too!
+
+*todo: see if we can come up with some way of doing this which doesnt involve the big nasty subr/gsub
+
+
+	sets game "engine_other_world" va00
+	file oope 2 "addons" 0
+
+	sets va30 game "WorldSwitcher_CurrentWorld_ChunkNames"
+	sets va31 ","
+	gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+
+*note that the addons file doesn't get created at all if there are no addons ticked, as it never outputs anything to the stream.
+	doif va32 > 0
+		reps va32
+			gsub set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
+			outs va33
+
+			subv va32 1
+
+			doif va32 > 0
+				outs "\n"
+			endi
+
+		repe
+	endi
+
+
+
+	file oclo
+
+
+
+
+
+
+
+*NEW: write selected icon too!
+
+	sets game "engine_other_world" va00
+	file oope 2 "icon" 0
+
+	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+
+	outs "iconType:normal"
+	outs "\n"
+	outs "spriteName:"
+	outs gall
+	outs "\n"
+	outs "spriteFrame:"
+	setv va99 abba
+	subv va99 1
+	outs vtos va99
+
+
+
+	file oclo
+
+
+
+
+
+
+* OLD photo logic. but maybe still very useful.
+
+
+**todo: what??
+****** TAKE ICON PICS! *****
+*	seta va90 targ
+*
+*
+*	rtar 1 1 674
+*
+*	doif ov00 = 0
+*		setv va15 44
+*	elif ov00 = 1
+*		setv va15 34
+*	elif ov00 = 2
+*		setv va15 48
+*	elif ov00 = 3
+*		setv va15 40
+*	elif ov00 = 4
+*		setv va15 49
+*	elif ov00 = 5
+*		setv va15 54
+*	elif ov00 = 6
+*		setv va15 6
+*	elif ov00 = 7
+*		setv va15 7
+*	endi
+*
+*
+*
+**todo: sensible classifier number
+**	new: simp 1 1 3465 "ds world switcher" 57 0 1000
+**	pose 36
+*
+**	new: simp 1 1 3465 "ds world switcher" 1 36 1000
+*
+*	doif va15 = 6
+*		new: simp 1 1 3465 "c2_icon_temp" 1 0 1000
+*	elif va15 = 7
+*		new: simp 1 1 3465 "c2_icon_temp" 1 1 1000
+*	else
+*		new: simp 1 1 3465 "ds world switcher" 1 va15 1000
+*	endi
+*
+*
+*	mvto 1000 1000
+*
+*	wait 1
+*
+*	inst
+*
+*	sets va98 va00
+*	sets va99 va00
+*
+*	adds va98 "_icon_lit"
+*	adds va99 "_icon_unlit"
+*
+**fix up the funky gamma?
+*	tino 140 140 140 128 128
+**	tino 128 128 128 128 128
+*
+**take an icon sized screenshot using the buffer room
+*	snap va98 1024 1014 48 29 0
+*
+**	tino 90 90 90 128 128
+*
+**create a second copy of the icon, set it to be a full black silhouette then overlay it over the first icon at 30% opacity
+**this creates a perfect dimmed icon yay!!
+**	new: simp 1 1 3465 "ds world switcher" 1 36 1000
+*
+*	doif va15 = 6
+*		new: simp 1 1 3465 "c2_icon_temp" 1 0 1000
+*	elif va15 = 7
+*		new: simp 1 1 3465 "c2_icon_temp" 1 1 1000
+*	else
+*		new: simp 1 1 3465 "ds world switcher" 1 va15 1000
+*	endi
+*
+*	mvto 1000 1000
+*
+*	tino -255 -255 -255 128 128
+*
+*	alph 180 1
+*
+*	snap va99 1024 1014 48 29 0
+*
+*	enum 1 1 3465
+*		ucln
+*		kill targ
+*	next
+*
+**	cmrp 1024 1024 0
+*
+*	targ va90
+*
+**va00
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+******************************************************
+******************************************************
+
+* force update prior to pulling index out :)
+	setv va99 nwld
+	setv ov04 wnti va00
+	file oope 0 "World Switcher Persistent State Entries" 0
+	outs va00
+	file oclo
+*	Now then, if we were in "first world" mode then load it :)
+	setv ov01 3
+	doif ov00 = 2
+		setv ov01 6
+	else
+		setv ov02 nwld
+		setv ov03 wnti va00
+		modv ov03 6
+		subv ov03 wnti va00
+		negv ov03
+	endi
+	unlk
+	mesg writ targ 2000
+
+
+
+
+
+
+
+
+
+
+
+*thanks Amaikokonut/Aiko for this awesome function!
+
+
+	subr set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+
+		wait 1
+
+		inst
+
+*in string va30, where the splitting character is va31, va32 is the number of
+*words/items in said string.
+		setv va32 0
+		setv va39 1
+		loop
+*if the first character is the delimiter, skip it 
+			doif sins va30 va39 va31 ne -1
+				doif subs va30 1 1 eq va31 and va39 eq 1
+					addv va39 1
+				endi
+				setv va38 sins va30 va39 va31
+				subv va38 va39
+				sets va37 subs va30 va39 va38
+			else
+				sets va37 subs va30 va39 -1
+				setv va39 -99
+			endi
+			doif va37 ne ""
+*             vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+				addv va32 1
+*             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+			endi
+			addv va39 va38
+			addv va39 1
+		untl va39 lt 1
+	retn
+
+
+
+	subr set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
+*in string va30, where the splitting charater is va31 and va32 is the index 
+* (indicies start at 1) of the thing you want, va33 is the item, or "" if it
+* doesn't exist
+		setv va39 1
+		setv va36 0
+		sets va33 ""
+		loop
+*if the first character is the delimiter, skip it 
+			doif sins va30 va39 va31 ne -1
+				doif subs va30 1 1 eq va31 and va39 eq 1
+					addv va39 1
+				endi
+				setv va38 sins va30 va39 va31
+				subv va38 va39
+				sets va37 subs va30 va39 va38
+			else
+				sets va37 subs va30 va39 -1
+				setv va39 -999999
+			endi
+			doif va37 ne ""
+				addv va36 1
+				doif va36 eq va32
+*                     vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+					sets va33 va37
+*                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+					setv va39 -999999
+				endi
+			endi
+			addv va39 va38
+			addv va39 1
+		untl va39 lt 1
+	retn
+
+
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+*RESET ICON (to AUTO) button!
+
+*(button created by icon chooser panel mouse click script)
+
+scrp 1 2 1000 4000
+
+	lock
+
+	part 50
+
+	pose 1
+
+	wait 2
+
+	inst
+
+	pat: kill 50
+
+*AUTOMATICALLY SET OUR ICON BASED ON CHECKED ADDONS!
+	setv game "WorldSwitcher_WorldCreation_AutoIcon" 1
+	call 4500 0 0
+
+endm
+
+
+
+
+
+
+
+
+
+*RESET ICON (TO WHATEVER THE WORLD CURRENTLY HAS SAVED) button!
+
+*(button created by icon chooser panel mouse click script)
+
+scrp 1 2 1000 4001
+
+	lock
+
+	part 50
+
+	pose 1
+
+	wait 2
+
+	inst
+
+	pat: kill 50
+
+	sets game "engine_other_world" wrld ov04
+
+** Select Icon ICON PREVIEW DULL part
+	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+
+
+*todo: make sure this stays up to date with the one in the password creation screen script. maybe make a shared function.
+
+
+*load world icon if it exists. if not...
+	gsub load_icon_from_world_journal
+
+
+	gall "blnk" 0
+
+
+
+	doif va11 <> ""
+
+		addv va12 1
+
+		gall va11 va12
+
+
+*no icon defined, calculate it from wtype
+	else
+
+
+
+		file iope 2 "wtype"
+		sets va64 innl
+		file iclo
+
+
+
+
+** 			Docked DS/C3
+		doif va64 = "docked"
+			setv va60 8
+		elif va64 = "undocked"
+**			Undocked DS
+			setv va60 0
+		elif va64 = "c3"
+**			Undocked C3 World (needs to be docked)
+			setv va60 2
+		elif va64 = "c1"
+**			Undocked DS/C1
+			setv va60 10
+		elif va64 = "c1c3"
+**			Docked DS/C1/C3
+			setv va60 12
+
+** default state looks like undocked DS, too
+		else
+
+			setv va60 0
+		endi
+
+*fix off by 1 showing us dimmed icons instead of light.
+		addv va60 1
+
+*set our gall!!
+		gall "WorldSwitcher_Icons_Default" va60
+
+
+	endi
+
+
+
+
+*todo: make sure this stays up to date with the one in the password creation screen. maybe make a shared function.
+
+
+*looks for a file called "icon" in the "journal" folder, and reads the following values from it:
+
+*VA10 - type (file or custom)
+*VA11 - filename
+*VA12 - frame
+
+	subr load_icon_from_world_journal
+
+*default values
+		sets va10 ""
+		sets va11 ""
+		setv va12 -1
+
+*open icon file
+		file iope 2 "icon"
+
+		doif inok = 1
+
+*load in all the necessary data
+			sets va35 "icontype:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			sets va10 va30
+
+			sets va35 "spritename:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			sets va11 va30
+
+			sets va35 "spriteframe:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			setv va12 stoi va30
+
+		endi
+
+		file iclo
+
+
+
+	retn
+
+
+
+
+
+
+
+*todo: this is defined a few times...
+
+
+*the subroutine that makes it happen!
+
+	subr load_value_from_key_named_va35_into_string_va30
+
+*init keyName string
+		sets va21 ""
+
+*var to track how many times we've ran through the file. we give up if we hit inok = 0 twice.
+		setv va36 0
+
+		loop
+			sets va20 innl
+
+			sets va22 lowa va20
+
+			doif sins va22 1 va35 = -1
+				adds va21 va20
+			endi
+
+*if we hit file end twice we give up
+			doif inok = 0
+				addv va36 1
+			endi
+
+
+		untl sins va22 1 va35 <> -1 or va36 = 2
+
+
+*	setv va23 strl va22
+*	subv va23 sins va22 1 "frame0: "
+
+*	sets va99 subs va22 sins va22 1 "frame0: " va23
+
+
+*read from position N (length of keyName string) (va23) to the END OF STRING. calculated by subtracting va23 from the length of the current string (va22).
+		setv va23 strl va35
+*this way off by 1 and we were reading the first pixel with as ":10" instead of "10"
+		addv va23 1
+		setv va24 strl va22
+		subv va24 va23
+
+
+*new fix, todo, might be dodgy. stops it cutting off the last character of eggs...
+		addv va24 1
+
+
+*return an empty string if we didn't manage to find the key we were looking for...
+		doif va36 = 2
+
+			sets va30 ""
+
+		else
+
+*  	vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+			sets va30 subs va22 va23 va24
+*  	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+		endi
+
+
+	retn
+
+
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*AUTOMATICALLY SET OUR ICON BASED ON CHECKED ADDONS! (this only works for ds, c3, c12ds and c2tods. sorry.)
+
+scrp 1 2 1000 4500
+
+	inst
+
+	doif game "WorldSwitcher_WorldCreation_AutoIcon" = 1
+
+* DS ONLY
+		doif game "WorldSwitcher_C3" = 0 and game "WorldSwitcher_C1" = 0 and game "WorldSwitcher_C2" = 0
+			setv va60 0
+* C3
+		elif game "WorldSwitcher_C3" = 1 and game "WorldSwitcher_C1" = 0 and game "WorldSwitcher_C2" = 0
+			setv va60 8
+* C1
+		elif game "WorldSwitcher_C3" = 0 and game "WorldSwitcher_C1" = 1 and game "WorldSwitcher_C2" = 0
+			setv va60 10
+* C2
+		elif game "WorldSwitcher_C3" = 0 and game "WorldSwitcher_C1" = 0 and game "WorldSwitcher_C2" = 1
+			setv va60 12
+* C3 + C1
+		elif game "WorldSwitcher_C3" = 1 and game "WorldSwitcher_C1" = 1 and game "WorldSwitcher_C2" = 0
+			setv va60 14
+* C1 + C2
+		elif game "WorldSwitcher_C3" = 0 and game "WorldSwitcher_C1" = 1 and game "WorldSwitcher_C2" = 1
+			setv va60 18
+* C3 + C2
+		elif game "WorldSwitcher_C3" = 1 and game "WorldSwitcher_C1" = 0 and game "WorldSwitcher_C2" = 1
+			setv va60 16
+* C3 + C2 + C1 (everything!!)
+		elif game "WorldSwitcher_C3" = 1 and game "WorldSwitcher_C1" = 1 and game "WorldSwitcher_C2" = 1
+			setv va60 20
+		endi
+
+
+		part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+		gall "blnk" 0
+
+*fix off by 1 showing us dimmed icons instead of light.
+		addv va60 1
+
+
+		gall "WorldSwitcher_Icons_Default" va60
+
+	endi
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+scrp 1 2 1000 699
+
+
+
+
+*select world name textbox
+	part 13
+
+	doif ptxt <> "" and ptxt <> wrld ov04
+
+
+*NEW: if world name override is present, set our display name!
+		file oope 2 "name_override" 0
+
+		outs ptxt
+
+		file oclo
+
+	else
+
+*idk why the delete function doesn't seem to work.
+*		file jdel 2 "name_override"
+
+*replacing the file with "", if it exists, is just as good.
+
+*NEW: if world name override is present, set our display name!
+		file oope 2 "name_override" 0
+
+		file iope 2 "name_override"
+
+		doif inok = 1
+			outs ""
+		endi
+		file iclo
+
+		file oclo
+
+	endi
+
+
+
+*write selected icon too! todo: make sure this stays up to date with the one in create new world. you'll prob need to make a shared function.
+
+	file oope 2 "icon" 0
+
+	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+
+	outs "iconType:normal"
+	outs "\n"
+	outs "spriteName:"
+	outs gall
+	outs "\n"
+	outs "spriteFrame:"
+	setv va99 abba
+	subv va99 1
+	outs vtos va99
+
+
+
+	file oclo
+
+
+
+
+
+*	stop
+
+	call 700 0 0
+
+endm
+
+
+
+
+
+
+rscr
+*todo: this is just the c12ds script
+enum 1 2 1000
+	kill targ
+next
+enum 1 2 1001
+	kill targ
+next
+scrx 1 2 1000 2000
+scrx 1 2 1000 800
+scrx 1 1 32302 301
+scrx 1 2 1000 450
+enum 1 1 32302
+	kill targ
+next
+ject "DS world switcher.cos" 7

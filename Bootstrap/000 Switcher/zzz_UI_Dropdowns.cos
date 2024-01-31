@@ -1,0 +1,766 @@
+
+
+
+
+
+
+
+*tweakable dropdown settings
+
+setv game "WorldSwitcher_dropdown_Width" 128
+setv game "WorldSwitcher_dropdown_Height" 21
+
+setv game "WorldSwitcher_dropdown_MaxNumItemsToDisplay" 14
+
+setv game "WorldSwitcher_dropdown_TextboxYOffset" -1
+
+
+*todo: a more logical solution would be getting a low plane number and adding it to the PLNE value from compound object
+setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 5000
+
+
+
+
+
+
+
+*important variables that all dropdown managers need to know!
+*
+*****************************************************************************
+**Example dropdown
+*****************************************************************************
+*
+**remember X and Y of dropdown to create list in the correct place when clicked!
+*	setv va00 167
+*	setv va01 150
+*
+**remember part numbers so dropdown script can refer to them
+*	setv va02 6001
+*	setv va03 6002
+*
+**Y of fixed text component of dropdown
+*	setv va04 va01
+*	addv va04 game "Holodeck_dropdown_TextboxYOffset"
+*
+**name of sprite file to use when creating the dropdown
+*	sets va05 "WorldSwitcher_IconEditor_Dropdown_Medium"
+*
+*
+**button component of dropdown
+*	pat: butt va02 va05 0 0 va00 va01 1 [] 6001 1
+**fixed text component of dropdown
+*	pat: fixd va03 va05 8 va00 va04 1 "whiteontransparentchars"
+*
+*
+*
+**dropdown manager for Create Action To Perform dropdown.
+*	new: comp 1 1 64741 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+*
+**set a named variable on the compound object to point to this dropdown in particular
+*	seta mame "ExampleDropdown" targ
+*
+**OV00 - compound object this dropdown is part of
+*	seta ov00 ownr
+*
+**compound object this slider is part of
+*	seta name "ParentObject" ownr
+*
+**X/Y coords of top left corner of dropdown
+*	setv name "X" va00
+*	setv name "Y" va01
+*
+**specific X/Y coords of top left corner of listbox component of dropdown can be specified here (still relative to the top left corner of the dropdown button)
+**if not set, it will appear just beneath your dropdown button (the height of one segment)
+*	setv name "X_Offset" 0
+*	setv name "Y_Offset" 0
+*
+*
+**part numbers for each component of the dropdown. if a textbox part isn't specified, the current dropdown text value won't be automatically put in the box.
+*	setv name "Button_PartNumber" va02
+*	setv name "Textbox_PartNumber" va03
+*
+**name of sprite file to use when creating the dropdown (should usually match the file used when creating the parts)
+*	sets name "Gallery" va05
+*
+**dropdown width should match the width of your sprites.
+*
+**here are the widths to use for the default sprites
+**WorldSwitcher_IconEditor_Dropdown_Long - 192
+**WorldSwitcher_IconEditor_Dropdown_Medium - 128
+**WorldSwitcher_IconEditor_Dropdown_Short - 102
+*	setv name "Width" 128
+*
+**default height (21) can also be overridden here. height is distance between entries in the listbox.
+**    setv name "Height" 0
+*
+**maximum number of entries to display on screen at once can be overriden here. useful for menus near the bottom of the screen, for example.
+**	setv name "MaxNumItemsToDisplay" 0
+*
+*
+**populate the dropdown with desired items
+*
+*	mesg wrt+ targ 1001 game "UI_ROTATE90" 0 0
+*	mesg wrt+ targ 1001 game "UI_ROTATEMINUS90" 0 0
+*	mesg wrt+ targ 1001 game "UI_ROTATE180" 0 0
+**
+**	mesg wrt+ targ 1001 game "UI_FLIPHORIZONTAL" 0 0
+**	mesg wrt+ targ 1001 game "UI_FLIPVERTICAL" 0 0
+**
+**	mesg wrt+ targ 1001 game "UI_INVERT" 0 0
+**	mesg wrt+ targ 1001 game "UI_CLEAR" 0 0
+*
+*
+**target main Compound Object again
+*	targ ownr
+*
+*************************************************************************
+
+
+
+
+
+
+
+
+
+*dropdown manager creation script
+scrp 1 1 64741 10
+
+	inst
+
+*state of dropdown - 0 (closed) or 1 (open)
+	setv mame "State" 0
+
+*index number of selected menu item
+	setv mame "Index" 0
+
+*previous index number of selected menu item. set at the same time as Index. used as a fallback if HoverPart was 0.
+	setv mame "PreviousIndex" 1
+
+*string value of selected menu item
+	sets mame "Value" ""
+
+*how many items this dropdown has loaded in total. don't edit this! add items using script 1001.
+	setv mame "ItemCount" 0
+
+*this is a tricky way of making it so there is some way of distinguishing between an X/Y override of 0,0 and null,null.
+*any non-number value will make your listbox appear just beneath your dropdown button (the height of one segment)
+	sets mame "X_Offset" ""
+	sets mame "Y_Offset" ""
+
+plne 5000
+
+endm
+
+
+
+*Create Dropdown Script!
+
+
+
+scrp 1 1 64741 1000
+
+	inst
+
+
+
+
+
+*PAUSE the game when a dropdown is open, so that the user can't accidentally click the form underneath etc
+
+*todo: pause could be optional and could be a separate function, but it isn't. same with unpause.
+
+
+	wpau 1
+	enum 1 0 0
+		doif gnus eq 2 and spcs eq 12
+			paus 0
+		else
+			paus 1
+		endi
+	next
+	enum 2 0 0
+		doif gnus eq 1 and spcs eq 1
+			paus 0
+		else
+			paus 1
+		endi
+	next
+	enum 3 0 0
+*			doif gnus ne 3 and spcs ne 103
+		paus 1
+*			endi
+	next
+	enum 4 0 0
+		paus 1
+	next
+
+*yep, we even pause the pause gui
+*enum 1 2 6
+*	paus 0
+*next
+
+*but we DON'T pause the dropdown menu itself
+	targ ownr
+	paus 0
+
+
+
+
+
+
+
+
+*don't pop open a dropdown if we already have one, or if there are no items in the dropdown.
+	doif mame "State" = 0 and name "ItemCount" > 0
+
+		setv mame "State" 1
+
+
+
+
+*make sure when we open the pop-up, we start scrolling from the position of whatever was last selected.
+		setv mame "ScrollingPosition" mame "Index"
+
+
+
+*make sure it doesn't go out of bounds.
+*subtract the number of Items you show on screen at once to get the safest high number to set the offset to.
+
+		setv va00 mame "ItemCount"
+		subv va00 name "NumItemsToDisplay"
+
+		doif mame "ScrollingPosition" > va00
+			setv mame "ScrollingPosition" va00
+		endi
+
+
+
+*if we don't have Height/Width/Gallery set up, use some defaults
+
+		doif mame "Width" = 0
+			setv mame "Width" game "Worldswitcher_dropdown_Width"
+		endi
+
+		doif mame "Height" = 0
+			setv mame "Height" game "WorldSwitcher_dropdown_Height"
+		endi
+
+		doif type mame "Gallery" <> 2
+			doif snax mame "Gallery" = 1
+				setv mame "Gallery" game "Worldswitcher_dropdown_Gallery"
+			endi
+		endi
+
+
+*animate button on parent object
+		targ mame "ParentObject"
+
+		setv va69 plne
+		
+		part mame "Button_PartNumber"
+
+		pose 1
+
+
+		setv va50 posl
+		setv va51 post
+
+
+		targ ownr
+
+*get X and Y of dropdown button that was clicked
+		addv va50 mame "X"
+		addv va51 mame "Y"
+
+
+*if specified (by using any numbers instead of the default "" null string, apply custom X and Y offsets to decide where we're creating our dropdown listbox.
+*if not, just find the position by adding the height of one segment to our starting X position.
+		doif type mame "X_Offset" <= 1
+			addv va50 mame "X_Offset"
+		endi
+
+		doif type mame "Y_Offset" <= 1
+			addv va51 mame "Y_Offset"
+		else
+			addv va51 mame "Height"
+		endi
+
+
+
+*Listen for these events:
+* 8 Raw Mouse Down + 16 Raw Mouse Up + 4 Raw Mouse Move + 32 Raw Mouse Wheel
+		imsk 60
+
+*move to coords of part that called us.
+		mvto va50 va51
+
+*move relative to the parent object
+		frel mame "ParentObject"
+
+*todo: i have no idea why this doesn't work. changing it in the creation script (10) works fine so??
+**set plane relative to parent object
+*		addv va69 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+*		
+*		plne va69
+		
+		
+*variable to keep track of what iteration of the loop we're on, and what part number to create
+		setv va99 1
+
+*for (how many dropdown Items to display at a time)
+		reps name "NumItemsToDisplay"
+
+
+*VA33 is the background sprite for the part of the menu we are drawing.
+*The first one has a shadow on the top, the last one has a highlight on the bottom.
+			doif va99 = 1
+
+				setv VA33 2
+
+			elif va99 = name "NumItemsToDisplay"
+
+				setv VA33 6
+
+			else
+
+				setv VA33 4
+
+			endi
+
+
+
+*subtract 1 from loop iteration so we load our items from base 0 instead of base 1
+			setv va70 va99
+			subv va70 1
+
+
+*load string from variable named after loop iteration (eg: 4)
+			sets va01 mame va70
+
+			setv name "Index" va70
+			sets name "Value" va01
+
+
+
+
+*multiply the loop iteration by the height of the back-piece (-1) to get the position for the next one
+			setv va80 va99
+			subv va80 1
+
+			mulv va80 name "Height"
+
+
+
+*VA33 is the background sprite for the part of the menu we are drawing.
+*The first one has a shadow on the top, the last one has a highlight on the bottom.
+
+*create the next item in the list
+			pat: fixd va99 mame "Gallery" VA33 0 va80 1 "WhiteOnTransparentChars"
+
+
+*add 1 to iteration variable
+			addv va99 1
+
+		repe
+
+*force call our scroll script with no up/down movement to update the text on all parts
+		call 78 0 0
+
+	endi
+
+endm
+
+
+
+
+
+
+******CODE DOWN HERE IS FOR DROPDOWNS*****
+
+
+
+
+
+
+*RAW MOUSE DOWN SCRIPT
+
+scrp 1 1 64741 76
+
+plne 6000
+
+	inst
+
+	lock
+
+*1 - left mouse button
+
+	doif _p1_ = 1
+
+
+*target the part on the main settings panel we're attached to and set it to the NORMAL (not depressed) state.
+		targ mame "ParentObject"
+		part mame "Button_PartNumber"
+		pose 0
+
+*force run mouse move script to make sure our last hovered "Index" is up to date
+		call 75 0 0
+
+
+		doif mame "HoverPart" > 0
+
+*add part number (1-14) to index offset (0-241) to get index of list entry we just clicked (1-255)
+			setv va77 mame "ScrollingPosition"
+			addv va77 mame "HoverPart"
+
+*back to base 0
+			subv va77 1
+
+*set to list entry number.
+			setv mame "Index" va77
+
+*set previous index as a fallback if there was no valid Hovered Part.
+			setv mame "PreviousIndex" va77
+
+
+*if non-zero, run the script with this number on the main object
+			doif mame "ValueUpdateScript" <> 0
+				mesg writ mame "ParentObject" mame "ValueUpdateScript"
+			endi
+
+
+		else
+
+*set at the same time as Index. used as a fallback if there was no valid Hovered Part.
+			setv mame "Index" mame "PreviousIndex"
+
+		endi
+
+
+
+
+*if the textbox part exists, target it and set the new text
+		doif mame "Textbox_PartNumber" <> 0 and part mame "Textbox_PartNumber" = 1
+
+			part mame "Textbox_PartNumber"
+
+
+*get string stored at our current index
+			sets va88 mame mame "Index"
+			ptxt va88
+
+		endi
+
+		targ ownr
+
+
+
+* stop listening for mouse stuff!
+		imsk 0
+
+*RESET TO CLOSED STATE
+		call 1002 0 0
+
+
+
+
+*UNPAUSE/RESUME the game! todo: should also be optional.
+
+		inst
+		wpau 0
+		enum 1 0 0
+			paus 0
+		next
+		enum 2 0 0
+			paus 0
+		next
+		enum 3 0 0
+			paus 0
+		next
+		enum 4 0 0
+			paus 0
+		next
+
+
+
+
+
+*this stops the button to open the popup immediately detecting it has been clicked when clicking the top of the bar
+		wait 2
+
+
+
+	endi
+
+
+endm
+
+
+
+
+
+*RAW MOUSE WHEEL SCRIPT
+
+scrp 1 1 64741 78
+
+*The delta value is sent in _P1_ - 120 units per 'click'.
+
+	inst
+
+*SCROLLED DOWN
+	doif _p1_ < -110
+
+*make sure it doesn't go out of bounds.
+*subtract the number of Items you show on screen at once to get the safest high number to set the offset to.
+
+		setv va00 mame "ItemCount"
+		subv va00 name "NumItemsToDisplay"
+
+		doif mame "ScrollingPosition" < va00
+			addv mame "ScrollingPosition" 1
+		endi
+
+*SCROLLED UP
+	elif _p1_ > 110
+
+*make sure it doesn't go out of bounds.
+		doif mame "ScrollingPosition" > 0
+			subv mame "ScrollingPosition" 1
+		endi
+
+
+	endi
+
+
+
+
+*variable to keep track of what iteration of the loop we're on.
+	setv va99 1
+
+
+*for (how many dropdown Items to display at a time)
+	reps name "NumItemsToDisplay"
+
+*add the scrolling position to the loop iteration so we load the correct entry.
+		setv va70 va99
+		addv va70 mame "ScrollingPosition"
+
+*subtract 1 to fix another base 0/1 issue
+		subv va70 1
+
+
+		sets va01 name va70
+
+		targ ownr
+
+		sets ov42 va01
+
+
+
+
+
+		part va99
+
+*set the catalogue entry as the text for the new part.
+		ptxt va01
+
+		addv va99 1
+
+	repe
+
+
+
+
+endm
+
+
+
+
+
+*mouse move script
+*(TODO: close these when you leave the room!)
+
+scrp 1 1 64741 75
+
+	inst
+
+*get X and Y of Hand and put them in VA44 and VA45
+	setv va44 mopx
+	setv va45 mopy
+
+
+*****GET COORDS OF ALL 4 CORNERS OF DROPDOWN MENU
+
+*get top left corner of dropdown menu
+	setv va20 posl
+	setv va21 post
+
+*right coord
+	setv va22 va20
+	addv va22 mame "Width"
+
+*so 15 * 21 = 630 pixels tall for example
+*bottom coord
+	setv va23 mame "NumItemsToDisplay"
+	mulv va23 mame "Height"
+	addv va23 va21
+
+*hovered part number will fall back to 0 if we're not hovering over anything.
+	setv name "HoverPart" 0
+
+*if the mouse cursor is inside the dropdown menu bounds
+	doif VA44 > va20 and VA44 < va22 and VA45 > va21 and VA45 < va23
+
+
+*Get y-coordinate relative to the top of the dropdown and add half of dropdown height from it.
+		setv va46 mame "Height"
+
+		setv va47 va46
+		divv va47 2
+
+		addv va21 va47
+
+*subtract this value from our mouse position to get a slightly modified relative mouse Y coordinate.
+*the extra nudge down by half a dropdown helps it capture the entire cell instead of just the first half of each cell.
+		subv va45 va21
+
+*divide by dropdown height to get the index number
+		divv va45 mame "Height"
+
+		setv va45 ftoi va45
+
+*add 1 to put us in correct part range
+		addv va45 1
+
+*make sure we're in bounds (not necessarily needed)
+		doif va45 > 0 and va45 <= name "NumItemsToDisplay"
+
+			part va45
+
+			pose 1
+
+			setv name "HoverPart" va45
+
+*handle unhighlighting of previous part
+			doif name "PreviousHoverPart" <> 0 and name "PreviousHoverPart" <> va45
+				part name "PreviousHoverPart"
+				pose 0
+			endi
+
+			setv name "PreviousHoverPart" va45
+
+		endi
+
+	else
+
+*handle unhighlighting of previous part
+		doif name "PreviousHoverPart" <> 0 and name "PreviousHoverPart" <> va45
+			part name "PreviousHoverPart"
+			pose 0
+		endi
+	endi
+
+endm
+
+
+
+
+*add named entry to dropdown
+
+scrp 1 1 64741 1001
+
+	inst
+
+*force close this if it's open
+	call 1002 0 0
+
+*add an entry named after our current item count (first one is named 0 for example) and then update our item count
+	sets name mame "ItemCount" _p1_
+
+	addv mame "ItemCount" 1
+
+
+
+
+*first entry gets automatically put into the textbox.
+	doif mame "ItemCount" = 1
+
+		targ mame "ParentObject"
+
+*set default textbox part text if we have a textbox
+		doif mame "Textbox_PartNumber" <> 0 and part mame "Textbox_PartNumber" = 1
+			part mame "Textbox_PartNumber"
+
+
+*and set it as our output value no matter what
+			ptxt mame 0
+		endi
+
+		sets mame "Value" mame 0
+
+*todo: disabled for now, possibly forever
+**if non-zero, run the script with this number on the main object
+*		doif mame "ValueUpdateScript" <> 0
+*			mesg writ targ mame "ValueUpdateScript"
+*		endi
+
+	endi
+
+
+
+
+*if the amount of Items loaded is less than the maximum number to display, set the NumItemsToDisplay to match the amount loaded.
+
+	doif name "MaxNumItemsToDisplay" <= 0
+		setv mame "MaxNumItemsToDisplay" game "WorldSwitcher_dropdown_MaxNumItemsToDisplay"
+	endi
+
+	setv name "NumItemsToDisplay" mame "MaxNumItemsToDisplay"
+
+	doif mame "ItemCount" < name "NumItemsToDisplay"
+		setv name "NumItemsToDisplay" mame "ItemCount"
+	endi
+
+
+
+
+endm
+
+
+
+*kill all existing parts and move out of bounds
+
+scrp 1 1 64741 1002
+
+	inst
+
+*do a loop to kill all parts
+	setv va00 -1
+	loop
+
+		setv va00 pnxt va00
+
+*don't delete part -1 or 0
+		doif va00 <> -1 and va00 <> 0
+			pat: kill va00
+		endi
+
+*setv va00 va01
+
+	untl va00 = -1
+
+*out of bounds
+	frel null
+	mvto -1000 -1000
+
+
+*reset to closed state so we can reopen it
+	setv name "State" 0
+
+*reset button pose
+	targ mame "ParentObject"
+	part mame "Button_PartNumber"
+	pose 0
+
+
+endm
