@@ -639,12 +639,26 @@ endm
 
 scrp 1 1 14546 100
 
-	lock
 
 	inst
 
-*unpause everything!
-	call 9001 0 0
+	lock
+
+
+
+*unpause the pixel grid and main form!!
+	targ game "IconEditor_PixelGrid"
+
+	paus 0
+
+	targ game "IconEditor_Main"
+
+	paus 0
+
+	targ ownr
+
+
+
 
 	part 100
 	pose 1
@@ -738,9 +752,9 @@ scrp 1 1 14546 100
 			targ game "IconEditor_PixelGrid"
 			part va02
 
-			dbg: outs "im TIRED"
-			dbg: outv pose
-			dbg: outv mame "NewPaletteIndex"
+*			dbg: outs "im TIRED"
+*			dbg: outv pose
+*			dbg: outv mame "NewPaletteIndex"
 
 			doif pose = mame "CurrentPaletteIndex"
 				pose mame "NewPaletteIndex"
@@ -779,12 +793,23 @@ endm
 
 scrp 1 1 14546 101
 
-	lock
 	inst
+	lock
 
 
-*unpause everything!
-	call 9001 0 0
+
+*unpause the pixel grid and main form!!
+	targ game "IconEditor_PixelGrid"
+
+	paus 0
+
+	targ game "IconEditor_Main"
+
+	paus 0
+
+	targ ownr
+
+
 
 	part 101
 	pose 1
@@ -848,86 +873,6 @@ endm
 
 
 
-*9000 - PAUSE
-
-scrp 1 1 14546 9000
-
-
-*PAUSE the game when the palette window is open so we don't accidentally click any other buttons
-
-
-	inst
-	wpau 1
-	enum 1 0 0
-		doif gnus eq 2 and spcs eq 12
-			paus 0
-		else
-			paus 1
-		endi
-	next
-	enum 2 0 0
-		doif gnus eq 1 and spcs eq 1
-			paus 0
-		else
-			paus 1
-		endi
-	next
-	enum 3 0 0
-*			doif gnus ne 3 and spcs ne 103
-		paus 1
-*			endi
-	next
-	enum 4 0 0
-		paus 1
-	next
-
-*but we DON'T pause the palette window itself
-	enum 1 1 14546
-		paus 0
-	next
-
-
-*or the slider managers lol
-	enum 1 1 64769
-		paus 0
-	next
-
-
-endm
-
-
-
-
-*9001 - UNPAUSE
-
-scrp 1 1 14546 9001
-
-*UNPAUSE/RESUME the game when done editing your colour.
-
-	inst
-	wpau 0
-	enum 1 0 0
-		paus 0
-	next
-	enum 2 0 0
-		paus 0
-	next
-	enum 3 0 0
-		paus 0
-	next
-	enum 4 0 0
-		paus 0
-	next
-
-
-
-
-
-endm
-
-
-
-
 
 
 
@@ -940,8 +885,22 @@ scrp 1 1 14546 1000
 
 	inst
 
-*PAUSE everything except the palette panel (no accidental misclicks)
-	call 9000 0 0
+
+
+
+*pause the pixel grid and main form!!
+	targ game "IconEditor_PixelGrid"
+
+	paus 1
+
+	targ game "IconEditor_Main"
+
+	paus 1
+
+	targ ownr
+
+
+
 
 *_P1_ is Index (for pose), _P2_ is RGB code (for editing)
 	setv name "NewPaletteIndex" _p1_

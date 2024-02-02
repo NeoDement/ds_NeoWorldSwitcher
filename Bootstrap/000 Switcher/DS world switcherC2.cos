@@ -3530,14 +3530,15 @@ scrp 1 2 1000 503
 
 
 	sets game "engine_other_world" va00
-	file oope 2 "addons" 0
 
 	sets va30 game "WorldSwitcher_CurrentWorld_ChunkNames"
 	sets va31 ","
 	gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
 
+
 *note that the addons file doesn't get created at all if there are no addons ticked, as it never outputs anything to the stream.
 	doif va32 > 0
+		file oope 2 "addons" 0
 		reps va32
 			gsub set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
 			outs va33

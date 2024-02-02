@@ -55,8 +55,12 @@ sets game "IconEditor_BrushSize" "X,"
 
 
 *LOCATION OF BUFFER FRAME (used for some transform operations and for taking photos for the sprites!)
-setv game "IconEditor_Buffer_X" 1000
+setv game "IconEditor_Buffer_X" 1010
 setv game "IconEditor_Buffer_Y" 1000
+
+*LOCATION OF CLIPBOARD FRAME (used for copy/paste and way out of bounds)
+setv game "IconEditor_Clipboard_X" -5000
+setv game "IconEditor_Clipboard_Y" -5000
 
 *these are the coordinates and dimensions used when taking a photo of the buffer, to be used as an icon
 *coordinates point to the CENTER of the snapshot, not the top left!
@@ -109,6 +113,12 @@ setv game "IconEditor_Tickrate_Fast" 10
 
 scrp 1 1 64742 76
 
+*don't draw if a dropdown is open.
+	doif game "IconEditor_DropdownOpen" = 1
+		stop
+	endi
+
+
 *1 left mouse/2 right mouse
 	setv ov00 _p1_
 
@@ -158,7 +168,8 @@ endm
 scrp 1 1 64742 75
 
 
-	doif game "IconEditor_CursorMode" <> 0
+*don't make the cursor look funky if a dropdown is open.
+	doif game "IconEditor_CursorMode" <> 0 and game "IconEditor_DropdownOpen" = 0
 
 *get pointer coords
 		setv va00 mopx
@@ -1663,7 +1674,7 @@ endm
 
 
 
-
+*todo: reconsider how the pause/unpause functions are implemented. copy from ui_dropdowns.
 
 ******************************************************
 ******************************************************

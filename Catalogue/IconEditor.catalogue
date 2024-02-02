@@ -6,21 +6,20 @@ TAG "WorldSwitcher_IconEditor_Text"
 # 0
 "Icon Editor"
 "Brush Size:"
+"Tip: Right-click with the fill tool to erase pixels"
 "Unlit:"
 "Lit:"
-"New"
 # 5
-"Delete"
-"Rename"
-"Copy"
 "Rotate 90"
 "Rotate -90"
-# 10
 "Rotate 180"
 "Flip Horizontal"
 "Flip Vertical"
-"Invert"
+# 10
+"Copy"
+"Paste"
 "Clear"
-# 15
 "Edit Colour"
-"Tip: Right-click with the fill tool to erase pixels"
+"Are you sure you want to\nclear the canvas?"
+# 15
+"You already have this\ncolour in your palette."

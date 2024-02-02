@@ -15,8 +15,16 @@ setv game "WorldSwitcher_dropdown_MaxNumItemsToDisplay" 14
 setv game "WorldSwitcher_dropdown_TextboxYOffset" -1
 
 
+
+*is a dropdown open? other ui elements such as the Pixel Grid can read this variable and use it to know to remain inactive.
+setv game "IconEditor_DropdownOpen" 0
+
+
+
 *todo: a more logical solution would be getting a low plane number and adding it to the PLNE value from compound object
 setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 5000
+
+
 
 
 
@@ -148,7 +156,7 @@ scrp 1 1 64741 10
 	sets mame "X_Offset" ""
 	sets mame "Y_Offset" ""
 
-plne 5000
+	plne 5000
 
 endm
 
@@ -166,47 +174,16 @@ scrp 1 1 64741 1000
 
 
 
-*PAUSE the game when a dropdown is open, so that the user can't accidentally click the form underneath etc
 
-*todo: pause could be optional and could be a separate function, but it isn't. same with unpause.
+*PAUSE PARENT OBJECT so that the user can't accidentally click the form underneath etc
+	targ mame "ParentObject"
 
+	paus 1
 
-	wpau 1
-	enum 1 0 0
-		doif gnus eq 2 and spcs eq 12
-			paus 0
-		else
-			paus 1
-		endi
-	next
-	enum 2 0 0
-		doif gnus eq 1 and spcs eq 1
-			paus 0
-		else
-			paus 1
-		endi
-	next
-	enum 3 0 0
-*			doif gnus ne 3 and spcs ne 103
-		paus 1
-*			endi
-	next
-	enum 4 0 0
-		paus 1
-	next
-
-*yep, we even pause the pause gui
-*enum 1 2 6
-*	paus 0
-*next
-
-*but we DON'T pause the dropdown menu itself
 	targ ownr
-	paus 0
 
-
-
-
+*a dropdown is open. other ui elements, such as the Pixel Grid, can read this variable and use it to know to remain inactive.
+	setv game "IconEditor_DropdownOpen" 1
 
 
 
@@ -257,7 +234,7 @@ scrp 1 1 64741 1000
 		targ mame "ParentObject"
 
 		setv va69 plne
-		
+
 		part mame "Button_PartNumber"
 
 		pose 1
@@ -303,8 +280,8 @@ scrp 1 1 64741 1000
 *		addv va69 game "WorldSwitcher_IconEditor_Dropdown_Plane"
 *		
 *		plne va69
-		
-		
+
+
 *variable to keep track of what iteration of the loop we're on, and what part number to create
 		setv va99 1
 
@@ -387,7 +364,7 @@ endm
 
 scrp 1 1 64741 76
 
-plne 6000
+	plne 6000
 
 	inst
 
@@ -463,25 +440,15 @@ plne 6000
 
 
 
+*UNPAUSE PARENT OBJECT
+		targ mame "ParentObject"
 
-*UNPAUSE/RESUME the game! todo: should also be optional.
+		paus 0
 
-		inst
-		wpau 0
-		enum 1 0 0
-			paus 0
-		next
-		enum 2 0 0
-			paus 0
-		next
-		enum 3 0 0
-			paus 0
-		next
-		enum 4 0 0
-			paus 0
-		next
+		targ ownr
 
-
+*dropdown no longer open!! other ui elements, such as the Pixel Grid, can read this variable.
+		setv game "IconEditor_DropdownOpen" 0
 
 
 
