@@ -349,7 +349,16 @@ scrp 1 1 34543 2000
 *pause our icon chooser panel until the icon editor unpauses it.
 	paus 1
 
-	new: comp 1 1 64736 "WorldSwitcher_IconEditor_Controls" 1 45 1500
+
+*position and activate the Icon Editor!
+mesg writ game "IconEditor_Main" 7500
+
+
+*old method was to create the icon editor. now we just have it loaded at all times.
+
+*this saves a noticable hitch when clicking the open button, and makes the palette and buffer available for taking snapshots of icons for the main world switcher.
+
+*	new: comp 1 1 64736 "WorldSwitcher_IconEditor_Controls" 1 45 1500
 
 
 endm
@@ -895,6 +904,8 @@ scrp 1 1 34543 75
 
 
 					setv game "WorldSwitcher_WorldCreation_AutoIcon" 0
+
+					setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
 
 				endi
 

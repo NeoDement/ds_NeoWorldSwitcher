@@ -50,6 +50,12 @@ setv game "WorldSwitcher_EngineMaxRooms" 2000
 sets game "WorldSwitcher_CurrentWorld_ChunkNames" ""
 
 
+*the icon preview part coords need to be GAME variables as they're accessed from several places.
+setv game "WorldSwitcher_WorldCreation_IconPreviewPart_X" 418
+setv game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 96
+
+
+
 
 ******* ALL NEW WORLD CREATION SCREEN RELATED STRINGS *******
 
@@ -964,7 +970,22 @@ scrp 1 2 1000 2000
 
 	retn
 
+
+
+
+
+
+
+
 	subr make_first_world
+
+
+
+
+
+
+
+
 
 
 
@@ -1002,10 +1023,10 @@ scrp 1 2 1000 2000
 
 
 ** Select Icon BUTTON part
-		pat: butt 7 "WorldSwitcher_WorldCreation" 2 1 418 96 0 [] 200 0
+		pat: butt 7 "WorldSwitcher_WorldCreation" 2 1 game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 0 [] 200 0
 
 ** Select Icon ICON PREVIEW DULL part
-		pat: dull 9 "blnk" 0 418 96 5
+		pat: dull 9 "blnk" 0 game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 5
 
 		setv game "WorldSwitcher_WorldCreation_IconPreviewPart" 9
 
@@ -1013,6 +1034,42 @@ scrp 1 2 1000 2000
 
 *all new worlds should do auto-icon!!
 		setv game "WorldSwitcher_WorldCreation_AutoIcon" 1
+
+*all new worlds should NOT be using a custom icon!
+		setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+*BEFORE WE CREATE THE NEW WORLD SCREEN, I WANT TO MAKE SURE THE BUFFER IS EMPTY!
+*by default we are NOT creating a world with a custom icon!
+
+
+*Clear buffer
+		seta mame "Transform_Target" game "IconEditor_Buffer"
+
+		gsub Clear
+
+** DISABLE CUSTOM ICON, ENABLE PRE-SET ICON **
+		call 5500 0 0
+
+*reset the EditCount to 0. we don't write the EditCount to the icon if it's 0.
+		setv game "WorldSwitcher_WorldCreation_EditCount" 0
+
+
+
+
+
+
 
 
 
@@ -1064,11 +1121,6 @@ scrp 1 2 1000 2000
 
 
 
-
-
-
-
-*TODO: find the code that deletes all part numbers under 100 and adjust it to delete ALL part numbers.
 
 
 
@@ -1269,36 +1321,65 @@ scrp 1 2 1000 2000
 
 
 ** Select Icon ICON PREVIEW DULL part
-			pat: dull 16 "blnk" 0 418 96 5
+			pat: dull 16 "blnk" 0 game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 5
 
 			setv game "WorldSwitcher_WorldCreation_IconPreviewPart" 16
 
 ** Select Icon BUTTON part
-			pat: butt 15 "WorldSwitcher_WorldCreation" 2 1 418 96 0 [] 200 0
+			pat: butt 15 "WorldSwitcher_WorldCreation" 2 1 game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 0 [] 200 0
 
 
+			part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+*			part 16
 
-*load world icon if it exists. if not...
+*load world icon if it exists. if not, we will default to "no icon defined" ELSE case.
 			gsub load_icon_from_world_journal
 
 
-
-			part 16
+*set editCount to whatever we just loaded. could be 0.
+			setv game "WorldSwitcher_WorldCreation_EditCount" va13
 
 			gall "blnk" 0
 
 
+*** NORMAL ICON ***
 
-			doif va11 <> ""
+			doif va11 = "normal"
 
+*(we add 1 to the stored frame number, because we store the Unlit frame not the Lit frame)
 				addv va12 1
 
 				gall va11 va12
 
 
-*no icon defined, calculate it from wtype
+				gsub CLEAR_CUSTOM_ICON_BUFFER
+
+
+*** CUSTOM ICON ***
+
+			elif va11 = "custom"
+
+
+TODO: HERE IT DOESNT RUN
+
+
+*todo: COPY TO CUSTOM ICON FUNCTION
+
+*HERE WE ARE
+
+*load "icon" from our currently accessed world's journal folder into the buffer
+				mesg wrt+ game "IconEditor_Main" 5002 "icon" 2 0
+
+*todo: idk
+				wait 6
+
+** DISABLE PRE-SET ICON, ENABLE CUSTOM ICON **
+				call 5600 0 0
+
+*...no icon defined, calculate it from wtype
 			else
 
+				gsub CLEAR_CUSTOM_ICON_BUFFER
 
 
 				file iope 2 "wtype"
@@ -2316,9 +2397,10 @@ scrp 1 2 1000 2000
 
 *looks for a file called "icon" in the "journal" folder, and reads the following values from it:
 
-*VA10 - type (file or custom)
-*VA11 - filename
-*VA12 - frame
+*VA10 - type (normal or custom)
+*VA11 - spriteName or palette
+*VA12 - spriteFrame or imageData
+*VA13 - editCount (only increased for custom icon worlds)
 
 	subr load_icon_from_world_journal
 
@@ -2326,6 +2408,7 @@ scrp 1 2 1000 2000
 		sets va10 ""
 		sets va11 ""
 		setv va12 -1
+		setv va13 0
 
 *open icon file
 		file iope 2 "icon"
@@ -2337,13 +2420,32 @@ scrp 1 2 1000 2000
 			gsub load_value_from_key_named_va35_into_string_va30
 			sets va10 va30
 
-			sets va35 "spritename:"
-			gsub load_value_from_key_named_va35_into_string_va30
-			sets va11 va30
+			doif va10 = "normal"
 
-			sets va35 "spriteframe:"
+				sets va35 "spritename:"
+				gsub load_value_from_key_named_va35_into_string_va30
+				sets va11 va30
+
+				sets va35 "spriteframe:"
+				gsub load_value_from_key_named_va35_into_string_va30
+				setv va12 stoi va30
+
+*we don't use this data because we reload the file in the Icon Editor script and load stuff there instead.
+*			elif va10 = "custom"
+*
+*				sets va35 "palette:"
+*				gsub load_value_from_key_named_va35_into_string_va30
+*				sets va11 va30
+*
+*				sets va35 "imagedata:"
+*				gsub load_value_from_key_named_va35_into_string_va30
+*				setv va12 stoi va30
+
+			endi
+
+			sets va35 "editcount:"
 			gsub load_value_from_key_named_va35_into_string_va30
-			setv va12 stoi va30
+			setv va13 stoi va30
 
 		endi
 
@@ -2423,6 +2525,55 @@ scrp 1 2 1000 2000
 
 
 
+*poorly named.
+
+	subr CLEAR_CUSTOM_ICON_BUFFER
+
+*Clear the Buffer and the TempIcon file completely
+		seta mame "Transform_Target" game "IconEditor_Buffer"
+
+		gsub Clear
+
+*save our (blank!) icon to the buffer in Startup journal folder as "tempicon". 
+		mesg wrt+ game "IconEditor_Main" 5001 "tempicon" 0 0
+
+** DISABLE CUSTOM ICON, ENABLE PRE-SET ICON **
+		call 5500 0 0
+
+	retn
+
+
+
+
+
+
+*** CLEAR ***
+
+*set all pixels on target to pose 0
+
+	subr Clear
+
+*get pixel grid size
+		setv va00 game "IconEditor_NumPixelsX"
+		mulv va00 game "IconEditor_NumPixelsY"
+
+		setv va01 1
+
+		reps va00
+
+
+*target Transformation Buffer and apply stored pose for each pixel
+			targ mame "Transform_Target"
+			part va01
+			pose 0
+
+			addv va01 1
+
+		repe
+
+		targ ownr
+
+	retn
 
 
 
@@ -3562,26 +3713,45 @@ scrp 1 2 1000 503
 
 
 
-*NEW: write selected icon too!
+
 
 	sets game "engine_other_world" va00
-	file oope 2 "icon" 0
 
-	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+*NEW: write selected icon too! todo: make sure this stays up to date with the one in password protect world. you'll prob need to make a shared function.
 
-	outs "iconType:normal"
-	outs "\n"
-	outs "spriteName:"
-	outs gall
-	outs "\n"
-	outs "spriteFrame:"
-	setv va99 abba
-	subv va99 1
-	outs vtos va99
+*write a normal, sprite name/frame based icon.
 
+	doif game "WorldSwitcher_WorldCreation_CustomIconEnabled" = 0
+		file oope 2 "icon" 0
 
+		part game "WorldSwitcher_WorldCreation_IconPreviewPart"
 
-	file oclo
+		outs "iconType:normal"
+		outs "\n"
+		outs "spriteName:"
+		outs gall
+		outs "\n"
+		outs "spriteFrame:"
+		setv va99 abba
+		subv va99 1
+		outs vtos va99
+
+*write an edit count, if we have one.
+		doif game "WorldSwitcher_WorldCreation_EditCount" > 0
+			outs "editCount:"
+			outs vtos game "WorldSwitcher_WorldCreation_EditCount"
+		endi
+
+		file oclo
+
+	else
+
+*It's a custom icon? Call the Icon Editor to handle the saving!
+
+*save our icon to the buffer into our currently accessed world's journal folder as "icon". 
+		mesg wrt+ game "IconEditor_Main" 5001 "icon" 2 0
+
+	endi
 
 
 
@@ -3847,6 +4017,9 @@ scrp 1 2 1000 4000
 
 	pat: kill 50
 
+*reset icon, so NOT a custom icon!
+	setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
+
 *AUTOMATICALLY SET OUR ICON BASED ON CHECKED ADDONS!
 	setv game "WorldSwitcher_WorldCreation_AutoIcon" 1
 	call 4500 0 0
@@ -3888,22 +4061,31 @@ scrp 1 2 1000 4001
 *todo: make sure this stays up to date with the one in the password creation screen script. maybe make a shared function.
 
 
-*load world icon if it exists. if not...
+*load world icon if it exists. if not, we will default to "no icon defined" ELSE case.
 	gsub load_icon_from_world_journal
-
 
 	gall "blnk" 0
 
 
+*** NORMAL ICON ***
 
-	doif va11 <> ""
+	doif va11 = "normal"
 
+*(we add 1 to the stored frame number, because we store the Unlit frame not the Lit frame)
 		addv va12 1
 
 		gall va11 va12
 
+*** CUSTOM ICON ***
 
-*no icon defined, calculate it from wtype
+	elif va11 = "custom"
+
+
+*todo: anything
+
+
+
+*...no icon defined, calculate it from wtype
 	else
 
 
@@ -3959,7 +4141,6 @@ scrp 1 2 1000 4001
 *VA12 - frame
 
 	subr load_icon_from_world_journal
-
 *default values
 		sets va10 ""
 		sets va11 ""
@@ -3975,13 +4156,27 @@ scrp 1 2 1000 4001
 			gsub load_value_from_key_named_va35_into_string_va30
 			sets va10 va30
 
-			sets va35 "spritename:"
-			gsub load_value_from_key_named_va35_into_string_va30
-			sets va11 va30
+			doif va10 = "normal"
 
-			sets va35 "spriteframe:"
-			gsub load_value_from_key_named_va35_into_string_va30
-			setv va12 stoi va30
+				sets va35 "spritename:"
+				gsub load_value_from_key_named_va35_into_string_va30
+				sets va11 va30
+
+				sets va35 "spriteframe:"
+				gsub load_value_from_key_named_va35_into_string_va30
+				setv va12 stoi va30
+
+			elif va10 = "custom"
+
+				sets va35 "palette:"
+				gsub load_value_from_key_named_va35_into_string_va30
+				sets va11 va30
+
+				sets va35 "imagedata:"
+				gsub load_value_from_key_named_va35_into_string_va30
+				setv va12 stoi va30
+
+			endi
 
 		endi
 
@@ -3990,6 +4185,7 @@ scrp 1 2 1000 4001
 
 
 	retn
+
 
 
 
@@ -4125,6 +4321,9 @@ scrp 1 2 1000 4500
 
 		gall "WorldSwitcher_Icons_Default" va60
 
+*auto icon, so we should NOT be using a custom icon!
+		setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
+
 	endi
 
 endm
@@ -4142,7 +4341,7 @@ endm
 
 
 
-
+*Confirm changes to PASSWORDED world!
 
 scrp 1 2 1000 699
 
@@ -4169,6 +4368,9 @@ scrp 1 2 1000 699
 
 *replacing the file with "", if it exists, is just as good.
 
+*todo: this creates a name override no matter what. could be fixed using FILE GLOB to check for an existing override instead.
+
+
 *NEW: if world name override is present, set our display name!
 		file oope 2 "name_override" 0
 
@@ -4185,25 +4387,53 @@ scrp 1 2 1000 699
 
 
 
-*write selected icon too! todo: make sure this stays up to date with the one in create new world. you'll prob need to make a shared function.
+*NEW: write selected icon too! todo: make sure this stays up to date with the one in create new world. you'll prob need to make a shared function.
+*the difference here being we add 1 to EditCount whenever we save changes to a custom icon.
 
-	file oope 2 "icon" 0
+*write a normal, sprite name/frame based icon.
 
-	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+	doif game "WorldSwitcher_WorldCreation_CustomIconEnabled" = 0
+		file oope 2 "icon" 0
 
-	outs "iconType:normal"
-	outs "\n"
-	outs "spriteName:"
-	outs gall
-	outs "\n"
-	outs "spriteFrame:"
-	setv va99 abba
-	subv va99 1
-	outs vtos va99
+		part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+
+		outs "iconType:normal"
+		outs "\n"
+		outs "spriteName:"
+		outs gall
+		outs "\n"
+		outs "spriteFrame:"
+		setv va99 abba
+		subv va99 1
+		outs vtos va99
+
+*write an edit count, if we have one.
+		doif game "WorldSwitcher_WorldCreation_EditCount" > 0
+			outs "editCount:"
+			outs vtos game "WorldSwitcher_WorldCreation_EditCount"
+		endi
+
+		file oclo
+
+	else
+
+*It's a custom icon? Call the Icon Editor to handle the saving!
+
+*add 1 to editCount, so we know to write a unique number after the icon filename. this will allow the icon changes to be seen as the engine can't load from the same named image file twice.
+		addv game "WorldSwitcher_WorldCreation_EditCount" 1
+
+*save our icon to the buffer into our currently accessed world's journal folder as "icon". 
+		mesg wrt+ game "IconEditor_Main" 5001 "icon" 2 0
+
+
+	endi
 
 
 
-	file oclo
+
+
+
+
 
 
 
@@ -4214,6 +4444,72 @@ scrp 1 2 1000 699
 	call 700 0 0
 
 endm
+
+
+
+
+
+
+
+
+
+
+
+
+** DISABLE CUSTOM ICON, ENABLE PRE-SET ICON **
+
+scrp 1 2 1000 5500
+
+	inst
+
+*show preview icon.
+
+*show doesn't work on a per-part basis so we're just gonna move the part back in bounds.
+*	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+*	show 1
+
+	pat: move game "WorldSwitcher_WorldCreation_IconPreviewPart" game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
+
+*position buffer offscreen.
+	targ game "IconEditor_Buffer"
+	frel null
+	mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+*set variable.
+	setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
+
+endm
+
+
+
+
+
+** DISABLE PRE-SET ICON, ENABLE CUSTOM ICON **
+
+scrp 1 2 1000 5600
+
+	inst
+
+*hide preview icon.
+
+*show doesn't work on a per-part basis so we're just gonna move the part back out of bounds.
+*	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+*	show 0
+
+	pat: move game "WorldSwitcher_WorldCreation_IconPreviewPart" game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+*position buffer onscreen, in place of the preview icon.
+	targ game "IconEditor_Buffer"
+	frel ownr
+	flto game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
+
+*set variable.
+	setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 1
+
+endm
+
+
+
 
 
 

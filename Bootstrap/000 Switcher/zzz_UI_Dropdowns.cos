@@ -48,7 +48,7 @@ setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 5000
 *
 **Y of fixed text component of dropdown
 *	setv va04 va01
-*	addv va04 game "Holodeck_dropdown_TextboxYOffset"
+*	addv va04 game "WorldSwitcher_dropdown_TextboxYOffset"
 *
 **name of sprite file to use when creating the dropdown
 *	sets va05 "WorldSwitcher_IconEditor_Dropdown_Medium"
