@@ -1059,6 +1059,8 @@ scrp 1 1 64736 10
 		elif va03 = 3
 			seta game "IconEditor_Buffer" targ
 			mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+			plne 1
 		endi
 
 	repe
@@ -1251,6 +1253,61 @@ endm
 
 
 
+
+
+
+
+
+
+*********************************************************
+* RE-INIT ALL PALETTE BUTTONS! LOAD IN DEFAULT COLOURS! *
+*********************************************************
+
+scrp 1 1 64736 1500
+
+
+
+
+*all palette options call script 1000, the part number is used to determine which button was pressed
+
+
+
+*first part id
+	setv va40 1001
+
+
+*loop iteration counter starts at 1
+	setv va00 1
+
+*X horizontal rows of buttons
+	reps game "IconEditor_Palette_Rows"
+
+*Y vertical columns of buttons
+		reps game "IconEditor_Palette_Columns"
+
+
+			part va40
+
+
+*initialize button
+			call 1000 va40 0
+
+*increase part id
+			addv va40 1
+
+*increase loop iteration
+			addv va00 1
+
+		repe
+
+	repe
+
+
+
+
+
+
+endm
 
 
 
@@ -2587,6 +2644,8 @@ scrp 1 1 64736 6000
 		seta mame "Transform_Source" game "IconEditor_Buffer"
 		seta mame "Transform_Target" game "IconEditor_PixelGrid"
 
+		gsub Copy
+
 	endi
 
 
@@ -3383,6 +3442,9 @@ scrp 1 1 64736 5002
 *		endi
 
 
+		targ game "IconEditor_Buffer"
+		show 0
+
 
 		sets va31 ","
 		gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
@@ -3411,7 +3473,7 @@ scrp 1 1 64736 5002
 *			endi
 
 *sloppy protection for attempting to run more than 1,000,000 instructions in a single tick
-			doif va99 = 15
+			doif va99 = 19
 				setv va99 0
 				slow
 				inst
@@ -3473,16 +3535,20 @@ scrp 1 1 64736 5002
 		untl mame "max_count" eq mame "counting"
 
 
-*_p2_ = 1, unhide our loaded grids :)
-		doif _p2_ = 1
-			targ game "IconEditor_PixelGrid"
-			show 1
-			targ game "IconEditor_Preview"
-			show 1
-			targ game "IconEditor_Preview_Darkened"
-			show 1
-		endi
+**_p2_ = 1, unhide our loaded grids :)
+*		doif _p2_ = 1
+*			targ game "IconEditor_PixelGrid"
+*			show 1
+*			targ game "IconEditor_Preview"
+*			show 1
+*			targ game "IconEditor_Preview_Darkened"
+*			show 1
+*		endi
 
+		targ game "IconEditor_Buffer"
+		show 1
+
+		targ ownr
 
 	retn
 
@@ -3606,7 +3672,9 @@ endm
 
 scrp 1 1 64736 3000
 
+	inst
 	lock
+
 
 	part 5
 
@@ -3616,6 +3684,8 @@ scrp 1 1 64736 3000
 
 	inst
 
+
+
 *call close script on icon panel first
 	targ game "WorldSwitcher_IconPanel"
 
@@ -3624,6 +3694,8 @@ scrp 1 1 64736 3000
 	mesg writ targ 4000
 
 	targ ownr
+
+
 
 
 
@@ -3646,6 +3718,35 @@ scrp 1 1 64736 3000
 
 ** DISABLE PRE-SET ICON, ENABLE CUSTOM ICON **
 	call 5600 0 0
+
+
+
+
+
+
+
+*set gall and pose
+	targ game "WorldSwitcher_Main"
+
+*create a button to reset the icon. script 4000 in "DS world switcherC2.cos"
+*or script 4001 for the password page
+	doif part 50 = 0
+
+*if world switcher is on "create new world" screen.
+		doif ov00 = 1 or ov00 = 2
+			pat: butt 50 "WorldSwitcher_WorldCreation" 13 2 471 101 2 [] 4000 0
+*if world switcher is  (most likely) on "enter/change password" mode
+		else
+			pat: butt 50 "WorldSwitcher_WorldCreation" 13 2 471 101 2 [] 4001 0
+
+		endi
+
+
+		setv game "WorldSwitcher_WorldCreation_AutoIcon" 0
+
+	endi
+
+
 
 
 
@@ -3977,6 +4078,9 @@ scrp 1 1 64736 8000
 *disable listening for mouse move events etc
 	imsk 0
 
+
+*call mouse out of bounds on pixelgrid to fix any "mouse still on grid" problems (faster ticks, wrong cursor)
+	mesg wrt+ targ 75 -9000 -9000 0
 
 
 

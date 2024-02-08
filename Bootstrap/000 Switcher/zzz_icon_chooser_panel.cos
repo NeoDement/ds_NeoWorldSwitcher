@@ -346,13 +346,19 @@ scrp 1 1 34543 2000
 
 	inst
 
-*pause our icon chooser panel until the icon editor unpauses it.
-	paus 1
-
+*	lock
+*
+**save our icon from the buffer into our local (Startup) journal folder as "tempicon".
+*	mesg wrt+ game "IconEditor_Main" 5001 "tempicon" 0 0
+*
+*	wait 1
 
 *position and activate the Icon Editor!
-mesg writ game "IconEditor_Main" 7500
+	mesg writ game "IconEditor_Main" 7500
 
+
+*pause our icon chooser panel until the icon editor unpauses it.
+	paus 1
 
 *old method was to create the icon editor. now we just have it loaded at all times.
 
@@ -799,6 +805,8 @@ scrp 1 1 34543 75
 
 
 
+*if ANY icons were highlighted this loop, don't delete the highlight part.
+	setv va80 0
 
 
 	reps game "WorldSwitcher_IconChooser_IconsPerPage"
@@ -831,6 +839,8 @@ scrp 1 1 34543 75
 		doif mopx > va31 and mopx < va33 and mopy > va32 and mopy < va34
 			pat: move 9 va21 va22
 
+*if ANY icons were highlighted this loop, don't delete the highlight part.
+			addv va80 1
 
 
 *if _p2_ is 1, that means we were called by the mouseclick event and should fire the appropriate icon back to the main form
@@ -905,7 +915,34 @@ scrp 1 1 34543 75
 
 					setv game "WorldSwitcher_WorldCreation_AutoIcon" 0
 
+
+
+
+** DISABLE CUSTOM ICON, ENABLE PRE-SET ICON **
+
+*on the main worldswitcher form...
+					targ game "WorldSwitcher_Main"
+
+*show preview icon.
+
+*show doesn't work on a per-part basis so we're just gonna move the part back in bounds.
+*	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+*	show 1
+
+					pat: move game "WorldSwitcher_WorldCreation_IconPreviewPart" game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
+
+*position buffer offscreen.
+					targ game "IconEditor_Buffer"
+					frel null
+					mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+*set variable.
 					setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
+
+
+
+
+
 
 				endi
 
@@ -920,11 +957,9 @@ scrp 1 1 34543 75
 			endi
 
 
-
-
-
-
 		endi
+
+
 
 
 *every 7 icons, time for a new row
@@ -946,6 +981,10 @@ scrp 1 1 34543 75
 
 	repe
 
+*if ANY icons were highlighted this loop, don't delete the highlight part.
+	doif va80 = 0
+		pat: kill 9
+	endi
 
 endm
 
