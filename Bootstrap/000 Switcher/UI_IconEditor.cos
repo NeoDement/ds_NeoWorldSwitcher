@@ -130,8 +130,6 @@ sets game "Default_Palette_16" "304"
 seta game "IconEditor_Clipboard" null
 
 
-
-
 *everything happens in the creation script
 new: comp 1 1 64736 "WorldSwitcher_IconEditor_Controls" 1 45 2000
 
@@ -863,6 +861,10 @@ scrp 1 1 64736 10
 
 
 
+
+
+*this room is where the buffer creates sprites!
+	setv game "mapeditortmp" addm 1000 1000 256 256 "icon_rendering_room"
 
 
 
@@ -4037,3 +4039,12 @@ scrp 1 1 64736 8000
 
 
 endm
+
+
+
+
+rscr
+
+*delete the icon rendering room
+setv va00 gmap 1024 1024
+delm va00
