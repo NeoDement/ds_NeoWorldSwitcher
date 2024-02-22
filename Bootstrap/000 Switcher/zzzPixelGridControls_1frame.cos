@@ -3636,17 +3636,18 @@ scrp 1 1 64736 5003
 *remember the old value in va60.
 	sets va00 game "engine_other_world"
 	sets game "engine_other_world" _p1_
-*open the file
-	call 5002 _p2_ 2
+*open the specified worlds icon
+	call 5002 "icon" 2
 
 *unset!!
 	sets game "engine_other_world" va00
 
 
-*"worldname"
+*"worldnameN"
 	sets va01 _p1_
-	sets va02 _p1_
+	adds va01 _p2_
 
+	sets va02 va01
 
 *_icon_lit
 	adds va01 "_icon_lit"
@@ -3691,23 +3692,27 @@ endm
 
 
 
+
+
+
+
 *CONFIRM (TICK) BUTTON - Save this icon and set it as this worlds icon
 
 scrp 1 1 64736 3000
 
-	inst
 	lock
 
+*if we weren't called from a button, we quit instantly
+	doif _p1_ <> 0
+		part _p1_
 
-	part 5
+		pose 1
+		wait 3
+		pose 0
+	endi
 
-	pose 1
-	wait 3
-	pose 0
 
 	inst
-
-
 
 *call close script on icon panel first
 	targ game "WorldSwitcher_IconPanel"
@@ -3828,11 +3833,15 @@ scrp 1 1 64736 4000
 
 	lock
 
-	part 6
+*if we weren't called from a button, we quit instantly
+	doif _p1_ <> 0
+		part _p1_
 
-	pose 1
-	wait 3
-	pose 0
+		pose 1
+		wait 3
+		pose 0
+	endi
+
 
 	inst
 
@@ -3870,6 +3879,19 @@ scrp 1 1 64736 4000
 	call 8000 0 0
 
 endm
+
+
+
+
+
+*translated keypress event!
+scrp 1 1 64736 79
+*user pressed esc, close changes w/o saving!
+	doif _p1_ = 27
+		call 4000 0 0
+	endi
+endm
+
 
 
 
@@ -3918,8 +3940,8 @@ scrp 1 1 64736 7500
 
 
 
-*listen for Mouse Wheel 32 (Brush Size Slider) + Mouse Move 4 (for the box that appears around the big Selected Colour when mouse is hovered)
-	imsk 36
+*listen for Mouse Wheel 32 (Brush Size Slider) + Mouse Move 4 (for the box that appears around the big Selected Colour when mouse is hovered) + Translated Keypress 64 (esc to quit) 
+	imsk 100
 
 	mvto 225 93
 

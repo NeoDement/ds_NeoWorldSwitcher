@@ -1,4 +1,4 @@
-
+*todo: need a function to CLEAR a dropdown!
 
 
 
@@ -185,7 +185,12 @@ scrp 1 1 64741 1000
 
 		paus 1
 
+*store IMSK and 0 it out. restore it later.
+		setv mame "Remembered_IMSK" imsk
+		imsk 0
+
 		targ ownr
+
 
 *a dropdown is open. other ui elements, such as the Pixel Grid, can read this variable and use it to know to remain inactive.
 		setv game "IconEditor_DropdownOpen" 1
@@ -268,8 +273,8 @@ scrp 1 1 64741 1000
 
 
 *Listen for these events:
-* 8 Raw Mouse Down + 16 Raw Mouse Up + 4 Raw Mouse Move + 32 Raw Mouse Wheel
-		imsk 60
+* 8 Raw Mouse Down + 16 Raw Mouse Up + 4 Raw Mouse Move + 32 Raw Mouse Wheel + Translated Keypress 64 (esc to quit) 
+		imsk 124
 
 *move to coords of part that called us.
 		mvto va50 va51
@@ -434,23 +439,10 @@ scrp 1 1 64741 76
 
 
 
-* stop listening for mouse stuff!
-		imsk 0
+
 
 *RESET TO CLOSED STATE
 		call 1002 0 0
-
-
-
-*UNPAUSE PARENT OBJECT
-		targ mame "ParentObject"
-
-		paus 0
-
-		targ ownr
-
-*dropdown no longer open!! other ui elements, such as the Pixel Grid, can read this variable.
-		setv game "IconEditor_DropdownOpen" 0
 
 
 
@@ -638,10 +630,13 @@ endm
 
 scrp 1 1 64741 1001
 
+
 	inst
 
 *force close this if it's open
-	call 1002 0 0
+	doif mame "State" <> 0
+		call 1002 0 0
+	endi
 
 *add an entry named after our current item count (first one is named 0 for example) and then update our item count
 	sets name mame "ItemCount" _p1_
@@ -667,11 +662,6 @@ scrp 1 1 64741 1001
 
 		sets mame "Value" mame 0
 
-*todo: disabled for now, possibly forever
-**if non-zero, run the script with this number on the main object
-*		doif mame "ValueUpdateScript" <> 0
-*			mesg writ targ mame "ValueUpdateScript"
-*		endi
 
 	endi
 
@@ -703,6 +693,8 @@ scrp 1 1 64741 1002
 
 	inst
 
+	lock
+
 *do a loop to kill all parts
 	setv va00 -1
 	loop
@@ -726,10 +718,43 @@ scrp 1 1 64741 1002
 *reset to closed state so we can reopen it
 	setv name "State" 0
 
+
+* stop listening for mouse stuff!
+	imsk 0
+
+
 *reset button pose
 	targ mame "ParentObject"
 	part mame "Button_PartNumber"
 	pose 0
 
 
+	targ ownr
+
+*dropdown no longer open!! other ui elements, such as the Pixel Grid, can read this variable.
+	setv game "IconEditor_DropdownOpen" 0
+
+
+
+*UNPAUSE PARENT OBJECT
+	targ mame "ParentObject"
+
+	paus 0
+
+	wait 1
+
+*restore IMSK value
+	imsk mame "Remembered_IMSK"
+
+endm
+
+
+
+
+*translated keypress event!
+scrp 1 1 64741 79
+*user pressed esc, close dropdown without selecting anything!
+	doif _p1_ = 27
+		call 1002 0 0
+	endi
 endm

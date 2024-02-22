@@ -257,23 +257,9 @@ scrp 1 1 34543 10
 
 
 
-*mvto 4270 10595
-*mvto 10 10
-
-
-*mvto 410 480
-
 
 *floatable
 	attr 32
-
-*todo: is this important?
-*(DISABLED: imsk is now only enabled when this is brought on screen (in DS world switcherC2.cos)
-**listen for mouse moves + mouse clicks
-*	imsk 12
-
-
-
 
 
 
@@ -300,35 +286,10 @@ scrp 1 1 34543 10
 
 	targ ownr
 
-**center it
-*
-*	setv va90 wndw
-*	divv va90 2
-*	setv va91 wndh
-*	divv va91 2
-*	setv va92 wdth
-*	divv va92 2
-*	setv va93 hght
-*	divv va93 2
-*
-*	subv va90 va92
-*	subv va91 va93
-*
-*	flto va90 va91
+	mvto 254 205
 
-	flto 254 205
-
-*listen for mouse moves + mouse clicks
-	imsk 12
-
-
-*todo: it would probably be smart to implement PAUSE/UNPAUSE like dropdowns have.
-*whatever solution you implement should be copied over to the Icon Editor
-*the colour editor has a nice solution...
-
-
-
-
+*listen for mouse moves + mouse clicks + Translated Keypress 64 (esc to quit) 
+	imsk 76
 
 
 endm
@@ -360,6 +321,9 @@ scrp 1 1 34543 2000
 *pause our icon chooser panel until the icon editor unpauses it.
 	paus 1
 
+
+*todo: no longer true, re-write this comment
+
 *old method was to create the icon editor. now we just have it loaded at all times.
 
 *this saves a noticable hitch when clicking the open button, and makes the palette and buffer available for taking snapshots of icons for the main world switcher.
@@ -389,7 +353,9 @@ endm
 scrp 1 1 34543 4000
 
 	inst
+	lock
 
+	wait 1
 
 	kill game "WorldSwitcher_ScreenFader"
 
@@ -411,6 +377,25 @@ endm
 
 
 
+
+
+
+*translated keypress event!
+scrp 1 1 34543 79
+*user pressed esc, close changes w/o saving!
+	doif _p1_ = 27
+		call 4000 0 0
+	endi
+endm
+
+
+
+
+
+
+
+
+
 ***************************************************************************************
 ****************************** SHARED DROPDOWN SCRIPT *********************************
 ***************************************************************************************
@@ -426,9 +411,6 @@ scrp 1 1 34543 6001
 *check if the correct button part number for this dropdown was sent
 	doif name "Button_PartNumber" = _p1_
 
-		targ ownr
-*todo: testing something. without this, switching from Random Icons to Standard should occasionally cause an index out of range error?
-		imsk 0
 		targ mame "IconsetDropdown"
 
 		mesg writ targ 1000
@@ -1000,12 +982,9 @@ endm
 scrp 1 1 34543 6002
 
 
-
-	lock
-
-
 	inst
 
+	lock
 
 
 
@@ -1084,7 +1063,7 @@ scrp 1 1 34543 6002
 
 
 *Total Pages
-*int totalPages = (totalIcons + maxIconsPerPage - 1) / maxIconsPerPage;
+*totalPages = (totalIcons + maxIconsPerPage - 1) / maxIconsPerPage
 	setv va98 va97
 	addv va98 28
 	subv va98 1
@@ -1094,17 +1073,10 @@ scrp 1 1 34543 6002
 	setv game "WorldSwitcher_IconChooser_MaxPage" va98
 
 
-*	dbg: outs "TOTAL PAGES:"
-*	dbg: outv va98
-
-
-
 *Icons This Page
-*int iconsThisPage = Math.Min(maxIconsPerPage, totalIcons - (maxIconsPerPage * (page - 1)));
+*iconsThisPage = Math.Min(maxIconsPerPage, totalIcons - (maxIconsPerPage * (page - 1)))
 
 *totalIcons - (maxIconsPerPage * (page - 1))
-
-
 	setv va80 game "WorldSwitcher_IconChooser_CurrentPage"
 	subv va80 1
 	setv va81 28
@@ -1115,18 +1087,10 @@ scrp 1 1 34543 6002
 	mulv va97 2
 	subv va88 va81
 
-*Math.Min(maxIconsPerPage, )
-
-*	dbg: outs "GRAAH?:"
-*	dbg: outv va88
-
-
+*maxIconsPerPage (28)
 	doif va88 > 28
 		setv va88 28
 	endi
-
-*	dbg: outs "GRAAH!:"
-*	dbg: outv va88
 
 
 
@@ -1196,10 +1160,8 @@ scrp 1 1 34543 6002
 		pat: kill 9
 	endi
 
-*todo: idk. testing testng.
-	imsk 12
-
-	call 75 0 0
+*fake mouse move redraw our selection highlight
+	call 75 mopx mopy
 
 
 

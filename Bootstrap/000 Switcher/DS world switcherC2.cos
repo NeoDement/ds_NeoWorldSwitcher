@@ -363,9 +363,10 @@ scrp 1 2 6060 75
 				adds va02 "_worldname"
 				sets va84 game va02
 
-
-
-
+*12_editcount (needed for swapping edited icons out for new versions
+				sets va02 vtos va01
+				adds va02 "_editcount"
+				sets va85 vtos game va02
 
 
 *				no icon specified or couldn't find the specified icon
@@ -377,8 +378,7 @@ scrp 1 2 6060 75
 
 
 *load "icon" from our currently accessed world's journal folder into the buffer, AND take screenshots to be used as sprites for the icons.
-					mesg wrt+ game "IconEditor_Main" 5003 va84 "icon" 0
-*5003
+					mesg wrt+ game "IconEditor_Main" 5003 va84 va85 0
 
 *					targ ownr
 
@@ -1142,7 +1142,8 @@ scrp 1 2 1000 2000
 ** DISABLE CUSTOM ICON, ENABLE PRE-SET ICON **
 		call 5500 0 0
 
-
+*reset the EditCount to 0. we don't write the EditCount to the icon if it's 0.
+		setv game "WorldSwitcher_WorldCreation_EditCount" 0
 
 
 
@@ -1422,6 +1423,9 @@ scrp 1 2 1000 2000
 
 *load world icon if it exists. if not, we will default to "no icon defined" ELSE case.
 			gsub load_icon_from_world_journal
+
+*set editCount to whatever we just loaded. could be 0.
+			setv game "WorldSwitcher_WorldCreation_EditCount" va13
 
 			part game "WorldSwitcher_WorldCreation_IconPreviewPart"
 
@@ -2116,11 +2120,12 @@ scrp 1 2 1000 2000
 
 
 
+*todo: possibly outdated comments
 
 *VA10 - type (normal or custom)
 *VA11 - filename
 *VA12 - frame
-
+*VA13 - editcount
 
 
 	subr initialize_icon
@@ -2175,6 +2180,9 @@ scrp 1 2 1000 2000
 *"worldname"
 				sets game va82 wrld va53
 
+*editCount
+				adds game va82 vtos va13
+
 *(copy worldname from GAME "12_icon_on" to GAME "12_icon_off")
 				sets game va83 game va82
 
@@ -2195,7 +2203,10 @@ scrp 1 2 1000 2000
 				adds va84 "_worldname"
 				sets game va84 wrld va53
 
-
+*put "editcount" into GAME "12_editcount"
+				sets va85 va81
+				adds va85 "_editcount"
+				setv game va85 va13
 
 
 
@@ -2407,6 +2418,7 @@ scrp 1 2 1000 2000
 *VA10 - type (normal or custom)
 *VA11 - spriteName or palette
 *VA12 - spriteFrame or imageData
+*VA13 - editCount (only increased for custom icon worlds)
 
 	subr load_icon_from_world_journal
 
@@ -2448,6 +2460,9 @@ scrp 1 2 1000 2000
 
 			endi
 
+			sets va35 "editcount:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			setv va13 stoi va30
 
 		endi
 
@@ -3746,6 +3761,13 @@ scrp 1 2 1000 503
 		subv va99 1
 		outs vtos va99
 
+*write an edit count, if we have one.
+		doif game "WorldSwitcher_WorldCreation_EditCount" > 0
+			outs "\n"
+			outs "editCount:"
+			outs vtos game "WorldSwitcher_WorldCreation_EditCount"
+		endi
+
 		file oclo
 
 	else
@@ -4152,6 +4174,7 @@ scrp 1 2 1000 4001
 *VA10 - type (normal or custom)
 *VA11 - spriteName or palette
 *VA12 - spriteFrame or imageData
+*VA13 - editCount (only increased for custom icon worlds)
 
 	subr load_icon_from_world_journal
 
@@ -4191,6 +4214,10 @@ scrp 1 2 1000 4001
 *				setv va12 stoi va30
 
 			endi
+
+			sets va35 "editcount:"
+			gsub load_value_from_key_named_va35_into_string_va30
+			setv va13 stoi va30
 
 		endi
 
@@ -4465,6 +4492,7 @@ scrp 1 2 1000 699
 
 
 *NEW: write selected icon too! todo: make sure this stays up to date with the one in create new world. you'll prob need to make a shared function.
+*the difference here being we add 1 to EditCount whenever we save changes to a custom icon.
 
 *write a normal, sprite name/frame based icon.
 
@@ -4483,12 +4511,21 @@ scrp 1 2 1000 699
 		subv va99 1
 		outs vtos va99
 
+*write an edit count, if we have one.
+		doif game "WorldSwitcher_WorldCreation_EditCount" > 0
+			outs "\n"
+			outs "editCount:"
+			outs vtos game "WorldSwitcher_WorldCreation_EditCount"
+		endi
 
 		file oclo
 
 	else
 
 *It's a custom icon? Call the Icon Editor to handle the saving!
+
+*add 1 to editCount, so we know to write a unique number after the icon filename. this will allow the icon changes to be seen as the engine can't load from the same named image file twice.
+		addv game "WorldSwitcher_WorldCreation_EditCount" 1
 
 *save our icon to the buffer into our currently accessed world's journal folder as "icon". 
 		mesg wrt+ game "IconEditor_Main" 5001 "icon" 2 0
@@ -4652,6 +4689,25 @@ endm
 
 
 
+
+
+
+
+**translated keypress event!
+*scrp 1 2 1000 79
+**user pressed esc, close current screen or quit
+*	doif _p1_ = 27
+*		doif ov00 = 3 or ov00 = 2
+*			quit
+*		else
+*		*craptacular fix 
+*		doif game "WorldSwitcher_IconPanel" = null
+*			setv ov01 3
+*			mesg writ ownr 2000
+*			endi
+*		endi
+*	endi
+*endm
 
 
 
