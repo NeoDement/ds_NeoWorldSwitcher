@@ -79,7 +79,7 @@ setv game "IconEditor_Snapshot_Height" 29
 *what should we set buzz (ideal interval in milliseconds between each tick) to?
 
 *lower values are smoother, this is used when the mouse is over the drawing surface to make them more responsive to input
-setv game "IconEditor_Tickrate_Fast" 10
+setv game "IconEditor_Tickrate_Fast" 1
 
 
 
@@ -1877,6 +1877,6 @@ endm
 
 scrp 1 1 64743 1
 
-mesg writ game "WorldSwitcher_Main" 200
+	mesg writ game "WorldSwitcher_Main" 200
 
 endm

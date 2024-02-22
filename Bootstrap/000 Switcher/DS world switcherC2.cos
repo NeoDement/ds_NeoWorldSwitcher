@@ -346,6 +346,12 @@ scrp 1 2 6060 75
 
 
 
+*12_passworded
+			sets va02 vtos va01
+			adds va02 "_passworded"
+			setv va86 game va02
+
+
 			doif va83 = "custom"
 
 *12_icon_on
@@ -382,9 +388,13 @@ scrp 1 2 6060 75
 
 *					targ ownr
 
-					sets va81 "blnk"
-					sets va82 "blnk"
+*ICON IS LOADING!
+					setv va88 1
 
+				else
+
+*ICON IS LOADED!!!
+					setv va88 0
 
 				endi
 
@@ -416,6 +426,31 @@ scrp 1 2 6060 75
 
 
 
+*lock part number is current part number + 1000
+			setv va05 va01
+			addv va05 1000
+
+*world is passworded. create a new part for the lock!
+			doif va86 = 1
+
+				setv va06 va61
+				subv va06 posl
+
+				setv va07 va71
+				subv va07 post
+
+				doif part va05 = 0
+					pat: dull va05 "WorldSwitcher_Icons_Default" 22 va06 va07 1
+				endi
+*OR delete it, if not passworded!
+			else
+				doif part va05 = 1
+					pat: kill va05
+				endi
+			endi
+
+
+
 
 
 *VA99 - ICON HIGHLIGHT STATE
@@ -433,11 +468,23 @@ scrp 1 2 6060 75
 *if we were told to highlight it, change us to the appropriate gallery
 			doif va99 = 1
 
+*highlight lock icon, too!
+				doif part va05 = 1
+					part va05
+					pose 1
+					part va01
+				endi
+
 
 *are we a custom icon?
 				doif va83 = "custom"
 
-					doif gall <> va81
+*icon is still loading, show a temporary icon
+					doif va88 = 1
+						gall "blnk" 0
+						gall "WorldSwitcher_Icons_Default" 25
+*icon is loaded, set the icon
+					elif gall <> va81
 						gall "blnk" 0
 						gall va81 0
 					endi
@@ -456,9 +503,41 @@ scrp 1 2 6060 75
 *if we were told to unhighlight it, change us to the appropriate gallery
 			elif va99 = 0
 
+*un-highlight lock icon, too!
+				doif part va05 = 1
+					part va05
+					pose 0
+					part va01
+				endi
+
+**world is passworded. create a new part for the lock!
+*				doif va86 = 1
+**lock part number is current part number + 1000
+*					setv va05 va01
+*					addv va05 1000
+*
+*					doif part va05 = 0
+*						pat: dull va05 "WorldSwitcher_Icons_Default" 22 va61 va71 1
+*					endi
+*				else
+*					doif part va05 = 1
+*						pat: kill va05
+*					endi
+*				endi
+
+
+
+
+
+
 				doif va83 = "custom"
 
-					doif gall <> va82
+*icon is still loading, show a temporary icon
+					doif va88 = 1
+						gall "blnk" 0
+						gall "WorldSwitcher_Icons_Default" 24
+*icon is loaded, set the icon
+					elif gall <> va82
 						gall "blnk" 0
 						gall va82 0
 					endi
@@ -804,6 +883,7 @@ scrp 1 2 1000 2000
 		file iope 2 "build"
 		sets va44 innl
 		doif va44 = ""
+		
 * Build number unknown, definitely needs to be warned of possible problems.
 			sets va44 read "World Switcher old build" 3
 			setv va88 1
@@ -1690,13 +1770,6 @@ scrp 1 2 1000 2000
 		setv game "7_y" -100
 		setv game "7_lit" 0
 
-**special variables to control if we should draw icons at all.
-*		setv game "12_VISIBLE" 0
-*		setv game "11_VISIBLE" 0
-*		setv game "10_VISIBLE" 0
-*		setv game "9_VISIBLE" 0
-*		setv game "8_VISIBLE" 0
-*		setv game "7_VISIBLE" 0
 
 
 *here: we are creating all the necessary world icons on the world selection screen
@@ -1831,6 +1904,7 @@ scrp 1 2 1000 2000
 
 
 *todo: i once saw it crash here with an invalid wrld index. i suspect this bug was present in the original, but it can probably still be fixed.
+*i think this was maybe fixed by moving script 75 into the Mouse Listener object, to stop some script being interrupted part way through.
 
 *here: va52 is world name as a string
 			sets va52 wrld va53
@@ -1916,98 +1990,6 @@ scrp 1 2 1000 2000
 
 
 *here: originally this is where the buttons were to animate the hover-over with [1]. it is now in the mouse move script.
-
-*** 			Docked DS/C3 and No Password
-*			doif va64 = "docked" and pswd va53 = ""
-*				pat: butt va01 "ds world switcher" 40 2 va50 va51 0 [] 450 0
-*** 			Docked DS/C3 and Password Protected
-*			elif va64 = "docked" and pswd va53 <> ""
-*				pat: butt va01 "ds world switcher" 42 2 va50 va51 0 [] 450 0
-*			elif va64 = "undocked" and pswd va53 = ""
-***			Undocked DS and No Password
-*				pat: butt va01 "ds world switcher" 36 2 va50 va51 0 [] 450 0
-*			elif va64 = "undocked" and pswd va53 <> ""
-***			Undocked DS and Password Protected
-*				pat: butt va01 "ds world switcher" 38 2 va50 va51 0 [] 450 0
-*			elif va64 = "c3"
-***			Undocked C3 World (needs to be docked)
-*				pat: butt va01 "ds world switcher" 34 6 va50 va51 0 [] 450 0
-*			elif va64 = "c1" and pswd va53 = ""
-***			Undocked DS/C1 and No Password
-*				pat: butt va01 "ds world switcher" 49 2 va50 va51 0 [] 450 0
-*			elif va64 = "c1" and pswd va53 <> ""
-***			Undocked DS/C1 and Password Protected
-*				pat: butt va01 "ds world switcher" 51 2 va50 va51 0 [] 450 0
-*
-*			elif va64 = "c1c3" and pswd va53 = ""
-***			Undocked DS/C1 and No Password
-*				pat: butt va01 "ds world switcher" 54 2 va50 va51 0 [] 450 0
-*			elif va64 = "c1c3" and pswd va53 <> ""
-***			Undocked DS/C1 and Password Protected
-*				pat: butt va01 "ds world switcher" 56 2 va50 va51 0 [] 450 0
-*
-*			endi
-
-
-
-*** 			Docked DS/C3 and No Password
-*			doif va64 = "docked" and pswd va53 = ""
-*				setv va60 8
-*
-**				8
-*
-*** 			Docked DS/C3 and Password Protected
-*			elif va64 = "docked" and pswd va53 <> ""
-*				setv va60 8
-*
-**				8 + lock
-*
-*			elif va64 = "undocked" and pswd va53 = ""
-***			Undocked DS and No Password
-*				setv va60 6
-*
-**				6
-*
-*			elif va64 = "undocked" and pswd va53 <> ""
-***			Undocked DS and Password Protected
-*				setv va60 6
-*
-**				6 + lock
-*
-*			elif va64 = "c3"
-***			Undocked C3 World (needs to be docked)
-*				setv va60 4
-*
-**				4 (do we need to add lockability?)
-*
-*			elif va64 = "c1" and pswd va53 = ""
-***			Undocked DS/C1 and No Password
-*				setv va60 10
-*
-**				10
-*
-*			elif va64 = "c1" and pswd va53 <> ""
-***			Undocked DS/C1 and Password Protected
-*				setv va60 10
-*
-**				10 + lock
-*
-*			elif va64 = "c1c3" and pswd va53 = ""
-***			Docked DS/C1/C3 and No Password
-*				setv va60 12
-*
-**				12
-*
-*			elif va64 = "c1c3" and pswd va53 <> ""
-***			Docked DS/C1/C3 and Password Protected
-*				setv va60 12
-*
-**				12 + lock
-*
-*			endi
-*
-*
-*			pat: butt va01 "ds world switcher" va60 2 va50 va51 0 [] 450 0
 
 			pat: butt va01 "ds world switcher" 12 2 va50 va51 0 [] 450 0
 
@@ -2152,6 +2134,20 @@ scrp 1 2 1000 2000
 			setv game va82 va51
 			addv game va82 post
 
+
+*"12_passworded"
+			sets va86 va81
+			adds va86 "_passworded"
+*set to 1 if a password is set on this world.
+			doif pswd va53 = ""
+				setv game va86 0
+			else
+				setv game va86 1
+			endi
+
+
+
+
 *(did you fail to load the icon? you should switch to "from existing sprite file" mode
 
 *"12_icon_type"
@@ -2207,6 +2203,7 @@ scrp 1 2 1000 2000
 				sets va85 va81
 				adds va85 "_editcount"
 				setv game va85 va13
+
 
 
 
@@ -2310,6 +2307,11 @@ scrp 1 2 1000 2000
 			adds va82 "_firstframe"
 			setv game va82 0
 
+*12_passworded
+			sets va82 va81
+			adds va82 "_passworded"
+			setv game va82 0
+			
 		endi
 
 
@@ -2331,47 +2333,6 @@ scrp 1 2 1000 2000
 
 	subr get_firstframe_for_default_style_world
 
-
-
-
-*todo: DELETE ME, newer code is below!!
-*
-*
-** 			Docked DS/C3 and No Password
-*		doif va64 = "docked" and pswd va53 = ""
-*			setv va60 8
-** 			Docked DS/C3 and Password Protected
-*		elif va64 = "docked" and pswd va53 <> ""
-*			setv va60 8
-*		elif va64 = "undocked" and pswd va53 = ""
-**			Undocked DS and No Password
-*			setv va60 0
-*		elif va64 = "undocked" and pswd va53 <> ""
-**			Undocked DS and Password Protected
-*			setv va60 0
-*		elif va64 = "c3"
-**			Undocked C3 World (needs to be docked)
-*			setv va60 2
-*		elif va64 = "c1" and pswd va53 = ""
-**			Undocked DS/C1 and No Password
-*			setv va60 10
-*		elif va64 = "c1" and pswd va53 <> ""
-**			Undocked DS/C1 and Password Protected
-*			setv va60 10
-*		elif va64 = "c1c3" and pswd va53 = ""
-**			Docked DS/C1/C3 and No Password
-*			setv va60 12
-*		elif va64 = "c1c3" and pswd va53 <> ""
-**			Docked DS/C1/C3 and Password Protected
-*			setv va60 12
-*		endi
-
-
-
-
-
-
-
 ** 			Docked DS/C3
 		doif va64 = "docked"
 			setv va60 8
@@ -2388,14 +2349,6 @@ scrp 1 2 1000 2000
 **			Docked DS/C1/C3
 			setv va60 12
 		endi
-
-
-**			Password Protected! Add padlock icon.
-		doif pswd va53 <> ""
-*todo: as separate icon on top of main icon.
-			setv va60 22
-		endi
-
 
 	retn
 
@@ -3784,112 +3737,6 @@ scrp 1 2 1000 503
 
 
 
-* OLD photo logic. but maybe still very useful.
-
-
-**todo: what??
-****** TAKE ICON PICS! *****
-*	seta va90 targ
-*
-*
-*	rtar 1 1 674
-*
-*	doif ov00 = 0
-*		setv va15 44
-*	elif ov00 = 1
-*		setv va15 34
-*	elif ov00 = 2
-*		setv va15 48
-*	elif ov00 = 3
-*		setv va15 40
-*	elif ov00 = 4
-*		setv va15 49
-*	elif ov00 = 5
-*		setv va15 54
-*	elif ov00 = 6
-*		setv va15 6
-*	elif ov00 = 7
-*		setv va15 7
-*	endi
-*
-*
-*
-**todo: sensible classifier number
-**	new: simp 1 1 3465 "ds world switcher" 57 0 1000
-**	pose 36
-*
-**	new: simp 1 1 3465 "ds world switcher" 1 36 1000
-*
-*	doif va15 = 6
-*		new: simp 1 1 3465 "c2_icon_temp" 1 0 1000
-*	elif va15 = 7
-*		new: simp 1 1 3465 "c2_icon_temp" 1 1 1000
-*	else
-*		new: simp 1 1 3465 "ds world switcher" 1 va15 1000
-*	endi
-*
-*
-*	mvto 1000 1000
-*
-*	wait 1
-*
-*	inst
-*
-*	sets va98 va00
-*	sets va99 va00
-*
-*	adds va98 "_icon_lit"
-*	adds va99 "_icon_unlit"
-*
-**fix up the funky gamma?
-*	tino 140 140 140 128 128
-**	tino 128 128 128 128 128
-*
-**take an icon sized screenshot using the buffer room
-*	snap va98 1024 1014 48 29 0
-*
-**	tino 90 90 90 128 128
-*
-**create a second copy of the icon, set it to be a full black silhouette then overlay it over the first icon at 30% opacity
-**this creates a perfect dimmed icon yay!!
-**	new: simp 1 1 3465 "ds world switcher" 1 36 1000
-*
-*	doif va15 = 6
-*		new: simp 1 1 3465 "c2_icon_temp" 1 0 1000
-*	elif va15 = 7
-*		new: simp 1 1 3465 "c2_icon_temp" 1 1 1000
-*	else
-*		new: simp 1 1 3465 "ds world switcher" 1 va15 1000
-*	endi
-*
-*	mvto 1000 1000
-*
-*	tino -255 -255 -255 128 128
-*
-*	alph 180 1
-*
-*	snap va99 1024 1014 48 29 0
-*
-*	enum 1 1 3465
-*		ucln
-*		kill targ
-*	next
-*
-**	cmrp 1024 1024 0
-*
-*	targ va90
-*
-**va00
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4534,11 +4381,11 @@ scrp 1 2 1000 699
 	endi
 
 
-*if no password is set, don't worry about loading the world.
+*if no password is set (and we're not unsetting a pswd), don't worry about loading the world.
 	part 5
 	sets va00 ptxt
 	part 7
-	doif ptxt = "" and va00 = ""
+	doif ptxt = "" and va00 = "" and pswd ov04 = ""
 		setv ov01 3
 		mesg writ targ 2000
 	else
@@ -4554,64 +4401,6 @@ endm
 
 
 
-
-
-
-*todo: delete this, its unchanged from default
-
-*scrp 1 2 1000 700
-*
-*
-**	Commit password entry screen
-**	Method is:
-**		if ov00 is 4
-**			check pwd okay & either go to ov05 or else switcher
-**		else
-**			if pass <> confirm then abort
-**			set pwd to pass
-**			enter world to commit password
-**		end
-*	lock
-*	part 3
-*	anim [1 1 1 1 1 0 0 0 0]
-*	over
-*	unlk
-*	doif ov00 = 4
-**		dbg: outs "Hmm, It's a check pwd"
-*		part 7
-*		setv ov01 3
-**		dbg: outs ptxt
-**		dbg: outs pswd ov04
-*		doif pswd ov04 = ptxt
-**			dbg: outs "Okay, let's go"
-*			setv ov01 ov05
-*		else
-*			sndc "buzz"
-*		endi
-*		mesg writ targ 2000
-*		stop
-*	else
-**		dbg: outs "Hmm, it's a new password"
-*		part 5
-*		sets va00 ptxt
-**		dbg: outs "Enter:"
-**		dbg: outs va00
-*		part 7
-**		dbg: outs "Confirm"
-**		dbg: outs ptxt
-*		setv ov01 3
-*		doif ptxt = va00
-**			dbg: outs "load it"
-*			pswd va00
-**			dbg: outs va00
-*			setv ov01 6
-*			mesg writ targ 2000
-*		else
-*			setv ov01 7
-*			sndc "buzz"
-*		endi
-*	endi
-*endm
 
 
 
@@ -4690,24 +4479,6 @@ endm
 
 
 
-
-
-
-**translated keypress event!
-*scrp 1 2 1000 79
-**user pressed esc, close current screen or quit
-*	doif _p1_ = 27
-*		doif ov00 = 3 or ov00 = 2
-*			quit
-*		else
-*		*craptacular fix 
-*		doif game "WorldSwitcher_IconPanel" = null
-*			setv ov01 3
-*			mesg writ ownr 2000
-*			endi
-*		endi
-*	endi
-*endm
 
 
 

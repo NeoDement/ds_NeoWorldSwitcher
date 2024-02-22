@@ -785,7 +785,8 @@ scrp 1 1 64736 10
 
 
 
-*WE'RE MAKING PIXEL GRIDS!!!!
+*We only create the buffer pixelgrid at first. The rest are created (just once) when opening the editor (scrp 7500)
+*This introduces a small hitch when opening the editor, but it's better than it hitching every time you launch the game.
 
 
 
@@ -793,122 +794,15 @@ scrp 1 1 64736 10
 
 
 
+*****************************************************
 
+*                 BUFFER PIXELGRID                  *
 
+*****************************************************
 
 
 
-
-
-
-
-
-
-
-
-
-****************************************************
-
-*               CURSOR              *
-
-****************************************************
-
-	new: simp 1 1 66650 "WorldSwitcher_IconEditor_Cursors" 0 0 9999
-
-	seta game "IconEditor_Cursor" targ
-
-* CURSOR MODES!
-*0 - none, default Pointer (unused)
-*1 - Brush Tool
-*2 - Eraser Tool
-*3 - Fill Can (unimplemented)
-*4 - Colour Picker
-
-	setv game "IconEditor_CursorMode" 0
-
-*floatable attribute, so it can follow the hand position in real time
-	attr 32
-
-
-
-
-****************************************************
-
-*               FULL SCALE PIXELGRIDS              *
-
-****************************************************
-
-
-
-*MAKE MAIN PIXEL GRID
-
-	new: comp 1 1 64742 "blnk" 0 0 2000
-
-*floatable. we are attached to the main icon editor "form"
-	attr 32
-
-
-*(DISABLED! starts inactive, activated when panel is opened from Icon Chooser Panel!)
-
-*Listen for these events:
-* 8 Raw Mouse Down + 16 Raw Mouse Up + 4 Raw Mouse Move
-*	imsk 28
-
-
-*create X by Y grid of parts, one for each pixel of the image
-*************************************************************
-
-*part number variable starts at 1 because 0 is the background
-	setv va00 1
-
-*X/Y offsets start at 1
-	setv va01 1
-	setv va02 1
-
-	reps game "IconEditor_NumPixelsY"
-
-		reps game "IconEditor_NumPixelsX"
-
-*Palette Index 219:
-
-*add 1 for the invisible frame
-*add 1 for the outline frame
-*add 216 colours for the length of the palette
-*multiply by 1, as this is the second image set in the file (Palette sized)
-*add 1 so we start on the invisible frame instead of the outline frame
-
-			pat: dull va00 "WorldSwitcher_IconEditor_Palette" 219 va01 va02 1
-
-			addv va00 1
-
-			addv va01 game "IconEditor_PixelSize"
-
-		repe
-
-		setv va01 1
-
-		addv va02 game "IconEditor_PixelSize"
-
-	repe
-
-*store main grid in a global variable so we can access it later
-	seta game "IconEditor_PixelGrid" targ
-
-
-
-
-
-
-
-
-
-
-*MAKE BRUSH PREVIEW OVERLAY GRID
-
-	new: comp 1 1 64742 "blnk" 0 0 2001
-
-*floatable. we are attached to the main icon editor "form"
-	attr 32
+	new: comp 1 1 64743 "blnk" 0 0 2000
 
 *create X by Y grid of parts, one for each pixel of the image
 *************************************************************
@@ -924,94 +818,6 @@ scrp 1 1 64736 10
 
 		reps game "IconEditor_NumPixelsX"
 
-*Palette Index 218:
-
-*add 1 for the invisible frame
-*add 1 for the outline frame
-*add 216 colours for the length of the palette
-*multiply by 1, as this is the second image set in the file (Palette sized)
-*the first frame in each image set is the outline frame
-
-			pat: dull va00 "WorldSwitcher_IconEditor_Palette" 218 va01 va02 1
-
-*start on frame 1, invisible when not highlighted	
-			part va00
-			pose 1
-
-			addv va00 1
-
-			addv va01 game "IconEditor_PixelSize"
-
-		repe
-
-		setv va01 0
-
-		addv va02 game "IconEditor_PixelSize"
-
-	repe
-
-
-*create brush overlay grid 1 pixel to the top left of the main one
-	setv va50 game "IconEditor_PixelGrid_X"
-	setv va51 game "IconEditor_PixelGrid_X"
-
-	subv va50 1
-	subv va51 1
-
-
-
-*store main grid in a global variable so we can access it later
-	seta game "IconEditor_BrushPreview" targ
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*****************************************************
-
-*                TINY SCALE PIXELGRIDS              *
-
-*****************************************************
-
-
-
-*set this to 0 and use it to count loop iterations.
-	setv va03 0
-
-*2 Previews (Lit and Unlit), 1 Buffer (for transformations and snapshots)
-	reps 3
-
-		new: comp 1 1 64743 "blnk" 0 0 2000
-
-*floatable. we are attached to the main icon editor "form"
-		attr 32
-
-*create X by Y grid of parts, one for each pixel of the image
-*************************************************************
-
-*part number variable starts at 1 because 0 is the background
-		setv va00 1
-
-*X/Y offsets start at 0
-		setv va01 0
-		setv va02 0
-
-		reps game "IconEditor_NumPixelsY"
-
-			reps game "IconEditor_NumPixelsX"
-
 *Palette Index 1:
 
 *add 1 for the invisible frame
@@ -1020,169 +826,27 @@ scrp 1 1 64736 10
 *multiply by 0, as this is the first image set in the file (Palette sized)
 *add 1 so we start on the invisible frame instead of the outline frame
 
-				pat: dull va00 "WorldSwitcher_IconEditor_Palette" 1 va01 va02 1
+			pat: dull va00 "WorldSwitcher_IconEditor_Palette" 1 va01 va02 1
 
-				addv va00 1
+			addv va00 1
 
-				addv va01 game "IconEditor_PixelSizeTiny"
-
-			repe
-
-			setv va01 0
-
-			addv va02 game "IconEditor_PixelSizeTiny"
+			addv va01 game "IconEditor_PixelSizeTiny"
 
 		repe
 
+		setv va01 0
 
-
-
-*store each frame in a specific game variable
-
-		addv va03 1
-
-		doif va03 = 1
-
-*preview frame
-			seta game "IconEditor_Preview" targ
-
-*darkened preview frame
-		elif va03 = 2
-			seta game "IconEditor_Preview_Darkened" targ
-
-*Buffer frame
-		elif va03 = 3
-			seta game "IconEditor_Buffer" targ
-			mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
-
-*buffer frame must be drawn just in front of the world creation screen.
-			plne 1
-*and must be clickable, to pass clicks thru it to the icon panel beneath (annoying)
-			attr 4
-		endi
+		addv va02 game "IconEditor_PixelSizeTiny"
 
 	repe
 
-
-
-
-
-
-
-
-
-
-
-******************************************************************************************
-
-
-
-
-
-
-
-
-
-*these are the coordinates for the main big pixel grid that you draw on
-	setv game "IconEditor_PixelGrid_X" 74
-	setv game "IconEditor_PixelGrid_Y" 81
-
-
-*these are the coordinates for the Lit preview image
-	setv game "IconEditor_PixelGridTiny_X" 132
-	setv game "IconEditor_PixelGridTiny_Y" 44
-
-
-*these are the coordinates for the Unlit preview image
-	setv game "IconEditor_PixelGridTiny2_X" 237
-	setv game "IconEditor_PixelGridTiny2_Y" 44
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*POSITION MAIN CANVAS
-
-	targ game "IconEditor_PixelGrid"
-
-	frel game "IconEditor_Main"
-
-
-
-	mvto 0 0
-
-	flto game "IconEditor_PixelGrid_X" game "IconEditor_PixelGrid_Y"
-
-
-
-
-
-
-
-
-
-*POSITION BRUSH PREVIEW OVERLAY GRID
-
-	targ game "IconEditor_BrushPreview"
-
-	frel game "IconEditor_Main"
-
-	flto game "IconEditor_PixelGrid_X" game "IconEditor_PixelGrid_Y"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*POSITION ICON PREVIEW IMAGE
-
-	targ game "IconEditor_Preview"
-
-	frel game "IconEditor_Main"
-
-	flto game "IconEditor_PixelGridTiny_X" game "IconEditor_PixelGridTiny_Y"
-
-
-
-
-
-
-*POSITION DARKENED ICON PREVIEW IMAGE
-
-	targ game "IconEditor_Preview_Darkened"
-
-	frel game "IconEditor_Main"
-
-	flto game "IconEditor_PixelGridTiny2_X" game "IconEditor_PixelGridTiny2_Y"
-
-
-
+	seta game "IconEditor_Buffer" targ
+	mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+*buffer frame must be drawn just in front of the world creation screen.
+	plne 1
+*and must be clickable, to pass clicks thru it to the icon panel beneath (annoying)
+	attr 4
 
 
 
@@ -3899,6 +3563,355 @@ endm
 
 
 
+scrp 1 1 64736 5000
+
+****************************************************
+
+*                      CURSOR                      *
+
+****************************************************
+
+	new: simp 1 1 66650 "WorldSwitcher_IconEditor_Cursors" 0 0 9999
+
+	seta game "IconEditor_Cursor" targ
+
+* CURSOR MODES!
+*0 - none, default Pointer (unused)
+*1 - Brush Tool
+*2 - Eraser Tool
+*3 - Fill Can (unimplemented)
+*4 - Colour Picker
+
+	setv game "IconEditor_CursorMode" 0
+
+*floatable attribute, so it can follow the hand position in real time
+	attr 32
+
+
+
+
+****************************************************
+
+*               FULL SCALE PIXELGRIDS              *
+
+****************************************************
+
+
+
+*MAKE MAIN PIXEL GRID
+
+	new: comp 1 1 64742 "blnk" 0 0 2000
+
+*floatable. we are attached to the main icon editor "form"
+	attr 32
+
+
+*create X by Y grid of parts, one for each pixel of the image
+*************************************************************
+
+*part number variable starts at 1 because 0 is the background
+	setv va00 1
+
+*X/Y offsets start at 1
+	setv va01 1
+	setv va02 1
+
+	reps game "IconEditor_NumPixelsY"
+
+		reps game "IconEditor_NumPixelsX"
+
+*Palette Index 219:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 1, as this is the second image set in the file (Palette sized)
+*add 1 so we start on the invisible frame instead of the outline frame
+
+			pat: dull va00 "WorldSwitcher_IconEditor_Palette" 219 va01 va02 1
+
+			addv va00 1
+
+			addv va01 game "IconEditor_PixelSize"
+
+		repe
+
+		setv va01 1
+
+		addv va02 game "IconEditor_PixelSize"
+
+	repe
+
+*store main grid in a global variable so we can access it later
+	seta game "IconEditor_PixelGrid" targ
+
+
+
+
+
+
+
+
+
+
+*MAKE BRUSH PREVIEW OVERLAY GRID
+
+	new: comp 1 1 64742 "blnk" 0 0 2001
+
+*floatable. we are attached to the main icon editor "form"
+	attr 32
+
+*create X by Y grid of parts, one for each pixel of the image
+*************************************************************
+
+*part number variable starts at 1 because 0 is the background
+	setv va00 1
+
+*X/Y offsets start at 0
+	setv va01 0
+	setv va02 0
+
+	reps game "IconEditor_NumPixelsY"
+
+		reps game "IconEditor_NumPixelsX"
+
+*Palette Index 218:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 1, as this is the second image set in the file (Palette sized)
+*the first frame in each image set is the outline frame
+
+			pat: dull va00 "WorldSwitcher_IconEditor_Palette" 218 va01 va02 1
+
+*start on frame 1, invisible when not highlighted	
+			part va00
+			pose 1
+
+			addv va00 1
+
+			addv va01 game "IconEditor_PixelSize"
+
+		repe
+
+		setv va01 0
+
+		addv va02 game "IconEditor_PixelSize"
+
+	repe
+
+
+*create brush overlay grid 1 pixel to the top left of the main one
+	setv va50 game "IconEditor_PixelGrid_X"
+	setv va51 game "IconEditor_PixelGrid_X"
+
+	subv va50 1
+	subv va51 1
+
+
+
+*store main grid in a global variable so we can access it later
+	seta game "IconEditor_BrushPreview" targ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*****************************************************
+
+*                TINY SCALE PIXELGRIDS              *
+
+*****************************************************
+
+
+
+*set this to 0 and use it to count loop iterations.
+	setv va03 0
+
+*2 Previews (Lit and Unlit)
+	reps 2
+
+		new: comp 1 1 64743 "blnk" 0 0 2000
+
+*floatable. we are attached to the main icon editor "form"
+		attr 32
+
+*create X by Y grid of parts, one for each pixel of the image
+*************************************************************
+
+*part number variable starts at 1 because 0 is the background
+		setv va00 1
+
+*X/Y offsets start at 0
+		setv va01 0
+		setv va02 0
+
+		reps game "IconEditor_NumPixelsY"
+
+			reps game "IconEditor_NumPixelsX"
+
+*Palette Index 1:
+
+*add 1 for the invisible frame
+*add 1 for the outline frame
+*add 216 colours for the length of the palette
+*multiply by 0, as this is the first image set in the file (Palette sized)
+*add 1 so we start on the invisible frame instead of the outline frame
+
+				pat: dull va00 "WorldSwitcher_IconEditor_Palette" 1 va01 va02 1
+
+				addv va00 1
+
+				addv va01 game "IconEditor_PixelSizeTiny"
+
+			repe
+
+			setv va01 0
+
+			addv va02 game "IconEditor_PixelSizeTiny"
+
+		repe
+
+
+
+
+*store each frame in a specific game variable
+
+		addv va03 1
+
+		doif va03 = 1
+*preview frame
+			seta game "IconEditor_Preview" targ
+
+*darkened preview frame
+		elif va03 = 2
+			seta game "IconEditor_Preview_Darkened" targ
+		endi
+
+	repe
+
+
+
+
+
+
+
+******************************************************************************************
+
+
+
+
+
+
+
+
+
+*these are the coordinates for the main big pixel grid that you draw on
+	setv game "IconEditor_PixelGrid_X" 74
+	setv game "IconEditor_PixelGrid_Y" 81
+
+
+*these are the coordinates for the Lit preview image
+	setv game "IconEditor_PixelGridTiny_X" 132
+	setv game "IconEditor_PixelGridTiny_Y" 44
+
+
+*these are the coordinates for the Unlit preview image
+	setv game "IconEditor_PixelGridTiny2_X" 237
+	setv game "IconEditor_PixelGridTiny2_Y" 44
+
+
+
+
+
+
+
+
+
+
+*POSITION MAIN CANVAS
+
+	targ game "IconEditor_PixelGrid"
+
+	frel game "IconEditor_Main"
+
+
+
+	mvto 0 0
+
+	flto game "IconEditor_PixelGrid_X" game "IconEditor_PixelGrid_Y"
+
+
+
+
+
+
+
+
+
+*POSITION BRUSH PREVIEW OVERLAY GRID
+
+	targ game "IconEditor_BrushPreview"
+
+	frel game "IconEditor_Main"
+
+	flto game "IconEditor_PixelGrid_X" game "IconEditor_PixelGrid_Y"
+
+
+
+
+
+
+
+
+
+
+*POSITION ICON PREVIEW IMAGE
+
+	targ game "IconEditor_Preview"
+
+	frel game "IconEditor_Main"
+
+	flto game "IconEditor_PixelGridTiny_X" game "IconEditor_PixelGridTiny_Y"
+
+
+
+
+
+
+*POSITION DARKENED ICON PREVIEW IMAGE
+
+	targ game "IconEditor_Preview_Darkened"
+
+	frel game "IconEditor_Main"
+
+	flto game "IconEditor_PixelGridTiny2_X" game "IconEditor_PixelGridTiny2_Y"
+
+
+	targ ownr
+
+endm
+
+
+
+
+
+
+
+
 
 *****************************************************************************
 ************************** OPEN ICON EDITOR ********************************
@@ -3913,7 +3926,10 @@ scrp 1 1 64736 7500
 
 
 
-
+*if the cursor hasn't been created yet, assume it's time to create some pixelgrids.
+	doif type game "IconEditor_Cursor" <> 3
+		call 5000 0 0
+	endi
 
 
 
@@ -3935,7 +3951,8 @@ scrp 1 1 64736 7500
 *select palette index 0
 	call 1001 1001 0
 
-
+*reset to default brush size
+	mesg wrt+ name "BrushSizeSlider" 1003 1 0 0
 
 
 
@@ -3951,6 +3968,9 @@ scrp 1 1 64736 7500
 *Listen for these events:
 * 8 Raw Mouse Down + 16 Raw Mouse Up + 4 Raw Mouse Move
 	imsk 28
+
+
+
 
 
 
