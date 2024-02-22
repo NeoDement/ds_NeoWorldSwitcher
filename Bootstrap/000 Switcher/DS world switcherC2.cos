@@ -332,6 +332,57 @@ scrp 1 2 1000 75
 				adds va02 "_icon_off"
 				sets va82 game va02
 
+*12_worldname (we need this so we can load the icon by setting the correct game "engine_other_world" variable.
+				sets va02 vtos va01
+				adds va02 "_worldname"
+				sets va84 game va02
+
+
+
+
+
+
+*				no icon specified or couldn't find the specified icon
+				doif snax va81 = 0 or snax va82 = 0
+
+
+*SEND A REQUEST TO THE ICON EDITOR TO SAVE AN IMAGE OF OUR ICON FILE!
+*if it's not busy already doing a request, it will make the file!
+
+					targ game "IconEditor_Buffer"
+
+					mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+
+*load "icon" from our currently accessed world's journal folder into the buffer, AND take screenshots to be used as sprites for the icons.
+					targ game "IconEditor_Main"
+					file iope 2 "icon"
+					sets name "worldname_icon_lit" va81
+					sets name "worldname_icon_unlit" va82
+					sets name "worldname" va84
+					mesg wrt+ targ 5002 "icon" 2 0
+
+
+					targ ownr
+
+					sets va81 "blnk"
+					sets va82 "blnk"
+
+
+				endi
+
+
+
+
+
+
+
+
+
+
+
+
+
 			else
 
 *12_spritename
@@ -350,24 +401,17 @@ scrp 1 2 1000 75
 
 
 
-
+*VA99 - ICON HIGHLIGHT STATE
 			setv va99 0
 
 			doif _p1_ > va61 and _p1_ < va62 and _p2_ > va71 and _p2_ < va72
-*		doif mopx > va61 and mopx < va62 and mopy > va71 and mopy < va72
+*			doif mopx > va61 and mopx < va62 and mopy > va71 and mopy < va72
 				setv va99 1
 			endi
 
 			doif va50 = 1
 				setv va99 1
 			endi
-
-**put va99 in a state where it won't get changed by the code below
-*		doif va50 = 2
-*			setv va99 2
-*		endi
-
-
 
 *if we were told to highlight it, change us to the appropriate gallery
 			doif va99 = 1
@@ -376,8 +420,8 @@ scrp 1 2 1000 75
 *are we a custom icon?
 				doif va83 = "custom"
 
-
 					doif gall <> va81
+						gall "blnk" 0
 						gall va81 0
 					endi
 
@@ -398,6 +442,7 @@ scrp 1 2 1000 75
 				doif va83 = "custom"
 
 					doif gall <> va82
+						gall "blnk" 0
 						gall va82 0
 					endi
 
@@ -408,12 +453,6 @@ scrp 1 2 1000 75
 					gall va81 va82
 
 				endi
-
-			else
-				dbg: asrt "what" = "hh"
-*
-*todo: here: this needs patching up. non-custom icons are non-functional.
-*			pose 1
 
 			endi
 
@@ -430,8 +469,6 @@ scrp 1 2 1000 75
 
 endm
 
-
-*endi
 
 
 
@@ -1771,6 +1808,9 @@ scrp 1 2 1000 2000
 			subv va53 1
 			addv va53 ov03
 
+
+*todo: i once saw it crash here with an invalid wrld index. i suspect this bug was present in the original, but it can probably still be fixed.
+
 *here: va52 is world name as a string
 			sets va52 wrld va53
 
@@ -2101,9 +2141,7 @@ scrp 1 2 1000 2000
 *"custom" - LOAD ICON FROM A COMMA SEPARATED ARRAY OF PIXELS
 			doif va10 = "custom"
 
-*				dbg: asrt 1 = 5
-
-*****custom icons are are all loaded from files in the journal directory into temporary s16 files at the start.
+*****custom icons are are all loaded from files in the journal directory into temporary s16 files in the icon drawing loop (script 75), whenever one is detected to be missing.
 *this means all we need for custom icons is a file name, no need for any frame numbers. we automatically append _lit or _unlit as appropriate.
 
 
@@ -2133,136 +2171,13 @@ scrp 1 2 1000 2000
 
 
 
-*				no icon specified or couldn't find the specified icon
-				doif snax game va82 = 0
 
-					targ game "IconEditor_Buffer"
+*this variable will be used so we know what to set "engine_other_world" to during the icon loading process! IN SCRIPT 75!
 
-					mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
-
-*					sets game "engine_other_world" wrld ov04
-
-*load "icon" from our currently accessed world's journal folder into the buffer
-					mesg wrt+ game "IconEditor_Main" 5002 "icon" 2 0
-
-*make sure buffer gets time to load
-					lock
-					wait 15
-					inst
-
-*take an icon sized screenshot using the buffer room
-					snap game va82 1024 1014 48 29 0
-
-					alph 75 1
-
-*take a DARKENED icon sized screenshot using the buffer room
-					snap game va83 1024 1014 48 29 0
-
-					alph 255 0
-
-					targ ownr
-
-
-
-here
-
-*todo: OK SO! ICONS DONT DIM/FLICKER/ANIMATE AT ALL IF THEY ARE CUSTOM?
-
-*i think we should:
-
-*check if the icon_lit and icon_unlit files exist already.
-*if they don't, try to create them from files.
-*if they still don't, set them to default. see if you can use a subr for this.
-
-
-
-
-*(todo: DISABLED, BUT WOULD BE A GOOD FALLBACK IF WE CAN'T CREATE THE CUSTOM ICON)	
-**					delete gallery icons, they're no longer needed
-*					sets va82 va81
-*					adds va82 "_icon_lit"
-*					delg va82
-*
-*					sets va82 va81
-*					adds va82 "_icon_unlit"
-*					delg va82
-*
-**icon_type must be normal, so we can use pose commands
-*					sets va82 va81
-*					adds va82 "_icon_type"
-*					sets game va82 "normal"
-*
-**						set us to whatever icon you would have been if the default game had to work it out
-*					sets va82 va81
-*					adds va82 "_spritename"
-*					sets game va82 "WorldSwitcher_Icons_Default"
-*
-*					sets va82 va81
-*					adds va82 "_firstframe"
-**						sets va82 va13
-*
-**this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
-**and return it to va60 as a number!
-*					gsub get_firstframe_for_default_style_world
-*					setv game va82 va60
-
-
-
-				endi
-
-*check again, we may have just changed it in a failure state. if we did, we don't need to try and set an _unlit icon here.
-				doif va10 = "custom"
-
-
-*put "worldname1_icon_unlit" into GAME "12_icon_off"
-					sets va82 va81
-					adds va82 "_icon_off"
-
-*"worldname"
-					sets game va82 wrld va53
-*editCount
-					adds game va82 vtos va13
-*_icon_unlit
-					adds game va82 "_icon_unlit"
-
-
-*					no icon specified or couldn't find the specified icon
-					doif snax game va82 = 0
-
-*(todo: DISABLED, BUT WOULD BE A GOOD FALLBACK IF WE CAN'T CREATE THE CUSTOM ICON)				
-**						delete gallery icons, they're no longer needed
-*						sets va82 va81
-*						adds va82 "_icon_lit"
-*						delg va82
-*
-*						sets va82 va81
-*						adds va82 "_icon_unlit"
-*						delg va82
-*
-**icon_type must be normal, so we can use pose commands
-*						sets va82 va81
-*						adds va82 "_icon_type"
-*						sets game va82 "normal"
-*
-**						set us to whatever icon you would have been if the default game had to work it out
-*						sets va82 va81
-*						adds va82 "_spritename"
-*						sets game va82 "WorldSwitcher_Icons_Default"
-*
-*						sets va82 va81
-*						adds va82 "_firstframe"
-**							sets va82 va13
-*
-**this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
-**and return it to va60 as a number!
-*						gsub get_firstframe_for_default_style_world
-*						setv game va82 va60
-
-
-
-					endi
-
-				endi
+*put "worldname" into GAME "12_worldname"
+				sets va84 va81
+				adds va84 "_worldname"
+				sets game va84 wrld va53
 
 
 
@@ -2305,7 +2220,6 @@ here
 
 
 			endi
-
 		endi
 
 *		subv va80 1
@@ -4662,6 +4576,8 @@ scrp 1 2 1000 5600
 	targ game "IconEditor_Buffer"
 	frel ownr
 	flto game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
+*fix position
+	mvby 12 2
 
 *set variable.
 	setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 1

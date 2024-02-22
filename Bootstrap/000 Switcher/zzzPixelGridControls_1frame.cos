@@ -1796,6 +1796,8 @@ scrp 1 1 64736 5600
 	targ game "IconEditor_Buffer"
 	frel game "WorldSwitcher_Main"
 	flto game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
+*fix position
+	mvby 12 2
 
 *set variable.
 	setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 1
@@ -2075,27 +2077,6 @@ scrp 1 1 64736 5001
 
 
 endm
-
-
-
-
-
-
-
-*
-**LOAD BUTTON (WIP)
-*scrp 1 1 64736 5002
-*
-*	inst
-*
-*	call 10001 "testSprite2.icon" 1
-*
-*endm
-
-
-
-
-
 
 
 
@@ -3241,6 +3222,14 @@ endm
 *_P1_ is filename
 *_P2_ is where to load from (0 for the current world's journal directory, 1 for the main journal directory, or 2 for the GAME engine_other_world world's journal directory.)
 
+*3 extra params! if any of these aren't set, don't generate sprite files!
+*name "worldname_icon_lit"
+*name "worldname_icon_unlit"
+*name "worldname"
+
+*todo: idk we can clean up these params a bit. _p2_ = 2 doesn't even function without the 3 extra params anymore.
+
+
 scrp 1 1 64736 5002
 
 	inst
@@ -3249,10 +3238,36 @@ scrp 1 1 64736 5002
 
 
 
-*	file iope 1 _p1_
 
-*yes they're meant to be backwards
-	file iope _p2_ _p1_
+
+*we need to set game "engine_other_world" to the correct value for this world, to load the icon.
+
+	doif type mame "worldname" = 2
+
+*remember the old value in va60.
+		sets va60 game "engine_other_world"
+		sets game "engine_other_world" mame "worldname"
+
+*open the file
+		file iope _p2_ _p1_
+
+*unset!!
+		sets game "engine_other_world" va60
+
+*no worldname to load from, so make sure we don't try to generate icon images.
+	else
+
+		deln name "worldname_icon_lit"
+		deln name "worldname_icon_unlit"
+		deln name "worldname"
+
+*open the file
+		file iope _p2_ _p1_
+
+	endi
+
+
+
 
 *get every necessary value from every necessary key
 
@@ -3301,30 +3316,85 @@ scrp 1 1 64736 5002
 
 
 
-
-
-
 	file iclo
 
 
 
+*** GENERATE SPRITE FILES! ***
+
+
+*if there are no icon names set, don't generate sprite files
+	doif type mame "worldname_icon_lit" = 2 and type mame "worldname_icon_unlit" = 2
+
+		targ game "IconEditor_Buffer"
 
 
 
+		part -1
+*		show 0
+
+*make sure buffer gets time to load
+*					lock
+*					wait 15
+*					inst
+
+
+
+
+
+*take a DARKENED icon sized screenshot using the buffer room
+		alph 75 1
+		snap mame "worldname_icon_unlit" 1024 1014 48 29 0
+
+*		wait 1
+*		inst
+
+*take an icon sized screenshot using the buffer room
+		alph 255 0
+		snap mame "worldname_icon_lit" 1024 1014 48 29 0
+
+
+*force re-draw of all loaded icons on main world switcher page
+		mesg wrt+ game "WorldSwitcher_Main" 75 mopx mopy 0
+
+
+	endi
+
+
+
+
+*unset our icon names before calling this again.
+	deln name "worldname_icon_lit"
+	deln name "worldname_icon_unlit"
+	deln name "worldname"
+
+
+
+*todo: clean up comments.
 
 *load every comma seperated palette entry into our palette
 
 	subr load_string_of_rgbs_va30_into_palette
+
+
+
 
 *todo: if any key you're trying to load from doesn't exist, throw a general error that stops the loading process
 
 		wait 1
 		inst
 
+*less instructions to pre-calculate!
+
+		setv va32 game "IconEditor_Palette_Rows"
+		mulv va32 game "IconEditor_Palette_Columns"
+*subv va32 1
+
 		sets va31 ","
-		gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+*		gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
 		setv name "counting" 0
 
+*todo: this is wrong now, i think
 *the value returned by the subroutine is off by 1 (323 instead of 324)
 *		addv va32 1
 
@@ -3339,6 +3409,7 @@ scrp 1 1 64736 5002
 
 
 *todo: somewhere around here you could put the fix for the last pixel not reading properly from the string unless the string ends with a , comma ,
+*todo: ^ fixed?
 
 			setv va32 name "counting"
 			gsub set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
@@ -3382,9 +3453,6 @@ scrp 1 1 64736 5002
 *takes a three character input and calculates the index using the equation i*36 + j*6 + k
 	subr get_palette_index_from_string_va40_into_va41
 
-*		dbg: outs va40
-*		dbg: outs "ough"
-
 *convert each character of the string into its numerical equivalent by subtracting 48
 		setv va41 char va40 1
 		subv va41 48
@@ -3421,37 +3489,26 @@ scrp 1 1 64736 5002
 
 *todo: clean up junky comments.
 
-
 	subr load_string_of_indexes_va30_into_buffer
 
 *todo: if any key you're trying to load from doesn't exist, throw a general error that stops the loading process
-
-*		wait 1
-*		inst
-
-
-**_p2_ = 1, so hide all visible pixelgrids to prepare for loading data in
-*		doif _p2_ = 1
-**hide our grids while we slowly load
-*			targ game "IconEditor_PixelGrid"
-*			show 0
-*			targ game "IconEditor_Preview"
-*			show 0
-*			targ game "IconEditor_Preview_Darkened"
-*			show 0
-*		endi
-
 
 		targ game "IconEditor_Buffer"
 		show 0
 
 
 		sets va31 ","
-		gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+
+*less instructions to just pre-calculate this!
+*		gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+
+		setv va32 game "IconEditor_NumPixelsX"
+		mulv va32 game "IconEditor_NumPixelsY"
+
 		setv mame "counting" 0
 
-*the value returned by the subroutine is off by 1 (323 instead of 324)
-		addv va32 1
+*the value returned by the subroutine is off by 1 (323 instead of 324) (no longer true)
+*		addv va32 1
 
 		setv mame "max_count" va32
 
@@ -3462,17 +3519,7 @@ scrp 1 1 64736 5002
 			setv va32 mame "counting"
 			gsub set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
 
-*			doif va33 = ""
-*				sets va33 "error loading byte "
-*				adds va33 vtos va32
-*				dbg: outs va33
-*			endi
-
-*			doif va34 = game "IconEditor_Preview_7"
-*				dbg: outs va33
-*			endi
-
-*sloppy protection for attempting to run more than 1,000,000 instructions in a single tick
+*sloppy (but functional) protection for attempting to run more than 1,000,000 instructions in a single tick
 			doif va99 = 19
 				setv va99 0
 				slow
@@ -3488,7 +3535,7 @@ scrp 1 1 64736 5002
 *select part number corresponding with the pixel number we're reading...
 			doif part mame "counting" = 1
 
-*get the corresponding colour palette index from the palette, and apply that colour pose to the specified pixel. to all relevant copies of the pixelgrid.
+*get the corresponding colour palette index from the palette, and apply that colour pose to the specified pixel.
 				targ game "IconEditor_Main"
 
 				addv va05 1000
@@ -3497,53 +3544,18 @@ scrp 1 1 64736 5002
 
 				setv va06 pose
 
-**_p2_ = 1, so load data into all visible pixelgrids
-*				doif _p2_ = 1
-*
-*					targ game "IconEditor_PixelGrid"
-*
-*					part mame "counting"
-*
-*					pose va06
-*
-*					targ game "IconEditor_Preview"
-*
-*					part mame "counting"
-*
-*					pose va06
-*
-*					targ game "IconEditor_Preview_Darkened"
-*
-*					part mame "counting"
-*
-*					pose va06
-*
-*					targ game "IconEditor_PixelGrid"
-**_p2_ = 0, so load data into the buffer
-*				else
-
 				targ game "IconEditor_Buffer"
 
 				part mame "counting"
 
 				pose va06
 
-*				endi
-
 			endi
 
 		untl mame "max_count" eq mame "counting"
 
 
-**_p2_ = 1, unhide our loaded grids :)
-*		doif _p2_ = 1
-*			targ game "IconEditor_PixelGrid"
-*			show 1
-*			targ game "IconEditor_Preview"
-*			show 1
-*			targ game "IconEditor_Preview_Darkened"
-*			show 1
-*		endi
+*unhide our loaded grid :)
 
 		targ game "IconEditor_Buffer"
 		show 1
@@ -3583,47 +3595,48 @@ scrp 1 1 64736 5002
 
 
 
+*disabled, we can save a lot of instructions by just pre-calculating these numbers
 
-*thanks Amaikokonut/Aiko for this awesome function!
-
-
-	subr set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
-
-		wait 1
-
-		inst
-
-*in string va30, where the splitting character is va31, va32 is the number of
-*words/items in said string.
-		setv va32 0
-		setv va39 1
-		loop
-*if the first character is the delimiter, skip it 
-			doif sins va30 va39 va31 ne -1
-				doif subs va30 1 1 eq va31 and va39 eq 1
-					addv va39 1
-				endi
-				setv va38 sins va30 va39 va31
-				subv va38 va39
-				sets va37 subs va30 va39 va38
-			else
-				sets va37 subs va30 va39 -1
-				setv va39 -99
-			endi
-			doif va37 ne ""
-*             vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-				addv va32 1
-*             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-			endi
-			addv va39 va38
-			addv va39 1
-		untl va39 lt 1
-	retn
+**thanks Amaikokonut/Aiko for this awesome function!
+*
+*
+*	subr set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
+*
+*		wait 1
+*
+*		inst
+*
+**in string va30, where the splitting character is va31, va32 is the number of
+**words/items in said string.
+*		setv va32 0
+*		setv va39 1
+*		loop
+**if the first character is the delimiter, skip it 
+*			doif sins va30 va39 va31 ne -1
+*				doif subs va30 1 1 eq va31 and va39 eq 1
+*					addv va39 1
+*				endi
+*				setv va38 sins va30 va39 va31
+*				subv va38 va39
+*				sets va37 subs va30 va39 va38
+*			else
+*				sets va37 subs va30 va39 -1
+*				setv va39 -99
+*			endi
+*			doif va37 ne ""
+**             vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+*				addv va32 1
+**             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+*			endi
+*			addv va39 va38
+*			addv va39 1
+*		untl va39 lt 1
+*	retn
 
 
 
 	subr set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
-*in string va30, where the splitting charater is va31 and va32 is the index 
+*in string va30, where the splitting character is va31 and va32 is the index 
 * (indicies start at 1) of the thing you want, va33 is the item, or "" if it
 * doesn't exist
 		setv va39 1
