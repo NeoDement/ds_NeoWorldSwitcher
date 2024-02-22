@@ -10,46 +10,113 @@ setv game "WorldSwitcher_slider_TextboxYOffset" -1
 setv game "WorldSwitcher_slider_PlayheadWidth" 10
 
 
-***********************************
-********* OBJECT VARIABLES *********
-***********************************
 
 
-*todo: re-do this list by copy pasting the example again
-
-*todo: put them here. they are in pixelgridscontrols script.
-*todo: replace all OVs with name variables.
 
 
+
+
+******************************************************************************
+***Example slider
+******************************************************************************
 *
+*
+**X and Y position of slider
+*	setv va00 118
+*	setv va01 313
+*
+*
+**remember part numbers so slider script can refer to them
+*	setv va02 7000
+*	setv va03 7001
+*	setv va04 7002
+*
+**X offset of editable text component of slider
+*	setv va05 va00
+*	addv va05 game "WorldSwitcher_slider_TextboxXOffset"
+*
+**Y offset of editable text component of slider
+*	setv va06 va01
+*	addv va06 game "WorldSwitcher_slider_TextboxYOffset"
+*
+*
+**button component of slider (backdrop of slider bar, clicking it makes the control active)
+*	pat: butt va02 "WorldSwitcher_Slider" 0 0 VA00 VA01 2 [] 7000 0
+*
+**playhead component of slider
+*	pat: butt va03 "WorldSwitcher_Slider" 2 0 VA00 VA01 5 [] 7000 0
+*
+**editable text component of slider
+*	pat: text va04 "WorldSwitcher_Slider" 3 VA05 VA06 1 7001 "WhiteOnTransparentChars"
+*	part va04
+*	frmt 8 8 8 8 0 0 2
+*
+*
+*
+**slider manager for Example slider.
+*	new: simp 1 1 64769 "blnk" 0 0 0
+*
+**set a named variable on the compound object to point to this slider in particular
+*	seta mame "ExampleSlider" targ
 *
 **compound object this slider is part of
-*seta name "ParentObject" ownr
+*	seta name "ParentObject" ownr
+*
 *
 **X/Y coords of top left corner of slider
-*setv name "X" 294
-*setv name "Y" 316
+*	setv name "X" va00
+*	setv name "Y" va01
 *
-**part numbers to use when creating the slider
-*setv name "Slider_PartNumber" 7000
-*setv name "Playhead_PartNumber" 7001
-*setv name "Textbox_PartNumber" 7002
+**part numbers for each component of the slider
+*	setv name "Slider_PartNumber" va02
+*	setv name "Playhead_PartNumber" va03
+*	setv name "Textbox_PartNumber" va04
 *
-**sprite file and frame number for slider (background element)
-*sets name "Slider_Image" "WorldSwitcher_Slider"
-*setv name "Slider_ImageIndex" 0
+**default playhead and slider width can also be overridden here
+**    setv name "Slider_Width" 0
+**    setv name "Playhead_Width" 0
 *
-**sprite file and frame number for playhead
-*sets name "Playhead_Image" "WorldSwitcher_Slider"
-*setv name "Playhead_ImageIndex" 2
 *
-**sprite file and frame number for editable text component
-*sets name "Textbox_Image" "WorldSwitcher_Slider"
-*setv name "Textbox_ImageIndex" 3
+**unique name for this slider (can be useful to kill all sliders with a certain name in a rscr, etc)
+*	sets name "SliderName" "ExampleSlider"
 *
-**offset of editable text component
-*setv name "Textbox_OffsetX" game "WorldSwitcher_slider_TextboxXOffset"
-*setv name "Textbox_OffsetY" game "WorldSwitcher_slider_TextboxYOffset"
+**minimum and maximum values our slider can display. can be negative.
+*	setv name "MinValue" 1
+*	setv name "MaxValue" 12
+*
+**default/current value for our slider. must be between min and max.
+*	setv name "Value" 1
+*
+*
+**number of digits after the decimal point. can be 0 for whole numbers.
+*	setv name "DecimalPrecision" 0
+*
+*
+*
+*
+**show a + sign before the number when it's greater than 0?
+*	setv name "ShowPlusSign" 0
+*
+**script on Compound Object to run after setting the value (can be 0 to run no script)
+*	setv name "ValueUpdateScript" 7002
+*
+*
+**INITIALIZE!
+*	mesg writ targ 1005
+*
+*
+*
+*
+**target main Compound Object again
+*	targ ownr
+
+*****************************************************************************
+
+
+
+
+
+
 
 
 
@@ -112,20 +179,6 @@ scrp 1 1 64769 1002
 
 
 
-**clamp value between -1.0 and 1.0
-*	doif va00 < name "MinValue"
-*		setv va00 name "MinValue"
-*	endi
-*
-*	doif va00 > name "MaxValue"
-*		setv va00 name "MaxValue"
-*	endi
-
-
-
-
-
-
 
 *number of characters after decimal place calculation
 
@@ -177,9 +230,6 @@ scrp 1 1 64769 1002
 	targ name "ParentObject"
 	part mame "Textbox_PartNumber"
 	ptxt va01
-
-**put output into named variable on main object
-*	setv name va10 va00
 
 *store our new Value
 	setv mame "Value" va00
@@ -418,24 +468,6 @@ scrp 1 1 64769 1003
 	call 1002 va02 1
 
 
-*
-**store slider_PlayheadWidth / 2 in va05
-*	setv va05 game "WorldSwitcher_slider_PlayheadWidth"
-*	divv va05 2
-*
-**subtract it from the position to correctly center the Playhead
-*	subv va02 va05
-*
-*
-*
-*
-**position slider playhead part (pat: dull).
-*	pat: move name "Playhead_PartNumber" va02 mv02
-
-
-
-
-
 endm
 
 
@@ -495,17 +527,6 @@ scrp 1 1 64769 1001
 
 *call function that targets editable text part of this slider, properly formats the number and sets it as the ptxt.
 	call 1002 va02 1
-
-**store slider_PlayheadWidth / 2 in va05
-*	setv va05 game "WorldSwitcher_slider_PlayheadWidth"
-*	divv va05 2
-*
-**subtract it from the position to correctly center the Playhead
-*	subv va00 va05
-*
-*
-**position slider playhead part (pat: dull).
-*	pat: move mame "Playhead_PartNumber" va00 mv02
 
 endm
 
