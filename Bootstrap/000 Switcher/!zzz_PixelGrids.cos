@@ -7,11 +7,10 @@ enum 1 1 64742
 	kill targ
 next
 
-*mini PixelGrids
-enum 1 1 64743
+*tiny scale PixelGrids
+enum 1 1 64742
 	kill targ
 next
-
 
 *fake mouse cursor
 enum 1 1 66650
@@ -1859,5 +1858,25 @@ scrp 1 1 64742 9011
 
 
 	repe
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+*annoying hack so we can click "through" the buffer pixelgrid when it's drawn in front of the panel it stays in.
+
+scrp 1 1 64743 1
+
+mesg writ game "WorldSwitcher_Main" 200
 
 endm

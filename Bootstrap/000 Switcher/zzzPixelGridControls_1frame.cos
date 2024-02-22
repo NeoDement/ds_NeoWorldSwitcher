@@ -36,6 +36,7 @@ doif reaq va20 = 1
 	sets game "UI_PASTE" read va20 11
 	sets game "UI_CLEAR" read va20 12
 
+*unused
 	sets game "UI_EDITCOLOUR" read va20 13
 
 	sets game "UI_AREYOUSURE" read va20 14
@@ -60,6 +61,7 @@ else
 	sets game "UI_PASTE" "Paste"
 	sets game "UI_CLEAR" "Clear"
 
+*unused
 	sets game "UI_EDITCOLOUR" "Edit Colour"
 
 	sets game "UI_AREYOUSURE" "Are you sure you want to\nclear the canvas?"
@@ -702,8 +704,6 @@ scrp 1 1 64736 10
 	part 1101
 	pose 1
 
-*note: script 75 (mouse move) handles this becoming visible when hovered.
-
 
 
 
@@ -1060,7 +1060,10 @@ scrp 1 1 64736 10
 			seta game "IconEditor_Buffer" targ
 			mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
 
+*buffer frame must be drawn just in front of the world creation screen.
 			plne 1
+*and must be clickable, to pass clicks thru it to the icon panel beneath (annoying)
+			attr 4
 		endi
 
 	repe
@@ -2357,37 +2360,6 @@ endm
 
 
 
-*todo: this probably isn't needed.
-
-*RAW MOUSE MOVE SCRIPT
-
-scrp 1 1 64736 75
-
-	inst
-
-	part 1101
-
-*animate hover over Edit Colour button
-
-	doif hotp = 1101
-
-		doif hots = game "IconEditor_Main"
-
-			pose 0
-
-		endi
-
-	else
-
-		pose 1
-
-	endi
-
-endm
-
-
-
-
 
 
 
@@ -3074,11 +3046,11 @@ scrp 1 2 8000 1001
 
 		setv va01 1
 
+*target Transformation Buffer and apply stored pose for each pixel
+		targ mame "Transform_Target"
+
 		reps va00
 
-
-*target Transformation Buffer and apply stored pose for each pixel
-			targ mame "Transform_Target"
 			part va01
 			pose 0
 
@@ -3222,14 +3194,6 @@ endm
 *_P1_ is filename
 *_P2_ is where to load from (0 for the current world's journal directory, 1 for the main journal directory, or 2 for the GAME engine_other_world world's journal directory.)
 
-*3 extra params! if any of these aren't set, don't generate sprite files!
-*name "worldname_icon_lit"
-*name "worldname_icon_unlit"
-*name "worldname"
-
-*todo: idk we can clean up these params a bit. _p2_ = 2 doesn't even function without the 3 extra params anymore.
-
-
 scrp 1 1 64736 5002
 
 	inst
@@ -3237,36 +3201,8 @@ scrp 1 1 64736 5002
 	lock
 
 
-
-
-
-*we need to set game "engine_other_world" to the correct value for this world, to load the icon.
-
-	doif type mame "worldname" = 2
-
-*remember the old value in va60.
-		sets va60 game "engine_other_world"
-		sets game "engine_other_world" mame "worldname"
-
 *open the file
-		file iope _p2_ _p1_
-
-*unset!!
-		sets game "engine_other_world" va60
-
-*no worldname to load from, so make sure we don't try to generate icon images.
-	else
-
-		deln name "worldname_icon_lit"
-		deln name "worldname_icon_unlit"
-		deln name "worldname"
-
-*open the file
-		file iope _p2_ _p1_
-
-	endi
-
-
+	file iope _p2_ _p1_
 
 
 *get every necessary value from every necessary key
@@ -3317,56 +3253,6 @@ scrp 1 1 64736 5002
 
 
 	file iclo
-
-
-
-*** GENERATE SPRITE FILES! ***
-
-
-*if there are no icon names set, don't generate sprite files
-	doif type mame "worldname_icon_lit" = 2 and type mame "worldname_icon_unlit" = 2
-
-		targ game "IconEditor_Buffer"
-
-
-
-		part -1
-*		show 0
-
-*make sure buffer gets time to load
-*					lock
-*					wait 15
-*					inst
-
-
-
-
-
-*take a DARKENED icon sized screenshot using the buffer room
-		alph 75 1
-		snap mame "worldname_icon_unlit" 1024 1014 48 29 0
-
-*		wait 1
-*		inst
-
-*take an icon sized screenshot using the buffer room
-		alph 255 0
-		snap mame "worldname_icon_lit" 1024 1014 48 29 0
-
-
-*force re-draw of all loaded icons on main world switcher page
-		mesg wrt+ game "WorldSwitcher_Main" 75 mopx mopy 0
-
-
-	endi
-
-
-
-
-*unset our icon names before calling this again.
-	deln name "worldname_icon_lit"
-	deln name "worldname_icon_unlit"
-	deln name "worldname"
 
 
 
@@ -3681,6 +3567,99 @@ endm
 
 
 
+
+
+
+
+*LOAD ICON FILE AND RENDER SPRITES (via buffer)
+
+*_P1_ is world name. icon name is worked out automatically.
+*_P2_ is name of icon file to load (passed to 5002, load icon into buffer script)
+
+
+scrp 1 1 64736 5003
+
+
+
+	inst
+
+	lock
+
+
+
+
+	targ game "IconEditor_Buffer"
+
+	setv va50 posl
+	setv va51 post
+
+	mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+
+
+
+
+*we need to set game "engine_other_world" to the correct value for this world, to load the icon.
+
+
+*remember the old value in va60.
+	sets va00 game "engine_other_world"
+	sets game "engine_other_world" _p1_
+*open the file
+	call 5002 _p2_ 2
+
+*unset!!
+	sets game "engine_other_world" va00
+
+
+*"worldname"
+	sets va01 _p1_
+	sets va02 _p1_
+
+
+*_icon_lit
+	adds va01 "_icon_lit"
+
+*_icon_unlit
+	adds va02 "_icon_unlit"
+
+
+
+
+*** GENERATE SPRITE FILES! ***
+
+*	targ game "IconEditor_Buffer"
+
+	part -1
+
+
+*take a DARKENED icon sized screenshot using the buffer room
+	alph 75 1
+	snap va02 1024 1014 48 29 0
+
+*take an icon sized screenshot using the buffer room
+	alph 0 0
+	snap va01 1024 1014 48 29 0
+
+
+*force re-draw of all loaded icons on main world switcher page
+	mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
+
+
+
+	mvto va50 va51
+
+
+endm
+
+
+
+
+
+
+
+
+
 *CONFIRM (TICK) BUTTON - Save this icon and set it as this worlds icon
 
 scrp 1 1 64736 3000
@@ -3758,119 +3737,6 @@ scrp 1 1 64736 3000
 		setv game "WorldSwitcher_WorldCreation_AutoIcon" 0
 
 	endi
-
-
-
-
-
-*old code. i had a better idea. we should only save the icon when saving the world, not every time we exit the icon editor.
-*we shall store our temporary icon into the Buffer. then we will swap the Icon Preview out for the Buffer.
-
-*maybe the buffer should be created in the pixelgrids.cos file
-
-*we must not delete the buffer object when we close the icon editor, instead unparenting it from the icon editor and placing it where the icon preview was.
-
-
-
-*will we have a separate temp.icon file containing the palette and pixel data?
-*or will we have yet another pair of compound objects to store this info?
-*(this is data that will have to be swapped back in if the user presses the cancel button on the icon editor.)
-*(also maybe re-use the "Are you sure you want to clear?" dialog if the user tries to close the panel after making edits)
-
-
-
-
-*maybe something like this:
-
-*
-*
-*
-*
-**SWAP BUFFER -> ICON PREVIEW IMAGE
-*
-*part game "WorldSwitcher_WorldCreation_IconPreviewPart"
-*show 0
-*
-*targ game "IconEditor_Buffer"
-*frel game "WorldSwitcher_Main"
-*flto 418 96
-*
-*setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 1
-*
-*
-*
-*
-*
-*
-**SWAP ICON PREVIEW IMAGE -> BUFFER
-*
-*part game "WorldSwitcher_WorldCreation_IconPreviewPart"
-*show 1
-*
-*targ game "IconEditor_Buffer"
-*frel null
-*mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
-*
-*setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
-*
-
-
-
-
-
-
-
-
-
-
-
-
-* the Lit Preview, which we will
-
-
-
-*	targ game "IconEditor_Buffer"
-*	part -1
-*
-*
-*	targ game "WorldSwitcher_Main"
-*	sets va00 wrld ov04
-*
-*	sets va98 va00
-*	sets va99 va00
-*
-*	adds va98 "_icon_lit"
-*	adds va99 "_icon_unlit"
-*
-**take an icon sized screenshot using the buffer room
-*	snap va98 1024 1014 48 29 0
-*
-*	alph 75 1
-*
-**take a DARKENED icon sized screenshot using the buffer room
-*	snap va99 1024 1014 48 29 0
-*
-*	alph 255 0
-*
-*	addv va90 1
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-**set gall and pose
-*	targ game "WorldSwitcher_Main"
-*	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
-*	gall "blnk" 0
-*
-**	gall here
 
 
 

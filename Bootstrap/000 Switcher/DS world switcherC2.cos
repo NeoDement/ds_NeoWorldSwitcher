@@ -45,6 +45,11 @@ setv game "button_height" 29
 setv game "WorldSwitcher_CurrentRooms" 0
 setv game "WorldSwitcher_EngineMaxRooms" 2000
 
+*Community Edition doesn't have this problem!
+doif eame "engine_community_edition" > 0
+	setv game "WorldSwitcher_EngineMaxRooms" 50000
+endi
+
 
 *blank string that will be filled with a list of chunk names to be saved to an "addons" file, to be injected when the world is launched
 sets game "WorldSwitcher_CurrentWorld_ChunkNames" ""
@@ -174,7 +179,13 @@ doif targ <> null
 else
 *	Ok, it doesn't exist yet. Let's make one!	
 ** 	make new world switcher monitor
-	new: comp 1 2 1001 "ds world switcher" 30 0 0
+*	new: comp 1 2 1001 "ds world switcher" 30 0 0
+
+*use new bg image with swapped out Lock icon
+	new: comp 1 2 1001 "WorldSwitcher_WorldCreation" 1 19 0
+*	new: comp 1 2 1000 "ds world switcher" 30 0 0
+
+
 
 * ov00 == 3    The parts for the "worldswitcher" set
 	setv ov00 3
@@ -242,6 +253,12 @@ endi
 
 
 
+*create mouse move listener
+new: simp 1 2 6060 "blnk" 1 0 0
+seta game "MouseMoveListener" targ
+
+
+
 
 
 
@@ -259,16 +276,21 @@ endm
 
 
 
-****MOUSE MOVE ON MAIN WORLDSWITCHER WINDOW*****
+****MOUSE MOVE, ONLY ACTIVE WHEN ON MAIN WORLDSWITCHER SCREEN*****
 
 *(also manually called a few times to update icons at appropriate times)
 
-
-scrp 1 2 1000 75
-
+scrp 1 2 6060 75
+*stop
 	inst
 	lock
 
+	targ game "WorldSwitcher_Main"
+
+
+	doif targ = null
+		stop
+	endi
 
 *VA50 button part number
 *VA61 - left 
@@ -276,7 +298,7 @@ scrp 1 2 1000 75
 *VA71 - top
 *VA72 - bottom
 
-	setv va01 12
+	setv va01 7
 
 	loop
 
@@ -349,21 +371,12 @@ scrp 1 2 1000 75
 *SEND A REQUEST TO THE ICON EDITOR TO SAVE AN IMAGE OF OUR ICON FILE!
 *if it's not busy already doing a request, it will make the file!
 
-					targ game "IconEditor_Buffer"
-
-					mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
-
 
 *load "icon" from our currently accessed world's journal folder into the buffer, AND take screenshots to be used as sprites for the icons.
-					targ game "IconEditor_Main"
-					file iope 2 "icon"
-					sets name "worldname_icon_lit" va81
-					sets name "worldname_icon_unlit" va82
-					sets name "worldname" va84
-					mesg wrt+ targ 5002 "icon" 2 0
+					mesg wrt+ game "IconEditor_Main" 5003 va84 "icon" 0
+*5003
 
-
-					targ ownr
+*					targ ownr
 
 					sets va81 "blnk"
 					sets va82 "blnk"
@@ -463,9 +476,9 @@ scrp 1 2 1000 75
 
 		endi
 
-		subv va01 1
+		addv va01 1
 
-	untl va01 = 6
+	untl va01 = 13
 
 endm
 
@@ -511,7 +524,9 @@ scrp 1 2 1001 1000
 
 
 ** 		Reinject the World Switcher
-		new: comp 1 2 1000 "ds world switcher" 30 0 0
+*use new bg image with swapped out Lock icon
+		new: comp 1 2 1000 "WorldSwitcher_WorldCreation" 1 19 0
+*	new: comp 1 2 1000 "ds world switcher" 30 0 0
 
 *don't ask me how, don't ask me why, but this code is now part of big fat script 2000 - the screen change script.
 *		seta game "WorldSwitcher_Main" targ
@@ -520,7 +535,7 @@ scrp 1 2 1001 1000
 * 		Invisible ready for fade in 
 		alph 256 1
 		part 0
-		pose 29
+*		pose 29
 
 * 		Set current configuration of the screen to "none"
 		setv ov00 0
@@ -657,12 +672,16 @@ scrp 1 2 1000 2000
 
 	setv ov00 ov01
 
-	doif ov00 = 3
+*if we're in World Switcher mode, listen for mouse movements, to handle icon highlighting.
+
+	targ game "MouseMoveListener"
+	doif mv00 = 3
 		imsk 68
 	else
 		imsk 64
 
 	endi
+	targ ownr
 
 	doif ov00 = 1
 		gsub make_new_world
@@ -680,7 +699,7 @@ scrp 1 2 1000 2000
 	endi
 
 	part 0
-	pose 0
+*	pose 0
 
 * Fade in
 	doif ov74 = 0
@@ -697,6 +716,9 @@ scrp 1 2 1000 2000
 		buzz 50
 		alph va00 0
 		setv ov74 1
+
+*force draw all the icons once. this will make any custom ones onscreen load.
+		mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
 	endi
 
 * All done - so let's stop here
@@ -1065,7 +1087,6 @@ scrp 1 2 1000 2000
 *		pat: dull 1 "ds world switcher" 19 22 20 0
 
 *new totally blank bg image
-*todo: this makes our other script that watches for this exact bg image number a little hard to follow...
 		pat: dull 1 "WorldSwitcher_WorldCreation" 0 22 20 0
 
 
@@ -1088,7 +1109,7 @@ scrp 1 2 1000 2000
 
 
 
-** Select Icon BUTTON part
+** Select Icon BUTTON part (NOTE: script 200 is also called by clicking on the buffer pixelgrid)
 		pat: butt 7 "WorldSwitcher_WorldCreation" 2 1 game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 0 [] 200 0
 
 ** Select Icon ICON PREVIEW DULL part
@@ -1131,8 +1152,6 @@ scrp 1 2 1000 2000
 ** DISABLE CUSTOM ICON, ENABLE PRE-SET ICON **
 		call 5500 0 0
 
-*reset the EditCount to 0. we don't write the EditCount to the icon if it's 0.
-		setv game "WorldSwitcher_WorldCreation_EditCount" 0
 
 
 
@@ -1316,6 +1335,18 @@ scrp 1 2 1000 2000
 			part 8
 			frmt 0 8 0 0 4 0 2
 			ptxt read "World Switcher" 6
+
+
+*		Cancel from Password Screen  (Return to Main Menu)
+			pat: butt 2 "ds world switcher" 24 2 374 232 0 [0] 502 0
+			part 2
+			anim [0]
+*		Accept Password (automatically loads world)
+			pat: butt 3 "ds world switcher" 22 2 125 232 0 [0] 700 0
+			part 3
+			anim [0]
+
+
 		else
 ** This World is not Password Protected
 
@@ -1388,25 +1419,21 @@ scrp 1 2 1000 2000
 
 
 
-
-** Select Icon ICON PREVIEW DULL part
-			pat: dull 16 "blnk" 0 game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 5
-
 			setv game "WorldSwitcher_WorldCreation_IconPreviewPart" 16
 
-** Select Icon BUTTON part
+** Select Icon ICON PREVIEW DULL part
+			pat: dull game "WorldSwitcher_WorldCreation_IconPreviewPart" "blnk" 0 game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 5
+
+
+** Select Icon BUTTON part (NOTE: script 200 is also called by clicking on the buffer pixelgrid)
 			pat: butt 15 "WorldSwitcher_WorldCreation" 2 1 game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y" 0 [] 200 0
 
 
-			part game "WorldSwitcher_WorldCreation_IconPreviewPart"
-*			part 16
 
 *load world icon if it exists. if not, we will default to "no icon defined" ELSE case.
 			gsub load_icon_from_world_journal
 
-
-*set editCount to whatever we just loaded. could be 0.
-			setv game "WorldSwitcher_WorldCreation_EditCount" va13
+			part game "WorldSwitcher_WorldCreation_IconPreviewPart"
 
 			gall "blnk" 0
 
@@ -1437,9 +1464,6 @@ scrp 1 2 1000 2000
 
 *...no icon defined, calculate it from wtype
 			else
-
-				gsub CLEAR_CUSTOM_ICON_BUFFER
-
 
 				file iope 2 "wtype"
 				sets va64 innl
@@ -1473,8 +1497,13 @@ scrp 1 2 1000 2000
 *fix off by 1 showing us dimmed icons instead of light.
 				addv va60 1
 
+*			part game "WorldSwitcher_WorldCreation_IconPreviewPart"
+
 *set our gall!!
 				gall "WorldSwitcher_Icons_Default" va60
+
+				gsub CLEAR_CUSTOM_ICON_BUFFER
+
 
 
 			endi
@@ -1485,14 +1514,6 @@ scrp 1 2 1000 2000
 
 
 
-
-
-
-*todo: COMMENT THIS OUTT, FIND A SOLUTION!!!!
-
-
-*all new worlds should do auto-icon!!
-*			setv game "WorldSwitcher_WorldCreation_AutoIcon" 1
 
 
 
@@ -1561,22 +1582,25 @@ scrp 1 2 1000 2000
 *			ptxt read "World Switcher" 16
 
 
-		endi
-
 
 
 
 *		Cancel from Password Screen  (Return to Main Menu)
-		pat: butt 2 "WorldSwitcher_WorldCreation" 6 2 461 292 0 [1] 502 0
-		part 2
-		anim [0]
-*		Accept Password (automatically loads world)
+			pat: butt 2 "WorldSwitcher_WorldCreation" 6 2 461 292 0 [1] 502 0
+			part 2
+			anim [0]
 
-*(call script 699 which processes any changes to the icon and name)
-*		pat: butt 3 "WorldSwitcher_WorldCreation" 4 2 55 292 0 [1] 700 0
-		pat: butt 3 "WorldSwitcher_WorldCreation" 4 2 55 292 0 [1] 699 0
-		part 3
-		anim [0]
+*		Accept Password (automatically loads world)
+*(699 instead of 700, to check over and save the newly added stuff)
+			pat: butt 3 "WorldSwitcher_WorldCreation" 4 2 55 292 0 [1] 699 0
+			part 3
+			anim [0]
+
+
+
+
+		endi
+
 
 
 
@@ -1586,7 +1610,8 @@ scrp 1 2 1000 2000
 ****
 
 
-		pat: dull 35 "ds world switcher" 0 0 0 0
+*		pat: dull 35 "ds world switcher" 0 0 0 0
+		pat: dull 35 "WorldSwitcher_WorldCreation" 19 0 0 0
 
 		pat: fixd 100 "ds world switcher" 18 45 34 0 "WhiteOnTransparentChars"
 		part 100
@@ -1685,7 +1710,7 @@ scrp 1 2 1000 2000
 			subv va00 1
 		untl va00 = 0
 
-		call 75 mopx mopy
+		mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
 
 
 
@@ -2053,11 +2078,12 @@ scrp 1 2 1000 2000
 				part 96
 				anim [0]
 *				Lock controller
-				pat: butt 97 "ds world switcher" 10 2 257 166 0 [0] 608 0
+
+*new icon, because we can change icon/name, as well as just Lock
+				pat: butt 97 "WorldSwitcher_WorldCreation" 17 2 257 166 0 [0] 608 0
 				part 97
 				anim [0]
 
-*				mesg writ targ 75
 			endi
 		endi
 	retn
@@ -2156,10 +2182,8 @@ scrp 1 2 1000 2000
 
 *"worldname"
 				sets game va82 wrld va53
-*editCount
-				adds game va82 vtos va13
 
-*(copy worldname1 from GAME "12_icon_on" to GAME "12_icon_off")
+*(copy worldname from GAME "12_icon_on" to GAME "12_icon_off")
 				sets game va83 game va82
 
 
@@ -2391,7 +2415,6 @@ scrp 1 2 1000 2000
 *VA10 - type (normal or custom)
 *VA11 - spriteName or palette
 *VA12 - spriteFrame or imageData
-*VA13 - editCount (only increased for custom icon worlds)
 
 	subr load_icon_from_world_journal
 
@@ -2399,7 +2422,6 @@ scrp 1 2 1000 2000
 		sets va10 ""
 		sets va11 ""
 		setv va12 -1
-		setv va13 0
 
 *open icon file
 		file iope 2 "icon"
@@ -2434,9 +2456,6 @@ scrp 1 2 1000 2000
 
 			endi
 
-			sets va35 "editcount:"
-			gsub load_value_from_key_named_va35_into_string_va30
-			setv va13 stoi va30
 
 		endi
 
@@ -2555,11 +2574,11 @@ scrp 1 2 1000 2000
 
 		setv va01 1
 
+*target Transformation Buffer and apply stored pose for each pixel
+		targ mame "Transform_Target"
+
 		reps va00
 
-
-*target Transformation Buffer and apply stored pose for each pixel
-			targ mame "Transform_Target"
 			part va01
 			pose 0
 
@@ -2700,9 +2719,6 @@ scrp 1 2 1000 450
 				mesg wrt+ ownr 600 95 0 0
 			endi
 *			anim [0]
-*here: reset to unhighlighted whenever you refresh the icons
-*todo: re-enable
-*			tino 90 90 90 128 128
 
 
 *reset all icons highlight state to 0
@@ -2714,9 +2730,7 @@ scrp 1 2 1000 450
 			setv game "7_lit" 0
 
 *manually update all the icons
-			call 75 0 0
-
-*ucln
+			mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
 		endi
 	endi
 
@@ -2746,23 +2760,21 @@ scrp 1 2 1000 450
 
 	setv va45 0
 
+
+	inst
+
+*disenable listening for mouse movements now we're animating.
+	targ game "MouseMoveListener"
+	imsk 64
+
+
 	reps 9
 
-*				wait 1
 
 		inst
 
 
 		doif va40 = 1
-*every even frame, set "N_lit" to 0
-*			setv va40 0
-*			gall "world_icon_lit" 0
-*			gall va81 0
-*		else
-*every odd frame, set "N_lit" to 1
-*			setv va40 1
-*			gall "world_icon_unlit" 0
-*			gall va82 0
 
 
 			setv va40 0
@@ -2832,18 +2844,22 @@ scrp 1 2 1000 450
 
 			wait 1
 			inst
-*			rtar 1 2 555
-*			anim [0]
-*			over
-*			targ ownr
+
 		endi
 
-		call 75 0 0
-		dbg: outv game "12_lit"
+		mesg wrt+ game "MouseMoveListener" 75 0 0 0
 
 		addv va45 1
 
 	repe
+
+
+*re-enable listening for mouse movements now we're done animating.
+	targ game "MouseMoveListener"
+	imsk 68
+
+	targ ownr
+
 
 	doif _p1_ = 12
 
@@ -2874,7 +2890,7 @@ scrp 1 2 1000 450
 
 
 *manually re-draw all the icons
-	call 75 mopx mopy
+	mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
 
 
 *******
@@ -2893,7 +2909,13 @@ scrp 1 2 1000 450
 	anim [0]
 **	Lock Button
 	pat: kill 97
-	pat: butt 97 "ds world switcher" 10 2 257 166 0 [0] 608 0
+
+*new icon, because we can change icon/name, as well as just Lock
+	pat: butt 97 "WorldSwitcher_WorldCreation" 17 2 257 166 0 [0] 608 0
+	part 97
+	anim [0]
+
+*	pat: butt 97 "ds world switcher" 10 2 257 166 0 [0] 608 0
 	part 97
 	anim [0]
 	slow
@@ -3732,12 +3754,6 @@ scrp 1 2 1000 503
 		subv va99 1
 		outs vtos va99
 
-*write an edit count, if we have one.
-		doif game "WorldSwitcher_WorldCreation_EditCount" > 0
-			outs "editCount:"
-			outs vtos game "WorldSwitcher_WorldCreation_EditCount"
-		endi
-
 		file oclo
 
 	else
@@ -4144,7 +4160,6 @@ scrp 1 2 1000 4001
 *VA10 - type (normal or custom)
 *VA11 - spriteName or palette
 *VA12 - spriteFrame or imageData
-*VA13 - editCount (only increased for custom icon worlds)
 
 	subr load_icon_from_world_journal
 
@@ -4152,8 +4167,6 @@ scrp 1 2 1000 4001
 		sets va10 ""
 		sets va11 ""
 		setv va12 -1
-		setv va13 0
-
 *open icon file
 		file iope 2 "icon"
 
@@ -4186,10 +4199,6 @@ scrp 1 2 1000 4001
 *				setv va12 stoi va30
 
 			endi
-
-			sets va35 "editcount:"
-			gsub load_value_from_key_named_va35_into_string_va30
-			setv va13 stoi va30
 
 		endi
 
@@ -4317,11 +4326,11 @@ scrp 1 2 1000 4001
 
 		setv va01 1
 
+*target Transformation Buffer and apply stored pose for each pixel
+		targ mame "Transform_Target"
+
 		reps va00
 
-
-*target Transformation Buffer and apply stored pose for each pixel
-			targ mame "Transform_Target"
 			part va01
 			pose 0
 
@@ -4415,12 +4424,14 @@ endm
 
 
 
+
+
+
+
+
 *Confirm changes to PASSWORDED world!
 
 scrp 1 2 1000 699
-
-
-
 
 *select world name textbox
 	part 13
@@ -4462,7 +4473,6 @@ scrp 1 2 1000 699
 
 
 *NEW: write selected icon too! todo: make sure this stays up to date with the one in create new world. you'll prob need to make a shared function.
-*the difference here being we add 1 to EditCount whenever we save changes to a custom icon.
 
 *write a normal, sprite name/frame based icon.
 
@@ -4481,20 +4491,12 @@ scrp 1 2 1000 699
 		subv va99 1
 		outs vtos va99
 
-*write an edit count, if we have one.
-		doif game "WorldSwitcher_WorldCreation_EditCount" > 0
-			outs "editCount:"
-			outs vtos game "WorldSwitcher_WorldCreation_EditCount"
-		endi
 
 		file oclo
 
 	else
 
 *It's a custom icon? Call the Icon Editor to handle the saving!
-
-*add 1 to editCount, so we know to write a unique number after the icon filename. this will allow the icon changes to be seen as the engine can't load from the same named image file twice.
-		addv game "WorldSwitcher_WorldCreation_EditCount" 1
 
 *save our icon to the buffer into our currently accessed world's journal folder as "icon". 
 		mesg wrt+ game "IconEditor_Main" 5001 "icon" 2 0
@@ -4503,21 +4505,93 @@ scrp 1 2 1000 699
 	endi
 
 
-
-
-
-
-
-
-
-
-
-
-*	stop
-
-	call 700 0 0
+*if no password is set, don't worry about loading the world.
+	part 5
+	sets va00 ptxt
+	part 7
+	doif ptxt = "" and va00 = ""
+		setv ov01 3
+		mesg writ targ 2000
+	else
+		call 700 0 0
+	endi
 
 endm
+
+
+
+
+
+
+
+
+
+
+
+*todo: delete this, its unchanged from default
+
+*scrp 1 2 1000 700
+*
+*
+**	Commit password entry screen
+**	Method is:
+**		if ov00 is 4
+**			check pwd okay & either go to ov05 or else switcher
+**		else
+**			if pass <> confirm then abort
+**			set pwd to pass
+**			enter world to commit password
+**		end
+*	lock
+*	part 3
+*	anim [1 1 1 1 1 0 0 0 0]
+*	over
+*	unlk
+*	doif ov00 = 4
+**		dbg: outs "Hmm, It's a check pwd"
+*		part 7
+*		setv ov01 3
+**		dbg: outs ptxt
+**		dbg: outs pswd ov04
+*		doif pswd ov04 = ptxt
+**			dbg: outs "Okay, let's go"
+*			setv ov01 ov05
+*		else
+*			sndc "buzz"
+*		endi
+*		mesg writ targ 2000
+*		stop
+*	else
+**		dbg: outs "Hmm, it's a new password"
+*		part 5
+*		sets va00 ptxt
+**		dbg: outs "Enter:"
+**		dbg: outs va00
+*		part 7
+**		dbg: outs "Confirm"
+**		dbg: outs ptxt
+*		setv ov01 3
+*		doif ptxt = va00
+**			dbg: outs "load it"
+*			pswd va00
+**			dbg: outs va00
+*			setv ov01 6
+*			mesg writ targ 2000
+*		else
+*			setv ov01 7
+*			sndc "buzz"
+*		endi
+*	endi
+*endm
+
+
+
+
+
+
+
+
+
 
 
 

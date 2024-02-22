@@ -172,24 +172,26 @@ scrp 1 1 64741 1000
 
 
 
+*don't pop open a dropdown if we already have one, or if there are no items in the dropdown.
+	doif mame "State" = 0 and name "ItemCount" > 0
+
+
+
 
 
 
 *PAUSE PARENT OBJECT so that the user can't accidentally click the form underneath etc
-	targ mame "ParentObject"
+		targ mame "ParentObject"
 
-	paus 1
+		paus 1
 
-	targ ownr
+		targ ownr
 
 *a dropdown is open. other ui elements, such as the Pixel Grid, can read this variable and use it to know to remain inactive.
-	setv game "IconEditor_DropdownOpen" 1
+		setv game "IconEditor_DropdownOpen" 1
 
 
 
-
-*don't pop open a dropdown if we already have one, or if there are no items in the dropdown.
-	doif mame "State" = 0 and name "ItemCount" > 0
 
 		setv mame "State" 1
 
