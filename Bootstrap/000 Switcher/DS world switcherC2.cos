@@ -169,60 +169,64 @@ ject "DS world switcherC2.cos" 2
 *target original world switcher
 
 
-
-rtar 1 2 1001
-doif targ <> null
-* ov00 == 3    The parts for the "worldswitcher" set
-	setv ov00 3
-*fire up world switcher screen via info agent
-	mesg writ targ 1000
-else
-*	Ok, it doesn't exist yet. Let's make one!	
-** 	make new world switcher monitor
+*
+*rtar 1 2 1001
+*doif targ <> null
+** ov00 == 3    The parts for the "worldswitcher" set
+*	setv ov00 3
+**fire up world switcher screen via info agent
+*	mesg writ targ 1000
+*else
+*
+**	Ok, it doesn't exist yet. Let's make one!	
+*** 	make new world switcher monitor
 *	new: comp 1 2 1001 "ds world switcher" 30 0 0
-
-*use new bg image with swapped out Lock icon
-	new: comp 1 2 1001 "WorldSwitcher_WorldCreation" 1 19 0
-*	new: comp 1 2 1000 "ds world switcher" 30 0 0
-
-
-
-* ov00 == 3    The parts for the "worldswitcher" set
-	setv ov00 3
-*setv name "waiting" 0 (same as above)
-	mesg writ targ 1001
-*mesg writ targ 1000
-endi
-
-*************************************
-**if c12ds is enabled, do something**
-*************************************
 *
-*doif totl 1 1 32302 <> 0
-*	new: simp 3 15 50200 "C1Enabled" 1 0 0
 *
-***set some variable, use it later when populating world addons screen :)**
 *
+*
+** ov00 == 3    The parts for the "worldswitcher" set
+*	setv ov00 3
+**setv name "waiting" 0 (same as above)
+*	mesg writ targ 1000
+**mesg writ targ 1000
+*endi
+*
+**************************************
+***if c12ds is enabled, do something**
+**************************************
+**
+**doif totl 1 1 32302 <> 0
+**	new: simp 3 15 50200 "C1Enabled" 1 0 0
+**
+****set some variable, use it later when populating world addons screen :)**
+**
+**	attr 0
+**	mvto 100 0
+**	tick 40
+**	mesg writ targ 301
+**endi
+*
+*doif totl 1 1 32302 <> 1
+*	enum 1 1 32302
+*		kill targ
+*	next
+*	new: simp 1 1 32302 "C1Enabled" 1 0 0
 *	attr 0
-*	mvto 100 0
+*	mvto 460 0
 *	tick 40
 *	mesg writ targ 301
 *endi
 
-doif totl 1 1 32302 <> 1
-	enum 1 1 32302
-		kill targ
-	next
-	new: simp 1 1 32302 "C1Enabled" 1 0 0
-	attr 0
-	mvto 460 0
-	tick 40
-	mesg writ targ 301
-endi
-
 
 *todo: crappy fix!
 
+
+*kill C1 Enabled sign, if it exists
+enum 1 1 32302
+	stpc
+	kill targ
+next
 
 
 ***************************************************************************
@@ -487,125 +491,118 @@ endm
 
 
 
-
-
-scrp 1 2 1001 1000
-
-	doif ov00 = 1
-		gsub reinject
-	elif ov00 = 2
-		gsub dock_this
-	elif ov00 = 3
-		rtar 1 2 1000
-		kill targ
-		gsub reinject
-	endi
-	subr reinject
-** 		destroy existing world switcher
-		enum 1 2 1000
-			kill targ
-		next
-		mesg wrt+ targ 300 0 0 2
-		tick 40
-		mesg writ targ 301
-
-		inst
-
-*todo: this should only appear if some option is checked
-		doif totl 1 1 32302 <> 1
-			enum 1 1 32302
-				kill targ
-			next
-			new: simp 1 1 32302 "C1Enabled" 1 0 0
-			attr 0
-			mvto 460 0
-		endi
-
-
-
-** 		Reinject the World Switcher
-*use new bg image with swapped out Lock icon
-		new: comp 1 2 1000 "WorldSwitcher_WorldCreation" 1 19 0
-*	new: comp 1 2 1000 "ds world switcher" 30 0 0
-
-*don't ask me how, don't ask me why, but this code is now part of big fat script 2000 - the screen change script.
-*		seta game "WorldSwitcher_Main" targ
-
-		part -1
-* 		Invisible ready for fade in 
-		alph 256 1
-		part 0
-*		pose 29
-
-* 		Set current configuration of the screen to "none"
-		setv ov00 0
-
-		mvto 115 92
-
-		setv ov02 nwld
-		setv ov03 0
-
-		setv ov04 -1
-		file iope 0 "World Switcher Persistent State Entries"
-		doif inok = 1
-			setv ov04 wnti innl
-			setv ov02 nwld
-			setv ov03 ov04
-			modv ov03 6
-			subv ov03 ov04
-			negv ov03
-		endi
-		file iclo
-* 		Tell ourselves to calculate and enter an initial state (scripted for use after delete etc)
-
+*
+*
+*scrp 1 2 1001 10009999
+*
+*	doif ov00 = 1
+*		gsub reinject
+*	elif ov00 = 2
+*		gsub dock_this
+*	elif ov00 = 3
+*		rtar 1 2 1000
+*		kill targ
+*		gsub reinject
+*	endi
+*	subr reinject
+*** 		destroy existing world switcher
+*		enum 1 2 1000
+*			kill targ
+*		next
+*		mesg wrt+ targ 300 0 0 2
+*		tick 40
+*		mesg writ targ 301
+*
+*		inst
+*
+**todo: this should only appear if some option is checked
+*		doif totl 1 1 32302 <> 1
+*			enum 1 1 32302
+*				kill targ
+*			next
+*			new: simp 1 1 32302 "C1Enabled" 1 0 0
+*			attr 0
+*			mvto 460 0
+*		endi
+*
+*
+*
+*** 		Reinject the World Switcher
+*		new: comp 1 2 1000 "WorldSwitcher_WorldCreation" 1 19 0
+*
+**don't ask me how, don't ask me why, but this code is now part of big fat script 2000 - the screen change script.
+**		seta game "WorldSwitcher_Main" targ
+*
+*		part -1
+** 		Invisible ready for fade in 
+*		alph 256 1
+*		part 0
+**		pose 29
+*
+** 		Set current configuration of the screen to "none"
+*		setv ov00 0
+*
+*		mvto 115 92
+*
+*		setv ov02 nwld
+*		setv ov03 0
+*
+*		setv ov04 -1
+*		file iope 0 "World Switcher Persistent State Entries"
+*		doif inok = 1
+*			setv ov04 wnti innl
+*			setv ov02 nwld
+*			setv ov03 ov04
+*			modv ov03 6
+*			subv ov03 ov04
+*			negv ov03
+*		endi
+*		file iclo
+** 		Tell ourselves to calculate and enter an initial state (scripted for use after delete etc)
+*
 *		imsk 64
-
-*+4, mouse move
-*		imsk 68
-
-
-		mesg wrt+ targ 300 0 0 2
-		tick 40
-		mesg writ targ 301
-
-*		C1 to DS Custom reinject stuff
-
-*todo: this should only appear if some option is checked
-		inst
-		doif totl 1 1 32302 <> 1
-			enum 1 1 32302
-				kill targ
-			next
-			new: simp 1 1 32302 "C1Enabled" 1 0 0
-			attr 0
-			mvto 460 0
-		endi
-
-** 		Weird! :O) If I don't have the wait 1 here then the tick 40 is never set (it seems).
-** 		And if the mesg wrt+ has a delay then it is never sent (the OWNR gets killed).
-		wait 1
-		tick 40
-		kill ownr
-	retn
-	subr dock_this
-** 		ov04 contains the world to be docked
-*		hide dialog and hand
-		mvto -1000 -1000
-		targ pntr
-		pose 19
-		targ ownr
-* 		write to this new world's directory to show whether docked or undocked
-		sets va00 wrld ov04
-		sets game "engine_other_world" va00
-		file oope 2 "wtype" 0
-		outs "docked"
-		file oclo
-** 		set the EAME and then load
-		setv eame "engine_no_auxiliary_bootstrap_1" 0
-		load wrld ov04
-		kill ownr
-	retn
-endm
+*
+*		mesg wrt+ targ 300 0 0 2
+*		tick 40
+*
+**		C1 to DS Custom reinject stuff
+*
+**todo: this should only appear if some option is checked
+*		inst
+*		doif totl 1 1 32302 <> 1
+*			enum 1 1 32302
+*				kill targ
+*			next
+*			new: simp 1 1 32302 "C1Enabled" 1 0 0
+*			attr 0
+*			mvto 460 0
+*		endi
+*
+*** 		Weird! :O) If I don't have the wait 1 here then the tick 40 is never set (it seems).
+*** 		And if the mesg wrt+ has a delay then it is never sent (the OWNR gets killed).
+*		wait 1
+*		tick 40
+*		kill ownr
+*	retn
+*	subr dock_this
+*** 		ov04 contains the world to be docked
+**		hide dialog and hand
+*		mvto -1000 -1000
+*		targ pntr
+*		pose 19
+*		targ ownr
+** 		write to this new world's directory to show whether docked or undocked
+*		sets va00 wrld ov04
+*		sets game "engine_other_world" va00
+*		file oope 2 "wtype" 0
+*		outs "docked"
+*		file oclo
+*** 		set the EAME and then load
+*		setv eame "engine_no_auxiliary_bootstrap_1" 0
+*		load wrld ov04
+*		kill ownr
+*	retn
+*endm
 
 
 scrp 1 2 1000 2000
@@ -626,19 +623,6 @@ scrp 1 2 1000 2000
 	inst
 	lock
 	tick 0
-
-
-
-
-
-
-*it would be better to do this when we create it, but this works good.
-	seta game "WorldSwitcher_Main" targ
-
-
-
-
-
 
 
 *NEW:
@@ -676,9 +660,9 @@ scrp 1 2 1000 2000
 
 	targ game "MouseMoveListener"
 	doif mv00 = 3
-		imsk 68
+		imsk 4
 	else
-		imsk 64
+		imsk 0
 
 	endi
 	targ ownr
@@ -698,12 +682,15 @@ scrp 1 2 1000 2000
 		gsub make_loading_screen
 	endi
 
-	part 0
-*	pose 0
 
 * Fade in
 	doif ov74 = 0
 		lock
+
+*it would be better to do this when we create it, but we're not hooking that event. this also only runs once, on creation :)
+		seta game "WorldSwitcher_Main" targ
+
+
 		part -1
 		setv va00 256
 		buzz 25
@@ -720,6 +707,9 @@ scrp 1 2 1000 2000
 *force draw all the icons once. this will make any custom ones onscreen load.
 		mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
 	endi
+
+	part 0
+	pose 0
 
 * All done - so let's stop here
 	stop
@@ -1610,8 +1600,10 @@ scrp 1 2 1000 2000
 ****
 
 
-*		pat: dull 35 "ds world switcher" 0 0 0 0
+
+*use new bg image with swapped out Lock icon
 		pat: dull 35 "WorldSwitcher_WorldCreation" 19 0 0 0
+*		pat: dull 35 "ds world switcher" 0 0 0 0
 
 		pat: fixd 100 "ds world switcher" 18 45 34 0 "WhiteOnTransparentChars"
 		part 100
@@ -2765,7 +2757,7 @@ scrp 1 2 1000 450
 
 *disenable listening for mouse movements now we're animating.
 	targ game "MouseMoveListener"
-	imsk 64
+	imsk 4
 
 
 	reps 9
@@ -2856,7 +2848,7 @@ scrp 1 2 1000 450
 
 *re-enable listening for mouse movements now we're done animating.
 	targ game "MouseMoveListener"
-	imsk 68
+	imsk 0
 
 	targ ownr
 

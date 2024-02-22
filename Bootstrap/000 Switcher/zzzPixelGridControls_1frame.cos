@@ -891,10 +891,6 @@ scrp 1 1 64736 10
 
 	repe
 
-
-*cmrt 0
-
-
 *store main grid in a global variable so we can access it later
 	seta game "IconEditor_PixelGrid" targ
 
@@ -994,9 +990,8 @@ scrp 1 1 64736 10
 *set this to 0 and use it to count loop iterations.
 	setv va03 0
 
-*reps 3
-*2 Previews (Lit and Unlit), 1 Buffer (for transformations and snapshots), 1 clipboard (for copy/paste)
-	reps 4
+*2 Previews (Lit and Unlit), 1 Buffer (for transformations and snapshots)
+	reps 3
 
 		new: comp 1 1 64743 "blnk" 0 0 2000
 
@@ -2560,19 +2555,7 @@ scrp 1 1 64736 6000
 		frmt 5 0 5 0 8 0 2
 		ptxt game "UI_AREYOUSURE"
 
-		setv va90 wndw
-		divv va90 2
-		setv va91 wndh
-		divv va91 2
-		setv va92 wdth
-		divv va92 2
-		setv va93 hght
-		divv va93 2
-
-		subv va90 va92
-		subv va91 va93
-
-		flto va90 va91
+		mvto 256 215
 
 *pause the pixel grid and main form!!
 		targ game "IconEditor_PixelGrid"
@@ -2580,8 +2563,24 @@ scrp 1 1 64736 6000
 		paus 1
 
 		targ ownr
+		part 0
+
+*move screen darkener just in front of the main panel, but still behind the newly opened colour editor panel
+		setv va00 plne
+		addv va00 1
+
+		targ game "WorldSwitcher_ScreenFader"
+
+		doif targ <> null
+			plne va00
+		endi
+
+		targ ownr
 
 		paus 1
+
+
+
 
 
 
@@ -3012,6 +3011,11 @@ endm
 
 scrp 1 2 8000 1001
 
+	lock
+	part _p1_
+	anim [1 1 1 1 1 0 0 0 0]
+	over
+
 	inst
 
 *Clear main pixelgrid
@@ -3029,7 +3033,18 @@ scrp 1 2 8000 1001
 
 	paus 0
 
+*move screen darkener just behind the Icon Chooser panel again. everything is obscured in such a way that this darkens everything appropriately.
 
+	targ game "WorldSwitcher_IconPanel"
+	part 0
+
+	setv va00 plne
+	subv va00 1
+
+	targ game "WorldSwitcher_ScreenFader"
+	plne va00
+
+*goodbye
 	kill ownr
 
 
@@ -3070,6 +3085,11 @@ endm
 
 scrp 1 2 8000 1000
 
+	lock
+	part _p1_
+	anim [1 1 1 1 1 0 0 0 0]
+	over
+
 	inst
 
 *unpause the pixel grid and main form!!
@@ -3081,7 +3101,18 @@ scrp 1 2 8000 1000
 
 	paus 0
 
+*move screen darkener just behind the Icon Chooser panel again. everything is obscured in such a way that this darkens everything appropriately.
 
+	targ game "WorldSwitcher_IconPanel"
+	part 0
+
+	setv va00 plne
+	subv va00 1
+
+	targ game "WorldSwitcher_ScreenFader"
+	plne va00
+
+*goodbye
 	kill ownr
 
 endm
@@ -3890,28 +3921,7 @@ scrp 1 1 64736 7500
 *listen for Mouse Wheel 32 (Brush Size Slider) + Mouse Move 4 (for the box that appears around the big Selected Colour when mouse is hovered)
 	imsk 36
 
-
-*floatable
-	attr 32
-
-
-**center it
-*
-*	setv va90 wndw
-*	divv va90 2
-*	setv va91 wndh
-*	divv va91 2
-*	setv va92 wdth
-*	divv va92 2
-*	setv va93 hght
-*	divv va93 2
-*
-*	subv va90 va92
-*	subv va91 va93
-*
-*	flto va90 va91
-
-	flto 225 93
+	mvto 225 93
 
 
 	targ game "IconEditor_PixelGrid"

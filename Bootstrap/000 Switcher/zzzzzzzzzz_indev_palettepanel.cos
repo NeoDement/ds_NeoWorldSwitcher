@@ -838,9 +838,10 @@ scrp 1 1 14546 200
 	pose 0
 
 
+*move screen darkener just behind the Icon Chooser panel again. everything is obscured in such a way that this darkens everything appropriately.
+
 	targ game "WorldSwitcher_IconPanel"
 
-*move screen darkener just behind the Icon Chooser panel again. everything is obscured in such a way that this darkens everything appropriately.
 	setv va00 plne
 	subv va00 1
 
