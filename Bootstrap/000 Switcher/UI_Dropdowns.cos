@@ -1,10 +1,3 @@
-*todo: need a function to CLEAR a dropdown!
-
-
-
-
-
-
 *tweakable dropdown settings
 
 setv game "WorldSwitcher_dropdown_Width" 128
@@ -21,8 +14,8 @@ setv game "IconEditor_DropdownOpen" 0
 
 
 
-*todo: a more logical solution would be getting a low plane number and adding it to the PLNE value from compound object
-setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 5000
+*this value is added to the PLNE value from the parent/compound object
+setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 50
 
 
 
@@ -32,8 +25,6 @@ setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 5000
 
 
 
-*important variables that all dropdown managers need to know!
-*
 *****************************************************************************
 **Example dropdown
 *****************************************************************************
@@ -107,22 +98,41 @@ setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 5000
 *
 **populate the dropdown with desired items
 *
-*	mesg wrt+ targ 1001 game "UI_ROTATE90" 0 0
-*	mesg wrt+ targ 1001 game "UI_ROTATEMINUS90" 0 0
-*	mesg wrt+ targ 1001 game "UI_ROTATE180" 0 0
-**
-**	mesg wrt+ targ 1001 game "UI_FLIPHORIZONTAL" 0 0
-**	mesg wrt+ targ 1001 game "UI_FLIPVERTICAL" 0 0
-**
-**	mesg wrt+ targ 1001 game "UI_INVERT" 0 0
-**	mesg wrt+ targ 1001 game "UI_CLEAR" 0 0
-*
+*	mesg wrt+ targ 1001 game "Example 1" 0 0
+*	mesg wrt+ targ 1001 game "Example 2" 0 0
+*	mesg wrt+ targ 1001 game "etc" 0 0
 *
 **target main Compound Object again
 *	targ ownr
 *
 *************************************************************************
 
+
+
+
+
+
+
+
+****************************************************************************************
+******************************* EXAMPLE DROPDOWN SCRIPT ********************************
+****************************************************************************************
+*
+*
+*
+*scrp 1 1 64736 6001
+*
+*	inst
+*
+**target Example Dropdown
+*	targ mame "ExampleDropdown"
+**check if the correct button part number for this dropdown was sent
+*	doif name "Button_PartNumber" = _p1_
+*		mesg writ targ 1000
+*		stop
+*	endi
+*
+*endm
 
 
 
@@ -155,8 +165,6 @@ scrp 1 1 64741 10
 *any non-number value will make your listbox appear just beneath your dropdown button (the height of one segment)
 	sets mame "X_Offset" ""
 	sets mame "Y_Offset" ""
-
-	plne 5000
 
 endm
 
@@ -240,6 +248,8 @@ scrp 1 1 64741 1000
 *animate button on parent object
 		targ mame "ParentObject"
 
+*remember plane
+		part 0
 		setv va69 plne
 
 		part mame "Button_PartNumber"
@@ -282,12 +292,11 @@ scrp 1 1 64741 1000
 *move relative to the parent object
 		frel mame "ParentObject"
 
-*todo: i have no idea why this doesn't work. changing it in the creation script (10) works fine so??
-**set plane relative to parent object
-*		addv va69 game "WorldSwitcher_IconEditor_Dropdown_Plane"
-*		
-*		plne va69
+*set plane relative to parent object
+		addv va69 game "WorldSwitcher_IconEditor_Dropdown_Plane"
 
+		part 0
+		plne va69
 
 *variable to keep track of what iteration of the loop we're on, and what part number to create
 		setv va99 1
@@ -370,8 +379,6 @@ endm
 *RAW MOUSE DOWN SCRIPT
 
 scrp 1 1 64741 76
-
-	plne 6000
 
 	inst
 
@@ -603,7 +610,7 @@ scrp 1 1 64741 75
 			setv name "HoverPart" va45
 
 *handle unhighlighting of previous part
-			doif name "PreviousHoverPart" <> 0 and name "PreviousHoverPart" <> va45
+			doif name "PreviousHoverPart" <> 0 and name "PreviousHoverPart" <> va45 and part name "PreviousHoverPart" = 1
 				part name "PreviousHoverPart"
 				pose 0
 			endi
@@ -615,7 +622,7 @@ scrp 1 1 64741 75
 	else
 
 *handle unhighlighting of previous part
-		doif name "PreviousHoverPart" <> 0 and name "PreviousHoverPart" <> va45
+		doif name "PreviousHoverPart" <> 0 and name "PreviousHoverPart" <> va45 and part name "PreviousHoverPart" = 1
 			part name "PreviousHoverPart"
 			pose 0
 		endi
@@ -649,9 +656,9 @@ scrp 1 1 64741 1001
 *first entry gets automatically put into the textbox.
 	doif mame "ItemCount" = 1
 
+*set default textbox part text if we have a textbox
 		targ mame "ParentObject"
 
-*set default textbox part text if we have a textbox
 		doif mame "Textbox_PartNumber" <> 0 and part mame "Textbox_PartNumber" = 1
 			part mame "Textbox_PartNumber"
 
@@ -745,6 +752,49 @@ scrp 1 1 64741 1002
 
 *restore IMSK value
 	imsk mame "Remembered_IMSK"
+
+endm
+
+
+
+*clear dropdown entries
+
+scrp 1 1 64741 1003
+
+	inst
+
+*force close this if it's open
+	doif mame "State" <> 0
+		call 1002 0 0
+	endi
+
+*loop counter
+	setv va00 0
+
+*repeat for every existing entry
+	reps mame "ItemCount"
+
+		deln va00
+
+		addv va00 1
+
+	repe
+
+*and then ofc set ItemCount to 0 too
+	setv mame "ItemCount" 0
+
+*previous hover part must be reset or we target out of bounds
+	setv name "PreviousHoverPart" va45
+
+
+*blank out textbox part text if we have a textbox
+	targ mame "ParentObject"
+
+	doif mame "Textbox_PartNumber" <> 0 and part mame "Textbox_PartNumber" = 1
+		part mame "Textbox_PartNumber"
+
+		ptxt ""
+	endi
 
 endm
 
