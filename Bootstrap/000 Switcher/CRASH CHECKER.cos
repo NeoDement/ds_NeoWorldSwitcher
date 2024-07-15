@@ -1,0 +1,29 @@
+*crash checker
+*
+*every 5 ticks
+*
+*check if the world switcher still exists
+*
+*
+*
+*
+*
+*
+*check if the game is paused, icon editor is set to open, but icon editor object doesnt exist?
+*
+*
+*
+*
+*
+*check if the game is paused, dropdown is set to open, but dropdown object doesnt exist?
+*
+*
+*
+*
+*
+*
+*unpause all objects
+*
+*
+*
+*delete world switcher, re-create worldswitcher.
