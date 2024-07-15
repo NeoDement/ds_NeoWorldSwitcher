@@ -114,11 +114,6 @@ scrp 1 1 64742 76
 		stop
 	endi
 
-*don't draw if the ColourEditor is open.
-	doif game "IconEditor_ColourEditorOpen" = 1
-		stop
-	endi
-
 
 *1 left mouse/2 right mouse
 	setv ov00 _p1_
@@ -222,11 +217,7 @@ scrp 1 1 64742 75
 			targ ownr
 
 
-
-*DRAW AT X/Y WITH CURRENTLY SELECTED BRUSH
 			call 9010 va00 va01
-
-
 
 *HAND IS OUTSIDE THE PIXEL GRID!
 *todo: account for c2tods custom cursor!
