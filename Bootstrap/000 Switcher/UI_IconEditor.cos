@@ -2042,7 +2042,6 @@ endm
 
 scrp 1 1 64736 6000
 
-
 	inst
 	lock
 
@@ -2197,53 +2196,12 @@ scrp 1 1 64736 6000
 **** CLEAR ****
 ***************
 
-
-*note: we manually do the coords because this room is a fixed size.
-
 	elif _p1_ = 8
 
-*Are you sure!?
+*Clear main pixelgrid
+		seta mame "Transform_Target" game "IconEditor_PixelGrid"
 
-		new: comp 1 2 8000 "small_useful_screen" 1 0 9075
-		attr 304
-*the CLEAR button
-		pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
-		part 1
-		anim [0]
-*the DON'T CLEAR button
-		pat: butt 2 "small_useful_screen" 1 2 58 106 2 [0 1 255] 1001 0
-		part 2
-		anim [0]
-*the text box
-		pat: fixd 3 "small_useful_screen" 5 25 59 1 "WhiteOnTransparentChars"
-
-		part 3
-		frmt 5 0 5 0 8 0 2
-		ptxt game "UI_AREYOUSURE"
-
-		mvto 256 215
-
-*pause the pixel grid and main form!!
-		targ game "IconEditor_PixelGrid"
-
-		paus 1
-
-		targ ownr
-		part 0
-
-*move screen darkener just in front of the main panel, but still behind the newly opened colour editor panel
-		setv va00 plne
-		addv va00 1
-
-		targ game "WorldSwitcher_ScreenFader"
-
-		doif targ <> null
-			plne va00
-		endi
-
-		targ ownr
-
-		paus 1
+		gsub Clear
 
 
 
@@ -2469,6 +2427,33 @@ scrp 1 1 64736 6000
 	retn
 
 
+*** CLEAR ***
+
+*set all pixels on target to pose 0
+
+	subr Clear
+
+*get pixel grid size
+		setv va00 game "IconEditor_NumPixelsX"
+		mulv va00 game "IconEditor_NumPixelsY"
+
+		setv va01 1
+
+*target Transformation Buffer and apply stored pose for each pixel
+		targ mame "Transform_Target"
+
+		reps va00
+
+			part va01
+			pose 0
+
+			addv va01 1
+
+		repe
+
+	retn
+
+
 
 
 
@@ -2653,7 +2638,62 @@ scrp 1 1 64736 6004
 		call 6000 7 0
 *Clear
 	elif name "Index" = 2
-		call 6000 8 0
+*		call 6000 8 0
+
+
+
+
+*note: we manually do the coords because this room is a fixed size.
+
+*Are you sure!?
+
+		new: comp 1 2 8000 "small_useful_screen" 1 0 9075
+		attr 304
+
+*listen for esc press
+		imsk 64
+
+*the CLEAR button
+		pat: butt 1 "small_useful_screen" 3 2 200 106 2 [0 1 255] 1000 0
+		part 1
+		anim [0]
+*the DON'T CLEAR button
+		pat: butt 2 "small_useful_screen" 1 2 58 106 2 [0 1 255] 1001 0
+		part 2
+		anim [0]
+*the text box
+		pat: fixd 3 "small_useful_screen" 5 25 59 1 "WhiteOnTransparentChars"
+
+		part 3
+		frmt 5 0 5 0 8 0 2
+		ptxt game "UI_AREYOUSURE"
+
+		mvto 256 215
+
+*pause the pixel grid and main form!!
+		targ game "IconEditor_PixelGrid"
+
+		paus 1
+
+		targ ownr
+		part 0
+
+*move screen darkener just in front of the main panel, but still behind the newly opened colour editor panel
+		setv va00 plne
+		addv va00 1
+
+		targ game "WorldSwitcher_ScreenFader"
+
+		doif targ <> null
+			plne va00
+		endi
+
+		targ ownr
+
+		paus 1
+
+
+
 	endi
 
 endm
@@ -2677,17 +2717,19 @@ endm
 
 scrp 1 2 8000 1001
 
+*	targ game "IconEditor_Main"
+*	paus 0
+*
+*	mesg wrt+ game "IconEditor_Main" 6000 8 0 0
+*	stop
+
 	lock
-	part _p1_
+	part 2
 	anim [1 1 1 1 1 0 0 0 0]
 	over
 
 	inst
 
-*Clear main pixelgrid
-	seta mame "Transform_Target" game "IconEditor_PixelGrid"
-
-	gsub Clear
 
 
 *unpause the pixel grid and main form!!
@@ -2698,6 +2740,13 @@ scrp 1 2 8000 1001
 	targ game "IconEditor_Main"
 
 	paus 0
+
+*call Clear function
+	mesg wrt+ targ 6000 8 0 0
+
+*wait a sec for the clear message to get sent before deleting yourself.
+	wait 1
+	inst
 
 *move screen darkener just behind the Icon Chooser panel again. everything is obscured in such a way that this darkens everything appropriately.
 
@@ -2715,31 +2764,7 @@ scrp 1 2 8000 1001
 
 
 
-*** CLEAR ***
 
-*set all pixels on target to pose 0
-
-	subr Clear
-
-*get pixel grid size
-		setv va00 game "IconEditor_NumPixelsX"
-		mulv va00 game "IconEditor_NumPixelsY"
-
-		setv va01 1
-
-*target Transformation Buffer and apply stored pose for each pixel
-		targ mame "Transform_Target"
-
-		reps va00
-
-			part va01
-			pose 0
-
-			addv va01 1
-
-		repe
-
-	retn
 
 
 
@@ -2752,7 +2777,7 @@ endm
 scrp 1 2 8000 1000
 
 	lock
-	part _p1_
+	part 1
 	anim [1 1 1 1 1 0 0 0 0]
 	over
 
@@ -2781,6 +2806,18 @@ scrp 1 2 8000 1000
 *goodbye
 	kill ownr
 
+endm
+
+
+
+
+
+*translated keypress event!
+scrp 1 2 8000 79
+*user pressed esc, jump to Do Not Clear script.
+	doif _p1_ = 27
+		call 1000 0 0
+	endi
 endm
 
 
