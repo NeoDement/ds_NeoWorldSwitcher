@@ -742,3 +742,20 @@ scrp 1 1 64769 1006
 	call 1003 va00 0
 
 endm
+
+
+
+
+
+
+
+
+
+
+*changed room (NOTE: This script is not natively executed by the engine, but is triggered by a script in DS Favorite Places.cos. Called when the main camera is switched to a different metaroom.
+scrp 1 1 64769 900
+*run mouse unclick script to release slider!
+	doif _p1_ = 27
+		call 77 0 0
+	endi
+endm
