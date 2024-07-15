@@ -812,7 +812,7 @@ endm
 
 
 
-*changed room (NOTE: This script is not natively excucted by the engine, but is triggered by a script in DS Favorite Places.cos. Called when the main camera is switched to a different metaroom.
+*changed room (NOTE: This script is not natively executed by the engine, but is triggered by a script in DS Favorite Places.cos. Called when the main camera is switched to a different metaroom.
 scrp 1 1 64741 900
 *close dropdown without selecting anything!
 	doif _p1_ = 27
