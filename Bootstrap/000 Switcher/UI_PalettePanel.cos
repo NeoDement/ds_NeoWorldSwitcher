@@ -6,14 +6,13 @@ next
 
 new: comp 1 1 14546 "small_useful_screen" 1 0 3000
 
-seta game "ColourEditor" targ
+seta game "IconEditor_ColourEditor" targ
 
 
 
 scrp 1 1 14546 10
 
 	inst
-
 
 
 
@@ -646,20 +645,6 @@ scrp 1 1 14546 100
 
 
 
-*unpause the pixel grid and main form!!
-	targ game "IconEditor_PixelGrid"
-
-	paus 0
-
-	targ game "IconEditor_Main"
-
-	paus 0
-
-	targ ownr
-
-
-
-
 	part 100
 	pose 1
 	wait 5
@@ -770,17 +755,83 @@ scrp 1 1 14546 100
 
 		repe
 
+
+
+
+*unpause the pixel grid and main form!!
+
+		targ game "IconEditor_Main"
+
+		paus 0
+
+		targ game "IconEditor_PixelGrid"
+
+*reset mouse click state. it gets set to true when the colour editor is opened.
+		setv ov00 0
+
+
+		paus 0
+
+		inst
+
+		targ ownr
+
+
+
+*self-terminate
+		call 200 0 0
+
+
 	else
 
-*todo: fix this
-		dbg: asrt "you already" = "have this colour"
+
+*You already have this in your palette!!
+
+		snde "no__"
+
+		new: comp 1 2 8009 "small_useful_screen_1button" 1 0 9075
+		attr 304
+*the ACCEPT button
+		pat: butt 1 "small_useful_screen_1button" 1 2 127 107 2 [0 1 255] 1000 0
+		part 1
+		anim [0]
+*the text box
+		pat: fixd 3 "small_useful_screen_1button" 3 25 59 1 "WhiteOnTransparentChars"
+
+		part 3
+		frmt 5 0 5 0 8 0 2
+
+*"You already have this in your palette."
+		ptxt game "UI_ALREADYHAVETHISCOLOUR"
+
+		mvto 256 215
+
+*move screen darkener just in front of the colour picker, but still behind the newly opened dialog box
+
+		targ ownr
+		part 0
+
+		setv va00 plne
+		addv va00 1
+
+		targ game "WorldSwitcher_ScreenFader"
+
+		doif targ <> null
+			plne va00
+		endi
+
+		targ ownr
+
+*pause the colour editor!!
+		paus 1
+
+
+
 
 	endi
 
 
 
-*self-terminate
-	call 200 0 0
 
 
 
@@ -977,6 +1028,54 @@ scrp 1 1 14546 1000
 
 
 
+
+
+
+endm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**You already have this in your palette! Dialog Results
+
+scrp 1 2 8009 1000
+
+	lock
+	part _p1_
+	anim [1 1 1 1 1 0 0 0 0]
+	over
+
+	inst
+
+*unpause the colour editor!!
+	targ game "IconEditor_ColourEditor"
+
+	paus 0
+
+*move screen darkener just behind the colour picker panel again.
+
+	part 0
+
+	setv va00 plne
+	subv va00 1
+
+	targ game "WorldSwitcher_ScreenFader"
+	plne va00
+
+*goodbye
+	kill ownr
 
 
 

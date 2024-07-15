@@ -1215,10 +1215,10 @@ scrp 1 1 64736 1002
 
 	targ game "IconEditor_PixelGrid"
 
-	mesg wrt+ game "ColourEditor" 1000 name "SelectedPaletteIndex" 0 0
+	mesg wrt+ game "IconEditor_ColourEditor" 1000 name "SelectedPaletteIndex" 0 0
 
 *wake up colour editor, you are needed. _P1_ is Index (for pose), _P2_ is RGB code (for editing)
-*	mesg wrt+ game "ColourEditor" 1000 name "SelectedPaletteIndex" name "SelectedPaletteRGB" 0
+*	mesg wrt+ game "IconEditor_ColourEditor" 1000 name "SelectedPaletteIndex" name "SelectedPaletteRGB" 0
 
 endm
 
@@ -2198,7 +2198,7 @@ scrp 1 1 64736 6000
 ***************
 
 
-*todo: manually do the coords because this room is a fixed size.
+*note: we manually do the coords because this room is a fixed size.
 
 	elif _p1_ = 8
 
