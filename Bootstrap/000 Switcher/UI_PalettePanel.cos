@@ -527,7 +527,7 @@ scrp 1 1 14546 7002
 
 
 
-*todo: this subr is defined identically both here and in "pixelgridcontrols.cos"
+*note: this subr is defined identically both here and in "pixelgridcontrols.cos"
 *any changes to it will have to be reflected there!
 
 
@@ -669,7 +669,7 @@ scrp 1 1 14546 100
 *reset button
 	pose 0
 
-*todo: this feels clumsy...
+*this feels clumsy...
 	targ game "IconEditor_Main"
 
 
@@ -911,7 +911,7 @@ scrp 1 1 14546 1000
 *	sets name "NewPaletteRGB" _p2_
 
 
-*todo: this is an awful, awful hack
+*messy hack
 	setv va31 name "NewPaletteIndex"
 	gsub get_string_from_palette_index_va31_into_va30
 
