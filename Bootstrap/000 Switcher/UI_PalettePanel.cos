@@ -791,6 +791,10 @@ scrp 1 1 14546 100
 
 		new: comp 1 2 8009 "small_useful_screen_1button" 1 0 9075
 		attr 304
+
+*listen for esc press
+		imsk 64
+
 *the ACCEPT button
 		pat: butt 1 "small_useful_screen_1button" 1 2 127 107 2 [0 1 255] 1000 0
 		part 1
@@ -1053,7 +1057,7 @@ endm
 scrp 1 2 8009 1000
 
 	lock
-	part _p1_
+	part 1
 	anim [1 1 1 1 1 0 0 0 0]
 	over
 
@@ -1079,4 +1083,15 @@ scrp 1 2 8009 1000
 
 
 
+endm
+
+
+
+
+*translated keypress event!
+scrp 1 2 8009 79
+*user pressed esc, run You already have this in your palette! Dialog close script!
+	doif _p1_ = 27
+		call 1000 0 0
+	endi
 endm
