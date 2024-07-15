@@ -1,24 +1,3 @@
-*enum 1 1 34543
-*	kill targ
-*next
-
-
-
-
-*kill dropdown stuff??
-
-*enum 1 1 64741
-*	kill targ
-*next
-*
-*
-*enum 1 1 55555
-*	kill targ
-*next
-
-
-
-
 
 
 
@@ -90,9 +69,9 @@ scrp 1 1 34543 10
 
 
 * left button
-	pat: butt 1 "worldswitcher_IconPanel" 3 2 15 167 1 [] 1000 0
+	pat: butt 1 "worldswitcher_IconPanel" 4 2 15 167 1 [] 1000 0
 * right button
-	pat: butt 2 "worldswitcher_IconPanel" 5 2 263 167 2 [] 1000 0
+	pat: butt 2 "worldswitcher_IconPanel" 6 2 263 167 2 [] 1000 0
 
 
 *	part 1
@@ -103,10 +82,10 @@ scrp 1 1 34543 10
 
 
 * + button (OPEN ICON EDITOR)
-	pat: butt 3 "worldswitcher_IconPanel" 2 1 91 167 3 [] 2000 0
+	pat: butt 3 "worldswitcher_IconPanel" 2 2 91 167 3 [] 2000 0
 
 * Icon Set:
-	pat: fixd 4 "worldswitcher_IconPanel" 9 12 12 4 "whiteontransparentchars"
+	pat: fixd 4 "worldswitcher_IconPanel" 8 12 12 4 "whiteontransparentchars"
 	part 4
 *ptxt "Icon Set:"
 	ptxt game "UI_ICONSET"
@@ -116,7 +95,7 @@ scrp 1 1 34543 10
 
 
 * Open Icon Editor text
-	pat: fixd 5 "worldswitcher_IconPanel" 9 123 168 5 "whiteontransparentchars"
+	pat: fixd 5 "worldswitcher_IconPanel" 8 123 168 5 "whiteontransparentchars"
 	part 5
 *ptxt "Open icon editor"
 	ptxt game "UI_CUSTOM"
@@ -305,30 +284,34 @@ endm
 
 scrp 1 1 34543 2000
 
+	lock
+	part _p1_
+	pose 1
+
 	inst
 
-*	lock
-*
-**save our icon from the buffer into our local (Startup) journal folder as "tempicon".
-*	mesg wrt+ game "IconEditor_Main" 5001 "tempicon" 0 0
-*
-*	wait 1
+
+	wait 3
+	lock
+
+	pose 0
+
+*check if mouse cursor object exists (indicates Icon Editor is loaded)
+
+*slightly different wait time after it's loaded makes it feel pretty consistent
+	doif type game "IconEditor_Cursor" = 3
+		wait 3
+	else
+		wait 1
+	endi
 
 *position and activate the Icon Editor!
 	mesg writ game "IconEditor_Main" 7500
 
 
+
 *pause our icon chooser panel until the icon editor unpauses it.
 	paus 1
-
-
-*todo: no longer true, re-write this comment
-
-*old method was to create the icon editor. now we just have it loaded at all times.
-
-*this saves a noticable hitch when clicking the open button, and makes the palette and buffer available for taking snapshots of icons for the main world switcher.
-
-*	new: comp 1 1 64736 "WorldSwitcher_IconEditor_Controls" 1 45 1500
 
 
 endm
@@ -541,19 +524,6 @@ scrp 1 1 34543 10000
 
 
 
-**** AUTO Iconset ***
-*
-*
-**todo: handle errors if this doesn't exist? right?
-*		targ game "WorldSwitcher_IconPanel"
-*		
-*		*this is a fake "iconset" category to allow the user to automatically have the script assign an icon based on enabled addons.
-*		mesg wrt+ name "IconsetDropdown" 1001 "Auto" 0 0
-*		targ ownr
-*		
-*		
-**		addv va90 1
-
 
 
 	doif va60 > 0
@@ -563,22 +533,51 @@ scrp 1 1 34543 10000
 
 			file iope 1 name va90
 
-*todo: do something if you cant find it
-*also do something if there are any missing keyvalues instead of infinite loop...
-
-
 *load in all the necessary icon data
-			sets va35 "displayname:"
-			gsub load_value_from_key_named_va35_into_string_va30
-			sets va50 va30
 
-			sets va35 "spritefile:"
-			gsub load_value_from_key_named_va35_into_string_va30
-			sets va51 va30
+*no error checking. if any of these values are invalid, it's up to the iconset creator to fix their file.
 
-			sets va35 "iconcount:"
-			gsub load_value_from_key_named_va35_into_string_va30
-			sets va52 va30
+			loop
+				sets va00 innl
+
+*va00 is lowercase version of the string for search purposes. va01 is original case, for display purposes.
+				sets va01 va00
+				sets va00 lowa va00
+
+				sets va32 "displayname:"
+				doif sins va00 1 va32 <> -1
+
+					sets va31 va01
+					gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+					sets va50 va30
+
+				endi
+
+				sets va32 "spritefile:"
+				doif sins va00 1 va32 <> -1
+
+					sets va31 va01
+					gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+					sets va51 va30
+
+				endi
+
+				sets va32 "iconcount:"
+				doif sins va00 1 va32 <> -1
+
+					sets va31 va01
+					gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+					sets va52 va30
+
+				endi
+
+
+			untl inok = 0
+
+
 
 
 
@@ -590,12 +589,10 @@ scrp 1 1 34543 10000
 			sets va82 va81
 			adds va82 "_displayName"
 			sets name va82 va50
-*		dbg: outs name va82
 
-*todo: handle errors if this doesn't exist? right?
-*		targ game "WorldSwitcher_IconPanel"
+*NOTE: could handle errors if this doesn't exist...
 			mesg wrt+ name "IconsetDropdown" 1001 va50 0 0
-*		targ ownr
+
 
 
 *"N_spriteFile"
@@ -648,49 +645,25 @@ scrp 1 1 34543 10000
 
 *the subroutine that makes it happen!
 
-	subr load_value_from_key_named_va35_into_string_va30
+	subr load_value_from_key_named_va32_in_string_va31_into_string_va30
 
-*init keyName string
-		sets va01 ""
+		sets va02 va31
 
-		loop
-			sets va00 innl
+*read from position 7 (length of string "frame0:") (VA03) to the END OF STRING. calculated by subtracting VA03 from the length of the current string (VA02).
+		setv va03 strl va32
 
-			sets va02 lowa va00
-
-			doif sins va02 1 va35 = -1
-				adds va01 va00
-			endi
-
-		untl sins va02 1 va35 <> -1
-
-
-*	setv va03 strl va02
-*	subv va03 sins va02 1 "frame0: "
-
-*	sets va99 subs va02 sins va02 1 "frame0: " va03
-
-
-*read from position N (length of keyName string) (VA03) to the END OF STRING. calculated by subtracting VA03 from the length of the current string (VA02).
-		setv va03 strl va35
-*this way off by 1 and we were reading the first pixel with as ":10" instead of "10"
-		addv va03 1
 		setv va04 strl va02
 		subv va04 va03
 
+*fix off by 1 errorz
+		addv va03 1
 
-*new fix, todo, might be dodgy. stops it cutting off the last character of icons...
-		addv va04 1
-
-*  	vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-		sets va30 subs va00 va03 va04
-*  	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+*  	      vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+		sets va30 subs va02 va03 va04
+*  	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	retn
 
-
-
-	targ ownr
 
 
 
@@ -738,12 +711,6 @@ scrp 1 1 34543 75
 
 	inst
 
-*todo: idk why i'm doing it this way.
-	doif part 9 = 0
-		pat: dull 9 "worldswitcher_IconPanel" 8 -1000 -1000 9
-	endi
-
-
 *initial icon X/Y positions
 	setv va11 13
 	setv va12 44
@@ -787,10 +754,6 @@ scrp 1 1 34543 75
 
 
 
-*if ANY icons were highlighted this loop, don't delete the highlight part.
-	setv va80 0
-
-
 	reps game "WorldSwitcher_IconChooser_IconsPerPage"
 
 
@@ -817,12 +780,16 @@ scrp 1 1 34543 75
 		addv va34 29
 		addv va34 post
 
+*target current part and set it to highlight mode
+		setv va91 va90
+		addv va91 10
+		part va91
 
 		doif mopx > va31 and mopx < va33 and mopy > va32 and mopy < va34
-			pat: move 9 va21 va22
 
-*if ANY icons were highlighted this loop, don't delete the highlight part.
-			addv va80 1
+
+			pose 1
+
 
 
 *if _p2_ is 1, that means we were called by the mouseclick event and should fire the appropriate icon back to the main form
@@ -870,6 +837,7 @@ scrp 1 1 34543 75
 				subv va24 1
 
 
+
 *set gall and pose
 				targ game "WorldSwitcher_Main"
 				part game "WorldSwitcher_WorldCreation_IconPreviewPart"
@@ -879,6 +847,8 @@ scrp 1 1 34543 75
 *				dbg: outv va24
 
 				gall va23 va24
+
+
 
 
 *create a button to reset the icon. script 4000 in "DS world switcherC2.cos"
@@ -907,10 +877,7 @@ scrp 1 1 34543 75
 
 *show preview icon.
 
-*show doesn't work on a per-part basis so we're just gonna move the part back in bounds.
-*	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
-*	show 1
-
+*move the part back in bounds.
 					pat: move game "WorldSwitcher_WorldCreation_IconPreviewPart" game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
 
 *position buffer offscreen.
@@ -938,7 +905,8 @@ scrp 1 1 34543 75
 
 			endi
 
-
+		else
+			pose 0
 		endi
 
 
@@ -962,11 +930,6 @@ scrp 1 1 34543 75
 		addv va90 1
 
 	repe
-
-*if ANY icons were highlighted this loop, don't delete the highlight part.
-	doif va80 = 0
-		pat: kill 9
-	endi
 
 endm
 
@@ -1107,7 +1070,7 @@ scrp 1 1 34543 6002
 
 
 *icon numbers start at 1, the 0 frames are the dim versions
-	addv va24 1
+*	addv va24 1
 
 
 	setv game "WorldSwitcher_IconChooser_IconsPerPage" va88
@@ -1156,9 +1119,6 @@ scrp 1 1 34543 6002
 	repe
 
 
-	doif part 9 = 1
-		pat: kill 9
-	endi
 
 *fake mouse move redraw our selection highlight
 	call 75 mopx mopy
@@ -1169,9 +1129,6 @@ scrp 1 1 34543 6002
 
 
 *LEFT
-*		doif _p1_ = 1
-*			subv game "WorldSwitcher_IconChooser_CurrentPage" 1
-
 	part 1
 
 	doif game "WorldSwitcher_IconChooser_CurrentPage" <= 1
@@ -1181,9 +1138,6 @@ scrp 1 1 34543 6002
 	endi
 
 *RIGHT
-*	else
-*			addv game "WorldSwitcher_IconChooser_CurrentPage" 1
-
 	part 2
 
 	doif game "WorldSwitcher_IconChooser_CurrentPage" >= game "WorldSwitcher_IconChooser_MaxPage"
@@ -1191,7 +1145,6 @@ scrp 1 1 34543 6002
 	else
 		pose 1
 	endi
-*	endi
 
 
 
