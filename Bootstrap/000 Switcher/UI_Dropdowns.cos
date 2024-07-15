@@ -455,6 +455,7 @@ scrp 1 1 64741 76
 
 *this stops the button to open the popup immediately detecting it has been clicked when clicking the top of the bar
 		wait 2
+		
 
 
 
@@ -546,7 +547,6 @@ endm
 
 
 *mouse move script
-*(TODO: close these when you leave the room!)
 
 scrp 1 1 64741 75
 
@@ -748,7 +748,8 @@ scrp 1 1 64741 1002
 
 	paus 0
 
-	wait 1
+*stops clicking through onto the parent agent immediately
+	wait 2
 
 *restore IMSK value
 	imsk mame "Remembered_IMSK"
@@ -804,6 +805,16 @@ endm
 *translated keypress event!
 scrp 1 1 64741 79
 *user pressed esc, close dropdown without selecting anything!
+	doif _p1_ = 27
+		call 1002 0 0
+	endi
+endm
+
+
+
+*changed room (NOTE: This script is not natively excucted by the engine, but is triggered by a script in DS Favorite Places.cos. Called when the main camera is switched to a different metaroom.
+scrp 1 1 64741 900
+*close dropdown without selecting anything!
 	doif _p1_ = 27
 		call 1002 0 0
 	endi
