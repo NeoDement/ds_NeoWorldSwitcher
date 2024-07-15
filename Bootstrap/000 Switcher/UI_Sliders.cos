@@ -124,7 +124,8 @@ setv game "WorldSwitcher_slider_PlayheadWidth" 10
 
 
 
-*todo: this is really poorly explained? it essentially converts a 0.0 to 1.0 range value into a valid number between MinValue and MaxValue 
+*this is really poorly explained...
+*it essentially converts a 0.0 to 1.0 range value into a valid number between MinValue and MaxValue 
 *then it does some operations to limit it to the specified number of decimal places.
 *it then sets the textbox to that value, and writes it to the specified output variable
 *it then does some further maths to put it back into a range between LeftPosition And RightPosition, and positions the slider there.
