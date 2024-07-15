@@ -1018,7 +1018,7 @@ scrp 1 1 64736 1000
 
 
 
-*todo: this subr is defined identically multiple times in this cos and others.
+*NOTE: this subr is defined identically multiple times in this cos and others.
 *any changes to it will have to be reflected everywhere!
 *ideally, it would all be handled from a shared palette object
 
