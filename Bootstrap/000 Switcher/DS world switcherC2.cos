@@ -3,6 +3,13 @@
 
 
 
+*KNOWN BUGS
+
+*setting an invalid spriteFrame with a valid SpriteName will bring the whole switcher to a grinding halt. 
+*This is something that can only be triggered by manually editing files so I think it's okay.
+
+
+
 *todo: you gotta add --compress to the build instructions hahaha uhhggh!
 
 
@@ -883,7 +890,7 @@ scrp 1 2 1000 2000
 		file iope 2 "build"
 		sets va44 innl
 		doif va44 = ""
-		
+
 * Build number unknown, definitely needs to be warned of possible problems.
 			sets va44 read "World Switcher old build" 3
 			setv va88 1
@@ -1195,6 +1202,8 @@ scrp 1 2 1000 2000
 *all new worlds should NOT be using a custom icon!
 		setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
 
+*reset room count to 0
+		setv game "WorldSwitcher_CurrentRooms" 0
 
 
 
@@ -1560,7 +1569,7 @@ scrp 1 2 1000 2000
 					setv va60 10
 				elif va64 = "c1c3"
 **			Docked DS/C1/C3
-					setv va60 12
+					setv va60 14
 
 ** default state looks like undocked DS, too
 				else
@@ -2157,6 +2166,16 @@ scrp 1 2 1000 2000
 
 
 
+
+
+
+
+
+
+
+
+
+
 *"custom" - LOAD ICON FROM A COMMA SEPARATED ARRAY OF PIXELS
 			doif va10 = "custom"
 
@@ -2208,7 +2227,84 @@ scrp 1 2 1000 2000
 
 
 *"normal" - ICON WILL BE SPECIFIED WITH A NAME AND A FRAME NUMBER.
-			elif va10 = "normal"
+*also check icon exists!
+			elif va10 = "normal" and snax va11 = 1
+
+
+
+
+
+***** UNUSED CODE TO CHECK IF IMAGE NAME AND INDEX ARE VALID VALID ****
+**(unused because it requires waiting a tick which kills this script... and even if it did work it would cause loading to be slow looking.
+*
+*
+**disable listening for mouse movements now.
+*				targ game "MouseMoveListener"
+*				imsk 0
+*				
+**check and don't set any wolf variables.
+*				setv va17 wolf 15 0
+*
+**enable autokill
+*				setv va00 wolf 7 8
+*
+**create tester object.
+*				new: simp 1 2 1234 "blnk" 1 0 0
+*
+*				seta game "whatever" targ
+*
+**run script to try and validate image name and frame
+*				mesg wrt+ targ 1000 va11 va12 0
+*
+*				slow
+*				inst
+*
+*				targ game "whatever"
+*
+**if the object hasn't killed itself, the sprite number was valid.
+*				doif targ = null
+**					dbg: outs "THAT GALLERY AND SPRITE NUMBER DO NOT EXIST!"
+*					setv va19 0
+*				else
+**					dbg: outs "THAT GALLERY AND SPRITE NUMBER EXIST!"
+*					setv va19 1
+*				endi
+*
+**set all wolf variables to the stored state from checking them. no kanga mask.
+*				setv va18 wolf 0 va17
+*				
+*				
+**re-enable listening for mouse movements now we're done.
+*				targ game "MouseMoveListener"
+*				imsk 4
+*
+*
+*
+**re-target the correct thing!
+*				targ ownr
+*
+*
+*
+**if icon and image number exist, set them up for later scripts to read
+*				doif va19 = 1
+*
+*					sets va82 va81
+*					adds va82 "_spritename"
+*					sets game va82 va11
+*
+*					sets va82 va81
+*					adds va82 "_firstframe"
+*					setv game va82 va12
+*
+**otherwise, find some defaults
+*				else
+*
+*					gsub reset_icon_to_default_style
+*
+*				endi
+
+************************
+
 
 				sets va82 va81
 				adds va82 "_spritename"
@@ -2218,29 +2314,12 @@ scrp 1 2 1000 2000
 				adds va82 "_firstframe"
 				setv game va82 va12
 
+
 *no IconType specified. we'll emulate default DS behaviour for this world type.
 			else
 
 
-*icon_type must be normal, so we can use pose commands
-				sets va82 va81
-				adds va82 "_icon_type"
-				sets game va82 "normal"
-
-*				set us to whatever icon you would have been if the default game had to work it out
-				sets va82 va81
-				adds va82 "_spritename"
-				sets game va82 "WorldSwitcher_Icons_Default"
-*				sets game va82 "worldswitcher_icons_X"
-
-				sets va82 va81
-				adds va82 "_firstframe"
-*				sets va82 va13
-
-*this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
-*and return it to va60 as a number!
-				gsub get_firstframe_for_default_style_world
-				setv game va82 va60
+				gsub reset_icon_to_default_style
 
 
 			endi
@@ -2311,7 +2390,7 @@ scrp 1 2 1000 2000
 			sets va82 va81
 			adds va82 "_passworded"
 			setv game va82 0
-			
+
 		endi
 
 
@@ -2347,7 +2426,7 @@ scrp 1 2 1000 2000
 			setv va60 10
 		elif va64 = "c1c3"
 **			Docked DS/C1/C3
-			setv va60 12
+			setv va60 14
 		endi
 
 	retn
@@ -2552,106 +2631,49 @@ scrp 1 2 1000 2000
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+	subr reset_icon_to_default_style
+
+
+*icon_type must be normal, so we can image names and frames
+		sets va82 va81
+		adds va82 "_icon_type"
+		sets game va82 "normal"
+
+*				set us to whatever icon you would have been if the default game had to work it out
+		sets va82 va81
+		adds va82 "_spritename"
+		sets game va82 "WorldSwitcher_Icons_Default"
+*				sets game va82 "worldswitcher_icons_X"
+
+		sets va82 va81
+		adds va82 "_firstframe"
+*				sets va82 va13
+
+*this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
+*and return it to va60 as a number!
+		gsub get_firstframe_for_default_style_world
+		setv game va82 va60
+
+
+	retn
+
+
+
+
 endm
 
 
-
-
-
-
-
-
-
-
-
-*
-**todo: original world type select button. delete this.
-*
-*** World Type Button: Docked or Undocked or C1?
-*scrp 1 2 1000 800
-*	inst
-*	lock
-*	snde "2bep"
-*** 	Check current World Type
-*
-**DS -> DS+C3
-*	doif name "wtype" = "undocked" and name "dsc1" = 0
-*** 		Change to Docked
-*		sets name "wtype" "docked"
-*		part 7
-*		pose 2
-*** 		Update Display
-*		part 9
-*		frmt 0 0 0 0 0 0 2
-*		ptxt read "World Switcher" 22
-*		dbg: outs "5"
-*
-**DS+C3 -> DS+C1
-*	elif name "wtype" = "docked"
-*** 		Change to Undocked
-*		sets name "wtype" "c1"
-*		part 7
-*		pose 17
-*** 		Update Display
-*		part 9
-*		frmt 0 0 0 0 0 0 2
-*		ptxt read "World SwitcherC1" 0
-*		dbg: outs "1"
-*
-**DS+C1 -> DS+C1+C3
-*	elif name "wtype" = "c1" and name "dsc1" = 0
-*** 		Change to Docked
-*		sets name "wtype" "c1c3"
-*		part 7
-*		pose 22
-*** 		Update Display
-*		part 9
-*		frmt 0 0 0 0 0 0 2
-*		ptxt read "World SwitcherC1" 1
-*		dbg: outs "2"
-*
-**DS+C1+C3 -> DS ONLY
-*	elif name "wtype" = "c1c3" and name "dsc1" = 0
-*** 		Change to Docked
-*		sets name "wtype" "undocked"
-*		part 7
-*		pose 1
-*** 		Update Display
-*		part 9
-*		frmt 0 0 0 0 0 0 2
-*		ptxt read "World Switcher" 23
-*		dbg: outs "4"
-*
-*
-*
-**if C3 isn't installed:
-*
-**DS+C1 -> DS ONLY
-*	elif name "wtype" = "c1" and name "dsc1" = 1
-*** 		Change to Undocked
-*		sets name "wtype" "undocked"
-*		part 7
-*		pose 1
-*** 		Update Display
-*		part 9
-*		frmt 0 0 0 0 0 0 2
-*		ptxt read "World Switcher" 23
-*		dbg: outs "3"
-*
-**DS ONLY -> DS+C1
-*	elif name "wtype" = "undocked" and name "dsc1" = 1
-*** 		Change to Docked
-*		sets name "wtype" "c1"
-*		part 7
-*		pose 17
-*** 		Update Display
-*		part 9
-*		frmt 0 0 0 0 0 0 2
-*		ptxt read "World SwitcherC1" 0
-*		dbg: outs "6"
-*	endi
-*
-*endm
 
 
 
@@ -2723,9 +2745,9 @@ scrp 1 2 1000 450
 
 	inst
 
-*disenable listening for mouse movements now we're animating.
+*disable listening for mouse movements now we're animating.
 	targ game "MouseMoveListener"
-	imsk 4
+	imsk 0
 
 
 	reps 9
@@ -2816,7 +2838,7 @@ scrp 1 2 1000 450
 
 *re-enable listening for mouse movements now we're done animating.
 	targ game "MouseMoveListener"
-	imsk 0
+	imsk 4
 
 	targ ownr
 
@@ -2939,29 +2961,30 @@ scrp 1 2 1000 100
 
 *if this "addon" is actually creatures 3, skip the usual logic and just set world type to docked.
 
-*if it's C1 or C2, set up variables used to automatically determine the icon.
+*if it's C1, C2, or C3, set up variables used to automatically determine the icon.
 		doif va09 = "Creatures 3"
 
 			sets name "wtype" "docked"
 
 			setv game "WorldSwitcher_C3" 1
 
-		elif va09 = "C12DS"
-
-			setv game "WorldSwitcher_C1" 1
-
-		elif va09 = "C2toDS"
-
-			setv game "WorldSwitcher_C2" 1
-
 		else
 
-			adds game "WorldSwitcher_CurrentWorld_ChunkNames" game va11
-			adds game "WorldSwitcher_CurrentWorld_ChunkNames" ","
+			doif va09 = "C12DS"
+
+				setv game "WorldSwitcher_C1" 1
+
+			elif va09 = "C2toDS"
+
+				setv game "WorldSwitcher_C2" 1
+
+			endi
 
 *		dbg: outs "tried to add this addon:"
 *		dbg: outs game "WorldSwitcher_CurrentWorld_ChunkNames"
 
+			adds game "WorldSwitcher_CurrentWorld_ChunkNames" game va11
+			adds game "WorldSwitcher_CurrentWorld_ChunkNames" ","
 		endi
 
 
@@ -3232,6 +3255,16 @@ scrp 1 2 1000 10000
 
 	reps va40
 
+
+*set addon data to blank or it will reuse the last ones values instead of failing to load...
+		sets mame "AddonName" ""
+		sets mame "IconFile" ""
+		sets mame "IconFrame" ""
+		sets mame "RoomCount" ""
+		sets mame "ChunkName" ""
+
+
+
 		call 10001 mame va90 0
 
 
@@ -3266,8 +3299,10 @@ scrp 1 2 1000 10000
 *	if the chunk exists, add an addon entry!
 		doif va10 <> 0
 
-
-			gsub make_addon_entry
+*if all the addon values are filled in, add it to the list.
+			doif mame "AddonName" <> "" and mame "IconFile" <> "" and mame "IconFrame" <> "" and mame "RoomCount" <> "" and mame "ChunkName" <> ""
+				gsub make_addon_entry
+			endi
 
 
 		endi
@@ -3364,7 +3399,7 @@ scrp 1 2 1000 10001
 
 *get every necessary value from every necessary key
 
-*todo: if you can't find ANY of these keys, or a bunch of other possible errors happen, you should recover from the error!!!
+*no error checking. if any of these values are invalid, it's up to the addon creator to fix their file.
 
 	loop
 		sets va00 innl
@@ -3426,6 +3461,8 @@ scrp 1 2 1000 10001
 			sets mame "ChunkName" va30
 
 		endi
+
+
 
 
 
@@ -3664,6 +3701,9 @@ scrp 1 2 1000 503
 	sets va31 ","
 	gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
 
+*todo: clear these out
+	dbg: outs va30
+	dbg: outv va32
 
 *note that the addons file doesn't get created at all if there are no addons ticked, as it never outputs anything to the stream.
 	doif va32 > 0
@@ -3993,7 +4033,7 @@ scrp 1 2 1000 4001
 			setv va60 10
 		elif va64 = "c1c3"
 **			Docked DS/C1/C3
-			setv va60 12
+			setv va60 14
 
 ** default state looks like undocked DS, too
 		else
@@ -4477,6 +4517,28 @@ scrp 1 2 1000 5600
 endm
 
 
+
+
+
+
+*unused!
+*** IMAGE FRAME NUMBER TESTER OBJECT SCRIPT ***
+*
+*scrp 1 2 1234 1000
+*
+**make sure the image exists.
+*	doif snax _p1_ = 1
+*
+**if the sprite number doesn't exist, autokill will automatically kill our test object.
+*		gall _p1_ _p2_
+*
+*	else
+*
+*		kill ownr
+*
+*	endi
+*
+*endm
 
 
 
