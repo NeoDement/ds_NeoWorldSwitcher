@@ -10,23 +10,15 @@
 
 
 
-*todo: you gotta add --compress to the build instructions hahaha uhhggh!
+*icons are loaded from "icon" in the worlds "journal" folder, if it exists.
+*it also can find the original intended icon using the old method if icon doesn't exist or is corrupt.
 
 
-*icons are loaded from 
-
-
-*for icons you're gonna want to have:
-
-*state_dim
-*state_highlighted
-*state_flashing
-
-*and control all the rendering in a separate script
+*all worldswitcher entry highlight rendering is controlled in a script instead of with simple pose commands.
 
 
 
-*big todo: workaround for this nonsense in the src code!
+*NOTE: the way icons are generated is a workaround for this nonsense in the src code!
 
 *		// if this is the start up world then load the start up world
 *		if(worldName == "Startup")
@@ -38,14 +30,13 @@
 *			ProcessFilesInPorch();
 *		
 
-*we will need to generate an icon each time it is needed to bypass them getting moved to the basement folder.
-*store an icon filename named after the world in the journal folder.
+*we need to generate an icon each time it is needed to bypass them getting moved to the basement folder.
 
 
 
-*todo: move this crapola elsewhere, add to rscr, etc
-setv game "button_width" 48
-setv game "button_height" 29
+*worldswitcher entry width and height.
+setv game "WorldSwitcher_WorldCreation_Button_Width" 48
+setv game "WorldSwitcher_WorldCreation_Button_Height" 29
 
 
 *the DS engine can't create more than 2000 rooms in a world, so we need to make sure users can't select addons that would push them over that limit.
@@ -125,7 +116,7 @@ inst
 lock
 
 
-*todo: don't do this... eventually
+*NOTE: may wish to disable this eventually? but honestly it's useful...
 
 *to catch errors, disable autokill
 SETV VA00 WOLF 7 0
@@ -153,16 +144,26 @@ ject "DS world switcher.cos" 7
 
 
 
-*kill these scripts on the original world switcher
+*kill these scripts on the original world switcher so our new ones can replace them
+*NOTE: i don't think this is actually needed? the c12ds launcher does it...
 
-*todo: add more here i guess...
-
-** World Type Button: Docked or Undocked?
+*this one isn't replaced! (World Type Button: Docked or Undocked?)
 scrx 1 2 1000 800
-** and here are the make routines
+
 scrx 1 2 1000 2000
-** This script is called by the "Select world" buttons (The nobbly bits)
 scrx 1 2 1000 450
+scrx 1 2 1000 100
+scrx 1 2 1000 200
+scrx 1 2 1000 10000
+scrx 1 2 1000 10001
+scrx 1 2 1000 503
+scrx 1 2 1000 4000
+scrx 1 2 1000 4001
+scrx 1 2 1000 4500
+scrx 1 2 1000 699
+scrx 1 2 1000 5500
+scrx 1 2 1000 5600
+
 
 *kill this script on the world info switcher agent
 
@@ -172,61 +173,6 @@ scrx 1 2 1001 1000
 
 *inject our EVENT scripts
 ject "DS world switcherC2.cos" 2
-
-*target original world switcher
-
-
-*
-*rtar 1 2 1001
-*doif targ <> null
-** ov00 == 3    The parts for the "worldswitcher" set
-*	setv ov00 3
-**fire up world switcher screen via info agent
-*	mesg writ targ 1000
-*else
-*
-**	Ok, it doesn't exist yet. Let's make one!	
-*** 	make new world switcher monitor
-*	new: comp 1 2 1001 "ds world switcher" 30 0 0
-*
-*
-*
-*
-** ov00 == 3    The parts for the "worldswitcher" set
-*	setv ov00 3
-**setv name "waiting" 0 (same as above)
-*	mesg writ targ 1000
-**mesg writ targ 1000
-*endi
-*
-**************************************
-***if c12ds is enabled, do something**
-**************************************
-**
-**doif totl 1 1 32302 <> 0
-**	new: simp 3 15 50200 "C1Enabled" 1 0 0
-**
-****set some variable, use it later when populating world addons screen :)**
-**
-**	attr 0
-**	mvto 100 0
-**	tick 40
-**	mesg writ targ 301
-**endi
-*
-*doif totl 1 1 32302 <> 1
-*	enum 1 1 32302
-*		kill targ
-*	next
-*	new: simp 1 1 32302 "C1Enabled" 1 0 0
-*	attr 0
-*	mvto 460 0
-*	tick 40
-*	mesg writ targ 301
-*endi
-
-
-*todo: crappy fix!
 
 
 *kill C1 Enabled sign, if it exists
@@ -240,25 +186,6 @@ next
 * End install
 ***************************************************************************
 
-**(from original c1 world injector script, we probably don't need it)
-*scrp 1 1 32302 301
-*
-*	dbg: asrt 5 = 7
-*
-**	Make C1 Enabled Sound
-*	inst
-*	lock
-*	stpc
-*	snde "C102"
-*
-*	setv game "button_width" 48
-*	setv game "button_height" 29
-*
-**target world switcher screen, listen for raw mouse movements
-*	enum 1 2 1001
-*		imsk 4
-*	next
-*endm
 
 
 
@@ -272,17 +199,6 @@ seta game "MouseMoveListener" targ
 
 
 
-
-
-
-*todo: can we delete this?
-
-scrp 1 2 1001 1001
-	dbg: asrt ov00 = 3
-	rtar 1 2 1000
-	setv name "waiting" 0
-	kill ownr
-endm
 
 
 
@@ -327,7 +243,7 @@ scrp 1 2 6060 75
 
 *12_x + button_width
 			setv va62 va61
-			addv va62 game "button_width"
+			addv va62 game "WorldSwitcher_WorldCreation_Button_Width"
 
 
 *12_y
@@ -337,7 +253,7 @@ scrp 1 2 6060 75
 
 *12_y + button_height
 			setv va72 va71
-			addv va72 game "button_height"
+			addv va72 game "WorldSwitcher_WorldCreation_Button_Height"
 
 
 *12_lit
@@ -501,9 +417,10 @@ scrp 1 2 6060 75
 *				doif gall <> va81 and base <> va82
 					addv va82 1
 
-*todo: here: add doif. don't set gall if we're already on this frame.
+*NOTE: we set gall even if we're already on the correct frame. could optimize.
 					gall "blnk" 0
 					gall va81 va82
+
 
 				endi
 
@@ -551,7 +468,7 @@ scrp 1 2 6060 75
 
 				else
 
-*todo: here: add doif. don't set gall if we're already on this frame.
+*NOTE: we set gall even if we're already on the correct frame. could optimize.
 					gall "blnk" 0
 					gall va81 va82
 
@@ -577,118 +494,7 @@ endm
 
 
 
-*
-*
-*scrp 1 2 1001 10009999
-*
-*	doif ov00 = 1
-*		gsub reinject
-*	elif ov00 = 2
-*		gsub dock_this
-*	elif ov00 = 3
-*		rtar 1 2 1000
-*		kill targ
-*		gsub reinject
-*	endi
-*	subr reinject
-*** 		destroy existing world switcher
-*		enum 1 2 1000
-*			kill targ
-*		next
-*		mesg wrt+ targ 300 0 0 2
-*		tick 40
-*		mesg writ targ 301
-*
-*		inst
-*
-**todo: this should only appear if some option is checked
-*		doif totl 1 1 32302 <> 1
-*			enum 1 1 32302
-*				kill targ
-*			next
-*			new: simp 1 1 32302 "C1Enabled" 1 0 0
-*			attr 0
-*			mvto 460 0
-*		endi
-*
-*
-*
-*** 		Reinject the World Switcher
-*		new: comp 1 2 1000 "WorldSwitcher_WorldCreation" 1 19 0
-*
-**don't ask me how, don't ask me why, but this code is now part of big fat script 2000 - the screen change script.
-**		seta game "WorldSwitcher_Main" targ
-*
-*		part -1
-** 		Invisible ready for fade in 
-*		alph 256 1
-*		part 0
-**		pose 29
-*
-** 		Set current configuration of the screen to "none"
-*		setv ov00 0
-*
-*		mvto 115 92
-*
-*		setv ov02 nwld
-*		setv ov03 0
-*
-*		setv ov04 -1
-*		file iope 0 "World Switcher Persistent State Entries"
-*		doif inok = 1
-*			setv ov04 wnti innl
-*			setv ov02 nwld
-*			setv ov03 ov04
-*			modv ov03 6
-*			subv ov03 ov04
-*			negv ov03
-*		endi
-*		file iclo
-** 		Tell ourselves to calculate and enter an initial state (scripted for use after delete etc)
-*
-*		imsk 64
-*
-*		mesg wrt+ targ 300 0 0 2
-*		tick 40
-*
-**		C1 to DS Custom reinject stuff
-*
-**todo: this should only appear if some option is checked
-*		inst
-*		doif totl 1 1 32302 <> 1
-*			enum 1 1 32302
-*				kill targ
-*			next
-*			new: simp 1 1 32302 "C1Enabled" 1 0 0
-*			attr 0
-*			mvto 460 0
-*		endi
-*
-*** 		Weird! :O) If I don't have the wait 1 here then the tick 40 is never set (it seems).
-*** 		And if the mesg wrt+ has a delay then it is never sent (the OWNR gets killed).
-*		wait 1
-*		tick 40
-*		kill ownr
-*	retn
-*	subr dock_this
-*** 		ov04 contains the world to be docked
-**		hide dialog and hand
-*		mvto -1000 -1000
-*		targ pntr
-*		pose 19
-*		targ ownr
-** 		write to this new world's directory to show whether docked or undocked
-*		sets va00 wrld ov04
-*		sets game "engine_other_world" va00
-*		file oope 2 "wtype" 0
-*		outs "docked"
-*		file oclo
-*** 		set the EAME and then load
-*		setv eame "engine_no_auxiliary_bootstrap_1" 0
-*		load wrld ov04
-*		kill ownr
-*	retn
-*endm
+
 
 
 scrp 1 2 1000 2000
@@ -953,7 +759,7 @@ scrp 1 2 1000 2000
 
 
 
-*todo: ? this code is unmodified from how it appears in c12ds. i got a headache trying to work it out.
+*NOTE: I haven't sanity checked this in a while.
 
 
 ** ==================		
@@ -1297,53 +1103,6 @@ scrp 1 2 1000 2000
 
 
 
-
-
-** Is C3 Installed?
-*		reaf
-*		doif reaq "patch_level" = 1
-*** 			Set WTYP Name Variable
-*			sets name "wtype" "undocked"
-*
-**(this is a c12ds variable and simply seems to mean "is c3 NOT installed?"
-**todo: can we make this not needed entirely?
-*			setv name "dsc1" 0
-*
-*** 			Show World Type Button
-*			part 7
-*			pose 1
-*
-**patch isn't installed, but c12ds enabled sign is present			
-*		elif reaq "patch_level" <> 1 and totl 1 1 32302 > 0
-**			DS with NO C3, but may have C1
-*** 			Set WTYP Name Variable
-*			sets name "wtype" "undocked"
-*
-*			setv name "dsc1" 1
-*
-*** 			Show World Type Button
-*			part 7
-*			pose 1
-*
-*		else
-*** 			Creatures 3 is not installed and neither is C1.
-*			sets name "wtype" "undocked"
-*
-*			setv name "dsc1" 0
-*
-*** 			Kill the World Type Toggle button
-*			pat: kill 7
-*** 			Recreate it as a dull part
-*			pat: dull 7 "ds world switcher" 30 254 228 2
-*			part 7
-*			pose 1
-*
-*		endi
-*
-*** 		Update Display
-*		part 9
-*		frmt 0 0 0 0 0 0 2
-*		ptxt read "World Switcher" 23
 
 
 
@@ -1912,7 +1671,7 @@ scrp 1 2 1000 2000
 			addv va53 ov03
 
 
-*todo: i once saw it crash here with an invalid wrld index. i suspect this bug was present in the original, but it can probably still be fixed.
+*NOTE: i once saw it crash here with an invalid wrld index. i suspect this bug was present in the original, but it can probably still be fixed.
 *i think this was maybe fixed by moving script 75 into the Mouse Listener object, to stop some script being interrupted part way through.
 
 *here: va52 is world name as a string
@@ -1966,7 +1725,7 @@ scrp 1 2 1000 2000
 
 			pat: dull va01 "ds world switcher" 5 va50 va51 0
 
-*cancel out the data for our non-existent icon. todo: get this working?
+*cancel out the data for our non-existent icon.
 			gsub blank_out_icon
 
 		else
@@ -2015,9 +1774,6 @@ scrp 1 2 1000 2000
 
 			doif ov04 = va53
 
-*here: when drawing the list of worlds, this is where the icons can be set to highlighted or not
-*todo: re-enable
-*				tino 128 128 128 128 128
 
 				doif va01 = 12
 
@@ -2111,7 +1867,7 @@ scrp 1 2 1000 2000
 
 
 
-*todo: possibly outdated comments
+*NOTE: possibly outdated comments
 
 *VA10 - type (normal or custom)
 *VA11 - filename
@@ -2403,10 +2159,6 @@ scrp 1 2 1000 2000
 
 
 
-
-*todo: get icons from worldswitcher_icons_Standard instead (or rename that to this and etc)
-
-
 *this will get the correct frame index for the Default style icons in "WorldSwitcher_Icons_Default"
 *and return it to va60 as a number!
 
@@ -2574,9 +2326,8 @@ scrp 1 2 1000 2000
 
 
 
-*poorly named.
 
-*todo: and needs to be get up to date with the copy in 4001 (reset button)
+*NOTE: needs to be get up to date with the copy in scrp 4001 (reset button)
 
 	subr CLEAR_CUSTOM_ICON_BUFFER
 
@@ -3017,9 +2768,9 @@ scrp 1 2 1000 100
 
 *ATTEMPT TO REMOVE THE ADDON NAME FROM OUR COMMA SEPARATED LIST OF ADDONS
 
-*todo: this is really unsafe. just do it some other way.
+*NOTE: this is really unsafe it would probably be better to just do it some other way.
 *(for example, if you had a chunk named "", and then tried to remove that chunk...
-*it would just find the first comma and delete it and that proably wouldn't be good.)
+*it would just find the first comma and delete it and that probably wouldn't be good.)
 			setv va20 sins game "WorldSwitcher_CurrentWorld_ChunkNames" 1 game va11
 
 
@@ -3144,7 +2895,7 @@ scrp 1 2 1000 10000
 *so we just read the whole line and convert that to a number instead.
 	setv va40 stoi innl
 
-	dbg: outv va40
+*	dbg: outv va40
 
 
 *loop iteration counter
@@ -3155,7 +2906,7 @@ scrp 1 2 1000 10000
 
 		sets va01 innl
 
-		dbg: outs va01
+*		dbg: outs va01
 
 *get length of globbed file string...	
 		setv va08 strl va01
@@ -3330,7 +3081,7 @@ scrp 1 2 1000 10000
 		adds va11 "_ChunkName"
 
 
-*todo: clear up these values RoomCount and ChunkName values when we close the world creation screen!
+*NOTE: we could clear up these values RoomCount and ChunkName values when we close the world creation screen.
 
 
 
@@ -3692,18 +3443,14 @@ scrp 1 2 1000 503
 
 *NEW: write addons too!
 
-*todo: see if we can come up with some way of doing this which doesnt involve the big nasty subr/gsub
-
-
 	sets game "engine_other_world" va00
 
 	sets va30 game "WorldSwitcher_CurrentWorld_ChunkNames"
 	sets va31 ","
 	gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
 
-*todo: clear these out
-	dbg: outs va30
-	dbg: outv va32
+*	dbg: outs va30
+*	dbg: outv va32
 
 *note that the addons file doesn't get created at all if there are no addons ticked, as it never outputs anything to the stream.
 	doif va32 > 0
@@ -3735,7 +3482,7 @@ scrp 1 2 1000 503
 
 	sets game "engine_other_world" va00
 
-*NEW: write selected icon too! todo: make sure this stays up to date with the one in password protect world. you'll prob need to make a shared function.
+*NEW: write selected icon too! NOTE: make sure this stays up to date with the one in password protect world. a shared function would be nice.
 
 *write a normal, sprite name/frame based icon.
 
@@ -3972,7 +3719,7 @@ scrp 1 2 1000 4001
 	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
 
 
-*todo: make sure this stays up to date with the one in the password creation screen script. maybe make a shared function.
+*NOTE: make sure this stays up to date with the one in the password creation screen script. maybe make a shared function would be nice.
 
 
 *load world icon if it exists. if not, we will default to "no icon defined" ELSE case.
@@ -4053,7 +3800,7 @@ scrp 1 2 1000 4001
 
 
 
-*todo: make sure this stays up to date with the one in the password creation screen. maybe make a shared function.
+*NOTE: make sure this stays up to date with the one in the password creation screen. maybe make a shared function.
 
 
 *looks for a file called "icon" in the "journal" folder, and reads the following values from it:
@@ -4121,7 +3868,7 @@ scrp 1 2 1000 4001
 
 
 
-*todo: this is defined a few times...
+*NOTE: this is defined a few times...
 
 
 *the subroutine that makes it happen!
@@ -4194,9 +3941,8 @@ scrp 1 2 1000 4001
 
 
 
-*poorly named.
 
-*todo: and needs to be get up to date with the copy in 2000 (main script for ds world switcher)
+*NOTE: needs to be get up to date with the copy in scrp 2000 (main script for ds world switcher)
 
 	subr CLEAR_CUSTOM_ICON_BUFFER
 
@@ -4329,13 +4075,7 @@ endm
 
 
 
-
-
-
-
-
-
-*Confirm changes to PASSWORDED world!
+*Confirm changes to existing world!
 
 scrp 1 2 1000 699
 
@@ -4359,7 +4099,8 @@ scrp 1 2 1000 699
 
 *replacing the file with "", if it exists, is just as good.
 
-*todo: this creates a name override no matter what. could be fixed using FILE GLOB to check for an existing override instead.
+*NOTE: this creates a name override no matter what.
+*this can't be fixed using FILE GLOB to check for an existing override instead, because it lacks an option to glob a specific world journal directory.
 
 
 *NEW: if world name override is present, set our display name!
@@ -4377,8 +4118,7 @@ scrp 1 2 1000 699
 	endi
 
 
-
-*NEW: write selected icon too! todo: make sure this stays up to date with the one in create new world. you'll prob need to make a shared function.
+*NEW: write selected icon too! NOTE: make sure this stays up to date with the one in create new world.
 *the difference here being we add 1 to EditCount whenever we save changes to a custom icon.
 
 *write a normal, sprite name/frame based icon.
@@ -4548,6 +4288,10 @@ endm
 
 
 rscr
+
+
+
+
 *todo: this is just the c12ds script
 enum 1 2 1000
 	kill targ
@@ -4563,3 +4307,43 @@ enum 1 1 32302
 	kill targ
 next
 ject "DS world switcher.cos" 7
+
+
+
+
+
+*UNUSED "DOES SPRITE FRAME NUMBER EXIST" TESTER OBJECT
+*enum 1 2 1234
+*	kill targ
+*next
+
+*scrx 1 2 1234 1000
+
+
+
+
+
+
+
+*NEW
+
+
+*WORLD ENTRY MOUSE MOVE LISTENER
+enum 1 2 6060
+	kill targ
+next
+
+scrx 1 2 6060 75
+
+
+
+
+
+*WORLD SWITCHER POPUPS/info agent?
+enum 1 2 1001
+	kill targ
+next
+
+scrx 1 2 1001 1000
+scrx 1 2 1001 1001
+
