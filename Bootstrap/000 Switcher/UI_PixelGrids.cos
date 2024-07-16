@@ -1676,7 +1676,7 @@ scrp 1 1 64742 9998
 		doif game "IconEditor_World_Was_Already_Paused" = 1
 			delg "IconEditor_World_Was_Already_Paused"
 		else
-			wpau 1
+			wpau 0
 		endi
 
 
