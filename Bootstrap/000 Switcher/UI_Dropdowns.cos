@@ -455,7 +455,7 @@ scrp 1 1 64741 76
 
 *this stops the button to open the popup immediately detecting it has been clicked when clicking the top of the bar
 		wait 2
-		
+
 
 
 
@@ -819,3 +819,29 @@ scrp 1 1 64741 900
 		call 1002 0 0
 	endi
 endm
+
+
+
+
+
+
+rscr
+
+
+*DROPDOWN MANAGERS
+*todo: unpause the game!
+
+enum 1 1 64741
+	kill targ
+next
+
+scrx 1 1 64741 10
+scrx 1 1 64741 1000
+scrx 1 1 64741 76
+scrx 1 1 64741 78
+scrx 1 1 64741 75
+scrx 1 1 64741 1001
+scrx 1 1 64741 1002
+scrx 1 1 64741 1003
+scrx 1 1 64741 79
+scrx 1 1 64741 900
