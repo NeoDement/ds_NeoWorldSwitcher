@@ -1,8 +1,8 @@
 //display name of Icon Set
-displayName:Creatures 2
+displayName:Eggs
 
 //name of sprite file
-spriteFile:worldswitcher_icons_C2
+spriteFile:worldswitcher_icons_Eggs
 
 //this number will be equal to the number of images in the sprite file divided by 2
-iconCount:83
+iconCount:17

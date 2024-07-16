@@ -1,8 +1,8 @@
 //display name of Icon Set
-displayName:Random Ass Icons
+displayName:Creatures 4
 
 //name of sprite file
-spriteFile:worldswitcher_icons_X
+spriteFile:worldswitcher_icons_C4
 
 //this number will be equal to the number of images in the sprite file divided by 2
-iconCount:57
+iconCount:9

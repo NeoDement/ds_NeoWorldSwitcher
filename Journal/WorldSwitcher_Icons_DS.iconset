@@ -1,8 +1,8 @@
 //display name of Icon Set
-displayName:Standard
+displayName:Docking Station
 
 //name of sprite file
-spriteFile:worldswitcher_icons_default
+spriteFile:worldswitcher_icons_DS
 
 //this number will be equal to the number of images in the sprite file divided by 2
-iconCount:4
+iconCount:33
