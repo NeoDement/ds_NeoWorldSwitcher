@@ -94,15 +94,15 @@ sets game "Default_Palette_3" "333"
 *DARK GREY
 sets game "Default_Palette_4" "222"
 
-*SCARLET
+*RED
 sets game "Default_Palette_5" "500"
-*BROWN
+*DARK RED
 sets game "Default_Palette_6" "201"
 
-*ORANGE
-sets game "Default_Palette_7" "530"
-*TURQOUISE todo: finalize and correctly label the palette entries
-sets game "Default_Palette_8" "421"
+*LIGHT ORANGE
+sets game "Default_Palette_7" "531"
+*DARK ORANGE
+sets game "Default_Palette_8" "521"
 
 *YELLOW
 sets game "Default_Palette_9" "541"
