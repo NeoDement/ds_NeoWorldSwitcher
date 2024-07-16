@@ -533,6 +533,7 @@ scrp 1 1 14546 7002
 *takes a three character input and calculates the index using the equation i*36 + j*6 + k
 	subr get_palette_index_from_string_va30_into_va31
 
+
 *convert each character of the string into its numerical equivalent by subtracting 48
 		setv va31 char va30 1
 		subv va31 48
@@ -901,7 +902,10 @@ scrp 1 1 14546 200
 	subv va00 1
 
 	targ game "WorldSwitcher_ScreenFader"
-	plne va00
+
+	doif targ <> null
+		plne va00
+	endi
 
 
 
@@ -1076,7 +1080,10 @@ scrp 1 2 8009 1000
 	subv va00 1
 
 	targ game "WorldSwitcher_ScreenFader"
-	plne va00
+
+	doif targ <> null
+		plne va00
+	endi
 
 *goodbye
 	kill ownr
@@ -1095,3 +1102,40 @@ scrp 1 2 8009 79
 		call 1000 0 0
 	endi
 endm
+
+
+
+
+
+
+
+
+rscr
+
+*COLOUR EDITOR
+*todo: unpause game
+enum 1 1 14546
+	kill targ
+next
+
+scrx 1 1 14546 10
+scrx 1 1 14546 7000
+scrx 1 1 14546 7003
+scrx 1 1 14546 7004
+scrx 1 1 14546 7005
+scrx 1 1 14546 7002
+scrx 1 1 14546 78
+scrx 1 1 14546 100
+scrx 1 1 14546 101
+scrx 1 1 14546 200
+scrx 1 1 14546 1000
+
+
+*YOU ALREADY HAVE THIS IN YOUR PALETTE popup box.
+*todo: unpause game
+enum 1 2 8009
+	kill targ
+next
+
+scrx 1 2 8009 1000
+scrx 1 2 8009 79
