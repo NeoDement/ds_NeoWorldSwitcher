@@ -71,6 +71,11 @@ endi
 
 
 
+******* NUMBER OF UNIQUE COLOURS IN PALETTE *******
+
+setv game "IconEditor_MaxColours" 216
+
+
 ******* PALETTE SIZE *******
 
 setv game "IconEditor_Palette_Rows" 8
@@ -1025,24 +1030,32 @@ scrp 1 1 64736 1000
 *takes a three character input and calculates the index using the equation i*36 + j*6 + k
 	subr get_palette_index_from_string_va30_into_va31
 
+		doif strl va30 = 3
+
 *convert each character of the string into its numerical equivalent by subtracting 48
-		setv va31 char va30 1
-		subv va31 48
+			setv va31 char va30 1
+			subv va31 48
 
-		setv va32 char va30 2
-		subv va32 48
+			setv va32 char va30 2
+			subv va32 48
 
-		setv va33 char va30 3
-		subv va33 48
+			setv va33 char va30 3
+			subv va33 48
 
 *The number 36 here is actually 6^2 (6 squared), and it helps in calculating the index of a three-digit string where each digit can range from 0-5,
 *similarly, the number 6 is 6^1 (6 to the power of 1).
 
-		mulv va31 36
-		mulv va32 6
+			mulv va31 36
+			mulv va32 6
 
-		addv va31 va32
-		addv va31 va33
+			addv va31 va32
+			addv va31 va33
+
+		else
+
+			setv va31 1
+
+		endi
 
 *add 2 to skip the outline frame and invisible frame.
 		addv va31 2
@@ -1056,7 +1069,7 @@ scrp 1 1 64736 1000
 
 
 
-*todo: this subr is defined identically multiple times in this cos and others.
+*NOTE: this subr is defined identically multiple times in this cos and others.
 *any changes to it will have to be reflected everywhere!
 *ideally, it would all be handled from a shared palette object
 
@@ -1512,9 +1525,11 @@ scrp 1 1 64736 5001
 *write the corresponding palette index for every pixel in the grid
 	adds va69 "palette:"
 
-*todo: functional palette writing
+*write palette!
 	gsub write_colours_from_palette_to_string_va30
 	adds va69 va30
+
+*dummy palette:
 *	adds va69 "555,000,333,222,500,201,530,421,541,320,351,030,245,005,535,304,"
 
 *newline char
@@ -1605,11 +1620,11 @@ scrp 1 1 64736 5001
 
 
 
-*todo: this subr is defined identically multiple times in this cos and others.
+*NOTE: this subr is defined identically multiple times in this cos and others.
 *any changes to it will have to be reflected everywhere!
 *ideally, it would all be handled from a shared palette object
 
-*todo: uses va40 instead of va30 to stop a variable conflict BLEHH!!
+*NOTE: uses va40 instead of va30 to stop a variable naming conflict
 
 *takes a palette index and calculates the corresponding rgb string
 	subr get_string_from_palette_index_va41_into_va40
@@ -1764,8 +1779,6 @@ endm
 
 
 
-
-*todo: move these scripts to appropriate place!
 
 
 
@@ -2828,100 +2841,6 @@ endm
 
 
 
-*todo: get rid
-
-*
-**LOAD ALL EXISTING ICONS!
-*
-*scrp 1 1 64736 10000
-*
-*	inst
-*	lock
-*
-*	file glob 1 "*.icon"
-*
-**check how many "*.icon" were found
-*
-**this line should work, but it doesn't read the entire line.
-**setv va50 inni
-*
-**so we just read the whole line and convert that to a number instead.
-*	setv va60 stoi innl
-*
-**	dbg: outv va60
-*
-**loop iteration counter
-*	setv va90 0
-*
-*	reps va60
-*
-*		sets va01 innl
-*
-**		dbg: outs va01
-*
-**get length of globbed file string...	
-*		setv va08 strl va01
-*
-**globbed files start with ".", so we remove 11 (number of characters forward we are looking from va02 (number of characters to read in total))
-**this stops it reading past the end of the string and causing an error.
-*		subv va08 11
-**+1 because we need to read from AFTER that character.
-*		addv va08 1
-*
-**and then just return the last bit of the name such as "testworld.icon"
-*		sets name va90 subs va01 11 va08
-*
-*		addv va90 1
-*	repe
-*
-*
-*
-*
-*
-*	targ game "IconEditor_Buffer"
-*	part -1
-*
-**run the loop again, this time to load up each file pointed to by the previous input stream (from globbing the directory)
-*
-**loop iteration counter
-*	setv va90 0
-*
-*	reps va60
-*
-**load currently named icon into buffer
-*
-*		call 10001 mame va90 0
-*
-*
-*		sets va00 mame "IconName"
-*
-*		sets va98 va00
-*		sets va99 va00
-*
-*		adds va98 "_icon_lit"
-*		adds va99 "_icon_unlit"
-*
-**take an icon sized screenshot using the buffer room
-*		snap va98 1024 1014 48 29 0
-*
-*		alph 75 1
-*
-**take a DARKENED icon sized screenshot using the buffer room
-*		snap va99 1024 1014 48 29 0
-*
-*		alph 255 0
-*
-*		addv va90 1
-*
-*	repe
-*
-*
-*
-*
-*
-*
-*endm
-
 
 
 
@@ -2943,8 +2862,6 @@ scrp 1 1 64736 5002
 
 
 *get every necessary value from every necessary key
-
-*todo: if you can't find ANY of these keys, or a bunch of other possible errors happen, you should recover from the error!!!
 
 	loop
 		sets va00 innl
@@ -2993,16 +2910,12 @@ scrp 1 1 64736 5002
 
 
 
-*todo: clean up comments.
-
 *load every comma seperated palette entry into our palette
 
 	subr load_string_of_rgbs_va30_into_palette
 
 
 
-
-*todo: if any key you're trying to load from doesn't exist, throw a general error that stops the loading process
 
 		wait 1
 		inst
@@ -3011,28 +2924,20 @@ scrp 1 1 64736 5002
 
 		setv va32 game "IconEditor_Palette_Rows"
 		mulv va32 game "IconEditor_Palette_Columns"
-*subv va32 1
 
 		sets va31 ","
 *		gsub set_va32_to_number_of_substrings_in_string_va30_delimited_by_string_va31
 		setv name "counting" 0
 
-*todo: this is wrong now, i think
-*the value returned by the subroutine is off by 1 (323 instead of 324)
-*		addv va32 1
 
 		setv name "max_count" va32
 
-*		inst
 
 		loop
 *			wait 1
 *			inst
 			addv name "counting" 1
 
-
-*todo: somewhere around here you could put the fix for the last pixel not reading properly from the string unless the string ends with a , comma ,
-*todo: ^ fixed?
 
 			setv va32 name "counting"
 			gsub set_va33_to_string_at_index_va32_from_string_va30_with_delimiter_va31
@@ -3049,9 +2954,27 @@ scrp 1 1 64736 5002
 			addv va01 1000
 
 			doif part va01 = 1
-*todo: for some reason the top left (1st) and bottom right (Last) pixel are being cut off
+
 				part va01
-				pose va41
+
+
+*if you try to load an invalid palette index, just load black instead.
+				setv va55 game "IconEditor_MaxColours"
+
+*add 2 to skip the outline frame and invisible frame.
+				addv va55 2
+
+*put us back in 0 - X space instead of 1 - X space...
+				subv va55 1
+
+				doif va41 < va55
+					pose va41
+				else
+					pose 1
+				endi
+
+
+
 			endi
 
 
@@ -3067,7 +2990,7 @@ scrp 1 1 64736 5002
 
 
 
-*todo: this subr is defined identically multiple times in this cos and others.
+*NOTE: this subr is defined identically multiple times in this cos and others.
 *any changes to it will have to be reflected everywhere!
 *ideally, it would all be handled from a shared palette object
 
@@ -3076,24 +2999,35 @@ scrp 1 1 64736 5002
 *takes a three character input and calculates the index using the equation i*36 + j*6 + k
 	subr get_palette_index_from_string_va40_into_va41
 
+
+
+		doif strl va40 = 3
+
 *convert each character of the string into its numerical equivalent by subtracting 48
-		setv va41 char va40 1
-		subv va41 48
+			setv va41 char va40 1
+			subv va41 48
 
-		setv va42 char va40 2
-		subv va42 48
+			setv va42 char va40 2
+			subv va42 48
 
-		setv va43 char va40 3
-		subv va43 48
+			setv va43 char va40 3
+			subv va43 48
 
 *The number 36 here is actually 6^2 (6 squared), and it helps in calculating the index of a three-digit string where each digit can range from 0-5,
 *similarly, the number 6 is 6^1 (6 to the power of 1).
 
-		mulv va41 36
-		mulv va42 6
+			mulv va41 36
+			mulv va42 6
 
-		addv va41 va42
-		addv va41 va43
+			addv va41 va42
+			addv va41 va43
+
+		else
+
+			setv va41 1
+
+		endi
+
 
 *add 2 to skip the outline frame and invisible frame.
 		addv va41 2
@@ -3110,11 +3044,9 @@ scrp 1 1 64736 5002
 
 
 
-*todo: clean up junky comments.
 
 	subr load_string_of_indexes_va30_into_buffer
 
-*todo: if any key you're trying to load from doesn't exist, throw a general error that stops the loading process
 
 		targ game "IconEditor_Buffer"
 		show 0
