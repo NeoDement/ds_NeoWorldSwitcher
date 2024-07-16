@@ -1152,3 +1152,43 @@ scrp 1 1 34543 6002
 
 
 endm
+
+
+
+
+
+
+
+
+
+
+
+rscr
+
+
+*ICON CHOOSER PANEL
+*todo: unpause the game
+
+enum 1 1 34543
+	kill targ
+next
+
+scrx 1 1 34543 10
+scrx 1 1 34543 2000
+scrx 1 1 34543 4000
+scrx 1 1 34543 79
+scrx 1 1 34543 6001
+scrx 1 1 34543 1000
+scrx 1 1 34543 10000
+scrx 1 1 34543 76
+scrx 1 1 34543 75
+scrx 1 1 34543 6002
+
+
+*SCREEN FADER
+enum 1 2 64736
+	kill targ
+next
+
+
+
