@@ -2757,7 +2757,10 @@ scrp 1 2 8000 1001
 	subv va00 1
 
 	targ game "WorldSwitcher_ScreenFader"
-	plne va00
+
+	doif targ <> null
+		plne va00
+	endi
 
 *goodbye
 	kill ownr
@@ -4080,8 +4083,83 @@ endm
 
 
 
+
+
+
+
 rscr
+
 
 *delete the icon rendering room
 setv va00 gmap 1024 1024
 delm va00
+
+
+
+
+
+*ARE YOU SURE!? Clear popup yes/no screen.
+*todo: unpause game
+
+enum 1 2 8000
+	kill targ
+next
+
+scrx 1 2 8000 1001
+scrx 1 2 8000 1000
+scrx 1 2 8000 79
+
+
+
+
+
+
+*ICON EDITOR MAIN
+*todo: unpause the game
+
+enum 1 1 64736
+	kill targ
+next
+
+scrx 1 1 64736 10
+scrx 1 1 64736 1500
+scrx 1 1 64736 1000
+scrx 1 1 64736 1001
+scrx 1 1 64736 1002
+scrx 1 1 64736 3001
+scrx 1 1 64736 3002
+scrx 1 1 64736 3003
+scrx 1 1 64736 3004
+scrx 1 1 64736 3500
+scrx 1 1 64736 3501
+scrx 1 1 64736 5500
+scrx 1 1 64736 5600
+scrx 1 1 64736 5001
+scrx 1 1 64736 7000
+scrx 1 1 64736 7001
+scrx 1 1 64736 7002
+scrx 1 1 64736 78
+scrx 1 1 64736 6000
+scrx 1 1 64736 6001
+scrx 1 1 64736 6002
+scrx 1 1 64736 6003
+scrx 1 1 64736 6004
+*scrx 1 1 64736 10000
+scrx 1 1 64736 5002
+scrx 1 1 64736 5003
+scrx 1 1 64736 3000
+scrx 1 1 64736 4000
+scrx 1 1 64736 79
+scrx 1 1 64736 5000
+scrx 1 1 64736 7500
+scrx 1 1 64736 8000
+
+
+
+
+*CUSTOM CURSOR
+
+*todo: unhide original cursor, with c2tods cursor cope code.
+enum 1 1 66650
+	kill targ
+next
