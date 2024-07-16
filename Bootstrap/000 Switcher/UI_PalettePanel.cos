@@ -1,3 +1,5 @@
+
+
 enum 1 1 14546
 	kill targ
 next
@@ -850,9 +852,16 @@ endm
 scrp 1 1 14546 101
 
 	inst
+
 	lock
 
 
+
+	part 101
+	pose 1
+	wait 5
+
+	inst
 
 *unpause the pixel grid and main form!!
 	targ game "IconEditor_PixelGrid"
@@ -867,11 +876,9 @@ scrp 1 1 14546 101
 
 
 
-	part 101
-	pose 1
-	wait 5
 
-	inst
+*reset button
+	pose 0
 
 *self-terminate
 	call 200 0 0
