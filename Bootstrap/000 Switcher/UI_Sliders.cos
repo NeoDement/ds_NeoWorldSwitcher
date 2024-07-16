@@ -759,3 +759,27 @@ scrp 1 1 64769 900
 		call 77 0 0
 	endi
 endm
+
+
+
+
+
+rscr
+
+*SLIDER MANAGERS
+*todo: unpause the game!
+
+enum 1 1 64769
+	kill targ
+next
+
+scrx 1 1 64769 1002
+scrx 1 1 64769 1000
+scrx 1 1 64769 75
+scrx 1 1 64769 77
+scrx 1 1 64769 1003
+scrx 1 1 64769 1001
+scrx 1 1 64769 1004
+scrx 1 1 64769 1005
+scrx 1 1 64769 1006
+scrx 1 1 64769 900
