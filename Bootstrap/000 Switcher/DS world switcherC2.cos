@@ -575,6 +575,9 @@ scrp 1 2 1000 2000
 	endi
 
 
+	part 0
+	pose 0
+
 * Fade in
 	doif ov74 = 0
 		lock
@@ -597,11 +600,14 @@ scrp 1 2 1000 2000
 		setv ov74 1
 
 *force draw all the icons once. this will make any custom ones onscreen load.
-		mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
-	endi
 
-	part 0
-	pose 0
+*only if we're in worldswitcher view or we access nonexistant icon data.
+		doif ov00 = 3
+			mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
+		endi
+
+
+	endi
 
 * All done - so let's stop here
 	stop
@@ -2289,11 +2295,6 @@ scrp 1 2 1000 2000
 		untl sins va22 1 va35 <> -1 or va36 = 2
 
 
-*	setv va23 strl va22
-*	subv va23 sins va22 1 "frame0: "
-
-*	sets va99 subs va22 sins va22 1 "frame0: " va23
-
 
 *read from position N (length of keyName string) (va23) to the END OF STRING. calculated by subtracting va23 from the length of the current string (va22).
 		setv va23 strl va35
@@ -2303,7 +2304,7 @@ scrp 1 2 1000 2000
 		subv va24 va23
 
 
-*new fix, todo, might be dodgy. stops it cutting off the last character of eggs...
+*stops it cutting off the last character
 		addv va24 1
 
 
@@ -3899,11 +3900,6 @@ scrp 1 2 1000 4001
 		untl sins va22 1 va35 <> -1 or va36 = 2
 
 
-*	setv va23 strl va22
-*	subv va23 sins va22 1 "frame0: "
-
-*	sets va99 subs va22 sins va22 1 "frame0: " va23
-
 
 *read from position N (length of keyName string) (va23) to the END OF STRING. calculated by subtracting va23 from the length of the current string (va22).
 		setv va23 strl va35
@@ -3913,7 +3909,7 @@ scrp 1 2 1000 4001
 		subv va24 va23
 
 
-*new fix, todo, might be dodgy. stops it cutting off the last character of eggs...
+*stops it cutting off the last character
 		addv va24 1
 
 
@@ -4292,21 +4288,32 @@ rscr
 
 
 
-*todo: this is just the c12ds script
+*todo: any more cleanup here?
+
+
+*MAIN WORLD SWITCHER
 enum 1 2 1000
 	kill targ
 next
-enum 1 2 1001
-	kill targ
-next
+
 scrx 1 2 1000 2000
-scrx 1 2 1000 800
-scrx 1 1 32302 301
 scrx 1 2 1000 450
-enum 1 1 32302
-	kill targ
-next
-ject "DS world switcher.cos" 7
+scrx 1 2 1000 100
+scrx 1 2 1000 200
+scrx 1 2 1000 10000
+scrx 1 2 1000 10001
+scrx 1 2 1000 503
+scrx 1 2 1000 4000
+scrx 1 2 1000 4001
+scrx 1 2 1000 4500
+scrx 1 2 1000 699
+scrx 1 2 1000 5500
+scrx 1 2 1000 5600
+
+
+
+
+
 
 
 
@@ -4324,8 +4331,6 @@ ject "DS world switcher.cos" 7
 
 
 
-
-*NEW
 
 
 *WORLD ENTRY MOUSE MOVE LISTENER
@@ -4347,3 +4352,19 @@ next
 scrx 1 2 1001 1000
 scrx 1 2 1001 1001
 
+
+
+*run rscr of all other scripts...
+ject "UI_Dropdowns.cos" 1
+ject "UI_IconChooserPanel.cos" 1
+ject "UI_IconEditor.cos" 1
+ject "UI_PalettePanel.cos" 1
+ject "UI_PixelGrids.cos" 1
+ject "UI_Sliders.cos" 1
+
+
+
+
+
+*and reinject the original!
+ject "DS world switcher.cos" 7
