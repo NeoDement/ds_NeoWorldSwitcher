@@ -2749,23 +2749,29 @@ scrp 1 2 1000 100
 
 
 *if this "addon" is actually creatures 3, skip the usual logic and just set world type to undocked.
+*and remove the C3 autioicon variable
 
-*if it's C1 or C2, set up variables used to automatically determine the icon.
 		doif va09 = "Creatures 3"
 
 			sets name "wtype" "undocked"
 
 			setv game "WorldSwitcher_C3" 0
 
-		elif va09 = "C12DS"
-
-			setv game "WorldSwitcher_C1" 0
-
-		elif va09 = "C2toDS"
-
-			setv game "WorldSwitcher_C2" 0
-
 		else
+
+
+*if it's C1 or C2, set up variables used to automatically determine the icon.
+			doif va09 = "C12DS"
+
+				setv game "WorldSwitcher_C1" 0
+
+			elif va09 = "C2toDS"
+
+				setv game "WorldSwitcher_C2" 0
+
+			endi
+
+
 
 *ATTEMPT TO REMOVE THE ADDON NAME FROM OUR COMMA SEPARATED LIST OF ADDONS
 
@@ -2882,6 +2888,11 @@ scrp 1 2 1000 10000
 	setv game "WorldSwitcher_C3" 0
 	setv game "WorldSwitcher_C1" 0
 	setv game "WorldSwitcher_C2" 0
+
+
+
+*blank string that will be filled with a list of chunk names to be saved to an "addons" file, to be injected when the world is launched
+	sets game "WorldSwitcher_CurrentWorld_ChunkNames" ""
 
 
 
