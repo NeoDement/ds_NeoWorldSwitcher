@@ -5,4 +5,4 @@ displayName:Eggs
 spriteFile:worldswitcher_icons_Eggs
 
 //this number will be equal to the number of images in the sprite file divided by 2
-iconCount:17
+iconCount:24

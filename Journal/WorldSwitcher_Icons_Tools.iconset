@@ -1,8 +1,8 @@
 //display name of Icon Set
-displayName:Creatures 0
+displayName:Tools
 
 //name of sprite file
-spriteFile:worldswitcher_icons_C0
+spriteFile:worldswitcher_icons_Tools
 
 //this number will be equal to the number of images in the sprite file divided by 2
-iconCount:7
+iconCount:17
