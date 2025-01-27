@@ -1,7 +1,9 @@
 * C2toDS Refresh World Switcher add-on
-*original by Cyberlife (duh), edits by Chicken for C12DS, further edits by NeoDement
+*original by Cyberlife, edits by Chicken for C12DS, further edits by NeoDement
 
 
+
+*todo: reworked this so delete comment.
 
 *KNOWN BUGS
 
@@ -585,6 +587,18 @@ scrp 1 2 1000 2000
 *it would be better to do this when we create it, but we're not hooking that event. this also only runs once, on creation :)
 		seta game "WorldSwitcher_Main" targ
 
+*todo: move this code elsewhere and improve it
+*		strk 5 ""
+*		mmsc 100 100 ""
+*		sndc "c2mu"
+
+*		new: simp 1 1 32302 "C2_Enabled" 1 0 0
+*		attr 0
+*		mvto 460 0
+
+*		targ ownr
+
+
 
 		part -1
 		setv va00 256
@@ -608,6 +622,8 @@ scrp 1 2 1000 2000
 
 
 	endi
+
+
 
 * All done - so let's stop here
 	stop
@@ -1286,15 +1302,49 @@ scrp 1 2 1000 2000
 			gall "blnk" 0
 
 
-*** NORMAL ICON ***
+
+
+
+
+
+
+
+
+
+
+*todo: read data from referenced iconset file
+
+*set default values
+			sets name "loaded_spriteFile" ""
+
+			setv name "loaded_iconCount" -1
 
 			doif va10 = "normal"
+
+				sets va15 va11
+
+				adds va15 ".iconset"
+
+				call 8000 va15 0
+
+			endi
+
+
+*** NORMAL ICON ***
+
+			doif va10 = "normal" and snax name "loaded_spriteFile" = 1 and va12 < name "loaded_iconCount"
+
+
+*todo: double because we store the icon INDEX, not the sprite frame
+				mulv va12 2
 
 *(we add 1 to the stored frame number, because we store the Unlit frame not the Lit frame)
 				addv va12 1
 
-				gall va11 va12
+				gall name "loaded_spriteFile" va12
 
+*todo: remember iconset name, for the icon saving functionality
+				sets game "WorldSwitcher_WorldCreation_Iconset" va11
 
 				gsub CLEAR_CUSTOM_ICON_BUFFER
 
@@ -1349,6 +1399,9 @@ scrp 1 2 1000 2000
 
 *set our gall!!
 				gall "WorldSwitcher_Icons_Default" va60
+
+*todo: remember iconset name, for the icon saving functionality
+				sets game "WorldSwitcher_WorldCreation_Iconset" "WorldSwitcher_Icons_Logos"
 
 				gsub CLEAR_CUSTOM_ICON_BUFFER
 
@@ -1932,14 +1985,50 @@ scrp 1 2 1000 2000
 
 
 
+*todo: read data from referenced iconset file
 
+*set default values
+			sets name "loaded_spriteFile" ""
+
+			setv name "loaded_iconCount" -1
+
+			doif va10 = "normal"
+
+				sets va15 va11
+
+				adds va15 ".iconset"
+
+				call 8000 va15 0
+
+			endi
+
+
+*"normal" - ICON WILL BE SPECIFIED WITH A NAME AND A FRAME NUMBER.
+			doif va10 = "normal" and snax name "loaded_spriteFile" = 1 and va12 < name "loaded_iconCount"
+
+
+
+
+				sets va82 va81
+				adds va82 "_spritename"
+				sets game va82 name "loaded_spriteFile"
+
+
+
+
+				sets va82 va81
+				adds va82 "_firstframe"
+
+*todo: double because we store the icon INDEX, not the sprite frame
+				mulv va12 2
+				setv game va82 va12
 
 
 
 
 
 *"custom" - LOAD ICON FROM A COMMA SEPARATED ARRAY OF PIXELS
-			doif va10 = "custom"
+			elif va10 = "custom"
 
 *****custom icons are are all loaded from files in the journal directory into temporary s16 files in the icon drawing loop (script 75), whenever one is detected to be missing.
 *this means all we need for custom icons is a file name, no need for any frame numbers. we automatically append _lit or _unlit as appropriate.
@@ -1988,94 +2077,6 @@ scrp 1 2 1000 2000
 
 
 
-*"normal" - ICON WILL BE SPECIFIED WITH A NAME AND A FRAME NUMBER.
-*also check icon exists!
-			elif va10 = "normal" and snax va11 = 1
-
-
-
-
-
-***** UNUSED CODE TO CHECK IF IMAGE NAME AND INDEX ARE VALID VALID ****
-**(unused because it requires waiting a tick which kills this script... and even if it did work it would cause loading to be slow looking.
-*
-*
-**disable listening for mouse movements now.
-*				targ game "MouseMoveListener"
-*				imsk 0
-*				
-**check and don't set any wolf variables.
-*				setv va17 wolf 15 0
-*
-**enable autokill
-*				setv va00 wolf 7 8
-*
-**create tester object.
-*				new: simp 1 2 1234 "blnk" 1 0 0
-*
-*				seta game "whatever" targ
-*
-**run script to try and validate image name and frame
-*				mesg wrt+ targ 1000 va11 va12 0
-*
-*				slow
-*				inst
-*
-*				targ game "whatever"
-*
-**if the object hasn't killed itself, the sprite number was valid.
-*				doif targ = null
-**					dbg: outs "THAT GALLERY AND SPRITE NUMBER DO NOT EXIST!"
-*					setv va19 0
-*				else
-**					dbg: outs "THAT GALLERY AND SPRITE NUMBER EXIST!"
-*					setv va19 1
-*				endi
-*
-**set all wolf variables to the stored state from checking them. no kanga mask.
-*				setv va18 wolf 0 va17
-*				
-*				
-**re-enable listening for mouse movements now we're done.
-*				targ game "MouseMoveListener"
-*				imsk 4
-*
-*
-*
-**re-target the correct thing!
-*				targ ownr
-*
-*
-*
-**if icon and image number exist, set them up for later scripts to read
-*				doif va19 = 1
-*
-*					sets va82 va81
-*					adds va82 "_spritename"
-*					sets game va82 va11
-*
-*					sets va82 va81
-*					adds va82 "_firstframe"
-*					setv game va82 va12
-*
-**otherwise, find some defaults
-*				else
-*
-*					gsub reset_icon_to_default_style
-*
-*				endi
-
-************************
-
-
-				sets va82 va81
-				adds va82 "_spritename"
-				sets game va82 va11
-
-				sets va82 va81
-				adds va82 "_firstframe"
-				setv game va82 va12
-
 
 *no IconType specified. we'll emulate default DS behaviour for this world type.
 			else
@@ -2091,6 +2092,10 @@ scrp 1 2 1000 2000
 *repe
 
 	retn
+
+
+
+
 
 
 
@@ -2206,8 +2211,8 @@ scrp 1 2 1000 2000
 *looks for a file called "icon" in the "journal" folder, and reads the following values from it:
 
 *VA10 - type (normal or custom)
-*VA11 - spriteName or palette
-*VA12 - spriteFrame or imageData
+*VA11 - iconsetName or palette
+*VA12 - iconsetIndex or imageData
 *VA13 - editCount (only increased for custom icon worlds)
 
 	subr load_icon_from_world_journal
@@ -2229,11 +2234,11 @@ scrp 1 2 1000 2000
 
 			doif va10 = "normal"
 
-				sets va35 "spritename:"
+				sets va35 "iconsetname:"
 				gsub load_value_from_key_named_va35_into_string_va30
 				sets va11 va30
 
-				sets va35 "spriteframe:"
+				sets va35 "iconsetindex:"
 				gsub load_value_from_key_named_va35_into_string_va30
 				setv va12 stoi va30
 
@@ -2253,6 +2258,9 @@ scrp 1 2 1000 2000
 			sets va35 "editcount:"
 			gsub load_value_from_key_named_va35_into_string_va30
 			setv va13 stoi va30
+
+*todo:
+*			xxx
 
 		endi
 
@@ -3505,12 +3513,16 @@ scrp 1 2 1000 503
 
 		outs "iconType:normal"
 		outs "\n"
-		outs "spriteName:"
-		outs gall
+		outs "iconsetName:"
+*todo: !!!!
+*we now get iconset name, not sprite name
+		outs game "WorldSwitcher_WorldCreation_Iconset"
 		outs "\n"
-		outs "spriteFrame:"
+		outs "iconSetIndex:"
 		setv va99 abba
 		subv va99 1
+*note: index is halved, because of unlit icons. we double it when loading
+		divv va99 2
 		outs vtos va99
 
 *write an edit count, if we have one.
@@ -3740,14 +3752,41 @@ scrp 1 2 1000 4001
 	gall "blnk" 0
 
 
-*** NORMAL ICON ***
+
+
+*todo: read data from referenced iconset file
+
+*set default values
+	sets name "loaded_spriteFile" ""
+
+	setv name "loaded_iconCount" -1
 
 	doif va10 = "normal"
+
+		sets va15 va11
+
+		adds va15 ".iconset"
+
+		call 8000 va15 0
+
+	endi
+
+
+*** NORMAL ICON ***
+
+	doif va10 = "normal" and snax name "loaded_spriteFile" = 1 and va12 < name "loaded_iconCount"
+
+
+*todo: double because we store the icon INDEX, not the sprite frame
+		mulv va12 2
 
 *(we add 1 to the stored frame number, because we store the Unlit frame not the Lit frame)
 		addv va12 1
 
-		gall va11 va12
+		gall name "loaded_spriteFile" va12
+
+*todo: remember iconset name, for the icon saving functionality
+		sets game "WorldSwitcher_WorldCreation_Iconset" va11
 
 		gsub CLEAR_CUSTOM_ICON_BUFFER
 
@@ -3766,10 +3805,6 @@ scrp 1 2 1000 4001
 
 *...no icon defined, calculate it from wtype
 	else
-
-
-		gsub CLEAR_CUSTOM_ICON_BUFFER
-
 
 		file iope 2 "wtype"
 		sets va64 innl
@@ -3806,6 +3841,11 @@ scrp 1 2 1000 4001
 *set our gall!!
 		gall "WorldSwitcher_Icons_Default" va60
 
+*todo: remember iconset name, for the icon saving functionality
+		sets game "WorldSwitcher_WorldCreation_Iconset" "WorldSwitcher_Icons_Logos"
+
+		gsub CLEAR_CUSTOM_ICON_BUFFER
+
 
 	endi
 
@@ -3840,11 +3880,11 @@ scrp 1 2 1000 4001
 
 			doif va10 = "normal"
 
-				sets va35 "spritename:"
+				sets va35 "iconsetname:"
 				gsub load_value_from_key_named_va35_into_string_va30
 				sets va11 va30
 
-				sets va35 "spriteframe:"
+				sets va35 "iconsetindex:"
 				gsub load_value_from_key_named_va35_into_string_va30
 				setv va12 stoi va30
 
@@ -4063,6 +4103,9 @@ scrp 1 2 1000 4500
 
 		gall "WorldSwitcher_Icons_Default" va60
 
+*todo: remember iconset name, for the icon saving functionality
+		sets game "WorldSwitcher_WorldCreation_Iconset" "WorldSwitcher_Icons_Logos"
+
 *auto icon, so we should NOT be using a custom icon!
 		setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
 
@@ -4128,6 +4171,7 @@ scrp 1 2 1000 699
 *NEW: write selected icon too! NOTE: make sure this stays up to date with the one in create new world.
 *the difference here being we add 1 to EditCount whenever we save changes to a custom icon.
 
+
 *write a normal, sprite name/frame based icon.
 
 	doif game "WorldSwitcher_WorldCreation_CustomIconEnabled" = 0
@@ -4137,12 +4181,16 @@ scrp 1 2 1000 699
 
 		outs "iconType:normal"
 		outs "\n"
-		outs "spriteName:"
-		outs gall
+		outs "iconsetName:"
+*todo: !!!!
+*we now get iconset name, not sprite name
+		outs game "WorldSwitcher_WorldCreation_Iconset"
 		outs "\n"
-		outs "spriteFrame:"
+		outs "iconSetIndex:"
 		setv va99 abba
 		subv va99 1
+*note: index is halved, because of unlit icons. we double it when loading
+		divv va99 2
 		outs vtos va99
 
 *write an edit count, if we have one.
@@ -4153,6 +4201,8 @@ scrp 1 2 1000 699
 		endi
 
 		file oclo
+
+
 
 	else
 
@@ -4268,24 +4318,117 @@ endm
 
 
 
-*unused!
-*** IMAGE FRAME NUMBER TESTER OBJECT SCRIPT ***
-*
-*scrp 1 2 1234 1000
-*
-**make sure the image exists.
-*	doif snax _p1_ = 1
-*
-**if the sprite number doesn't exist, autokill will automatically kill our test object.
-*		gall _p1_ _p2_
-*
-*	else
-*
-*		kill ownr
-*
-*	endi
-*
-*endm
+
+
+
+
+
+
+
+*todo: delete this?
+
+*load iconset script
+
+scrp 1 2 1000 8000
+
+	inst
+	lock
+
+
+
+
+
+
+
+	file iope 1 _p1_
+
+*load in all the necessary icon data
+
+*no error checking. if any of these values are invalid, it's up to the iconset creator to fix their file.
+
+	loop
+		sets va00 innl
+
+*va00 is lowercase version of the string for search purposes. va01 is original case, for display purposes.
+		sets va01 va00
+		sets va00 lowa va00
+
+
+		sets va32 "spritefile:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va01
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			sets va51 va30
+
+		endi
+
+		sets va32 "iconcount:"
+		doif sins va00 1 va32 <> -1
+
+			sets va31 va01
+			gsub load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+			sets va52 va30
+
+		endi
+
+
+	untl inok = 0
+
+
+
+*if you failed to load a "spritefile:" value, don't update the globals
+
+	doif type va51 = 2
+
+*"loaded_spriteFile"
+		sets name "loaded_spriteFile" va51
+
+*"loaded_iconCount"
+		setv name "loaded_iconCount" stoi va52
+
+	endi
+
+
+	file iclo
+
+
+
+
+
+
+
+
+*the subroutine that makes it happen!
+
+	subr load_value_from_key_named_va32_in_string_va31_into_string_va30
+
+		sets va02 va31
+
+*read from position 7 (length of string "frame0:") (VA03) to the END OF STRING. calculated by subtracting VA03 from the length of the current string (VA02).
+		setv va03 strl va32
+
+		setv va04 strl va02
+		subv va04 va03
+
+*fix off by 1 errorz
+		addv va03 1
+
+*  	      vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+		sets va30 subs va02 va03 va04
+*  	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+	retn
+
+
+
+
+
+
+
+endm
 
 
 
@@ -4328,17 +4471,7 @@ scrx 1 2 1000 5600
 
 
 
-
-
-*UNUSED "DOES SPRITE FRAME NUMBER EXIST" TESTER OBJECT
-*enum 1 2 1234
-*	kill targ
-*next
-
-*scrx 1 2 1234 1000
-
-
-
+*todo: install/reinstall scripts need to be beefed up. if you inject this multiple times there will be multiple mouse move listeners for example!
 
 
 

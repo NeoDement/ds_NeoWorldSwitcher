@@ -601,6 +601,24 @@ scrp 1 1 34543 10000
 			sets name va82 va51
 *		dbg: outs name va82
 
+
+
+
+*N_iconsetFile
+			sets va82 va81
+			adds va82 "_iconsetFile"
+
+*cut off ".iconset" suffix (last 8 chars)
+			setv va68 strl name va90
+			subv va68 8
+			sets va69 subs name va90 1 va68
+
+			sets name va82 va69
+
+
+
+
+
 *"N_iconCount"
 			sets va82 va81
 			adds va82 "_iconCount"
@@ -808,10 +826,18 @@ scrp 1 1 34543 75
 				targ ownr
 
 
+
 *read in the specified sprite file name
 				sets va51 va50
 				adds va51 "_spriteFile"
 				sets va23 name va51
+
+
+*also, read in the specified iconset file name
+				sets va52 va50
+				adds va52 "_iconsetFile"
+				sets va26 name va52
+
 
 
 
@@ -848,6 +874,8 @@ scrp 1 1 34543 75
 
 				gall va23 va24
 
+*remember iconset name, for the icon saving functionality
+				sets game "WorldSwitcher_WorldCreation_Iconset" va26
 
 
 
@@ -1189,6 +1217,3 @@ scrx 1 1 34543 6002
 enum 1 2 64736
 	kill targ
 next
-
-
-
