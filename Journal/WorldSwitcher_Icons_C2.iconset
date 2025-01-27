@@ -5,4 +5,4 @@ displayName:Creatures 2
 spriteFile:worldswitcher_icons_C2
 
 //this number will be equal to the number of images in the sprite file divided by 2
-iconCount:83
+iconCount:89

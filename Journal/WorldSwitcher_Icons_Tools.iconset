@@ -5,4 +5,4 @@ displayName:Tools
 spriteFile:worldswitcher_icons_Tools
 
 //this number will be equal to the number of images in the sprite file divided by 2
-iconCount:17
+iconCount:18
