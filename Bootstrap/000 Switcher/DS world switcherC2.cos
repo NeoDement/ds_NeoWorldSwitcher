@@ -173,8 +173,21 @@ scrx 1 2 1000 5600
 scrx 1 2 1001 1000
 
 
-*inject our EVENT scripts
-ject "DS world switcherC2.cos" 2
+
+
+
+
+*inject our EVENT scripts and REMOVE script. this also runs all UI script remove scripts, to aid in a clean re-inject.
+ject "DS world switcherC2.cos" 3
+
+
+*run install/event scripts of all UI scripts...
+ject "UI_Dropdowns.cos" 6
+ject "UI_IconChooserPanel.cos" 6
+ject "UI_IconEditor.cos" 6
+ject "UI_PalettePanel.cos" 6
+ject "UI_PixelGrids.cos" 6
+ject "UI_Sliders.cos" 6
 
 
 *kill C1 Enabled sign, if it exists
