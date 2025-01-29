@@ -161,17 +161,30 @@ endm
 
 
 
+
 *RAW MOUSE MOVE SCRIPT
 
 scrp 1 1 64742 75
+
+	inst
+
+*don't do anything to cursor if it doesn't exist
+	targ game "IconEditor_Cursor"
+
+	doif targ = null
+		setv game "IconEditor_CursorMode" 0
+		stop
+	else
+		targ ownr
+	endi
 
 
 *don't make the cursor look funky if a dropdown is open.
 	doif game "IconEditor_CursorMode" <> 0 and game "IconEditor_DropdownOpen" = 0
 
 *get pointer coords
-		setv va00 mopx
-		setv va01 mopy
+		setv va00 _p1_
+		setv va01 _p2_
 
 		targ ownr
 
@@ -743,6 +756,12 @@ scrp 1 1 64742 9010
 	lock
 
 
+**don't respond to middle mouse
+*	doif ov00 = 4
+*		stop
+*	endi
+
+
 *clear any previous selected marker pixels
 
 	call 9011 0 0
@@ -757,7 +776,6 @@ scrp 1 1 64742 9010
 	else
 		setv va50 name "SelectedPaletteIndex"
 	endi
-
 
 
 
@@ -879,8 +897,8 @@ scrp 1 1 64742 9010
 
 					setv va10 ov69
 
-*only draw if mouse button is held down
-					doif ov00 <> 0
+*only draw if a mouse button is held down. not middle mouse.
+					doif ov00 = 1 or ov00 = 2
 *					doif 0 = 0
 
 *erase
@@ -1562,7 +1580,7 @@ endm
 
 ******************************************************
 ******************************************************
-**  PAUSE - Pauses everything except stuff needed for pixelgrind to function  **
+**  PAUSE - Pauses everything except stuff needed for pixelgrid to function  **
 ******************************************************
 ***********************(9999)*************************
 ******************************************************
@@ -1571,7 +1589,7 @@ scrp 1 1 64742 9999
 
 	inst
 
-*don't waste cycles if we're already paused
+*don't pause if we're already paused
 	doif game "IconEditor_Paused" = 0
 
 		setv game "IconEditor_Paused" 1
@@ -1618,16 +1636,20 @@ scrp 1 1 64742 9999
 
 *unpause objects necessary for pixelgrid function.
 		targ game "IconEditor_Main"
-		paus 0
+		doif targ <> null
+			paus 0
+		endi
 
 		targ name "BrushSizeSlider"
-		paus 0
+		doif targ <> null
+			paus 0
+		endi
 
 		targ game "IconEditor_BrushPreview"
-		paus 0
+		doif targ <> null
+			paus 0
+		endi
 
-		targ game "IconEditor_BrushPreview"
-		paus 0
 
 	endi
 
@@ -1656,7 +1678,7 @@ scrp 1 1 64742 9998
 
 	inst
 
-*don't waste cycles if we're already UNpaused
+*don't unpause if we're already UNpaused
 	doif game "IconEditor_Paused" = 1
 
 		setv game "IconEditor_Paused" 0
