@@ -185,7 +185,7 @@ scrp 1 1 64736 10
 *lit icon preview (slightly darker bg)
 	pat: dull 1 "WorldSwitcher_IconEditor_Controls" 32 121 42 1
 
-	pat: fixd 2 "WorldSwitcher_IconEditor_Controls" 25 53 46 10 "whiteontransparentchars"
+	pat: fixd 2 "WorldSwitcher_IconEditor_Controls" 25 53 46 1 "whiteontransparentchars"
 	part 2
 	frmt 8 8 8 8 0 0 1
 *	ptxt "Lit:"
@@ -195,7 +195,7 @@ scrp 1 1 64736 10
 *unlit icon preview (slightly brighter bg. darkened to match lighter bg using fake darkener below.)
 	pat: dull 3 "WorldSwitcher_IconEditor_Controls" 33 226 42 1
 
-	pat: fixd 4 "WorldSwitcher_IconEditor_Controls" 25 157 46 10 "whiteontransparentchars"
+	pat: fixd 4 "WorldSwitcher_IconEditor_Controls" 25 157 46 1 "whiteontransparentchars"
 	part 4
 	frmt 8 8 8 8 0 0 1
 *	ptxt "Unlit:"
@@ -240,7 +240,7 @@ scrp 1 1 64736 10
 
 
 
-	pat: fixd 101 "WorldSwitcher_IconEditor_Controls" 4 7 9 10 "whiteontransparentchars"
+	pat: fixd 101 "WorldSwitcher_IconEditor_Controls" 4 7 9 1 "whiteontransparentchars"
 	part 101
 *	ptxt "Icon Editor"
 	ptxt game "UI_APPNAME"
@@ -267,7 +267,7 @@ scrp 1 1 64736 10
 
 
 *Brush Size:
-	pat: fixd 102 "WorldSwitcher_IconEditor_Controls" 4 -30 311 10 "whiteontransparentchars"
+	pat: fixd 102 "WorldSwitcher_IconEditor_Controls" 4 -30 311 1 "whiteontransparentchars"
 	part 102
 	frmt 8 8 8 8 0 0 1
 	ptxt game "UI_BRUSHSIZE"
@@ -307,10 +307,10 @@ scrp 1 1 64736 10
 
 
 *button component of slider (backdrop of slider bar, clicking it makes the control active)
-	pat: butt va02 "WorldSwitcher_Slider" 0 0 VA00 VA01 2 [] 7000 0
+	pat: butt va02 "WorldSwitcher_Slider" 0 0 VA00 VA01 1 [] 7000 0
 
 *playhead component of slider
-	pat: butt va03 "WorldSwitcher_Slider" 2 0 VA00 VA01 5 [] 7000 0
+	pat: butt va03 "WorldSwitcher_Slider" 2 0 VA00 VA01 1 [] 7000 0
 
 *editable text component of slider
 	pat: text va04 "WorldSwitcher_Slider" 3 VA05 VA06 1 7001 "WhiteOnTransparentChars"
@@ -688,26 +688,7 @@ scrp 1 1 64736 10
 *this will be targeted by the colour editor panel, later
 	setv mame "SelectedColourPreview_PartNumber" 1100
 
-	pat: dull mame "SelectedColourPreview_PartNumber" "WorldSwitcher_IconEditor_Palette" 655 25 220 1
-
-
-
-
-*LARGE COLOUR PREVIEW HOVER OUTLINE
-
-*Palette Index 654:
-
-*add 1 for the invisible frame
-*add 1 for the outline frame
-*add 216 colours for the length of the palette
-*multiply by 3, as this is the fourth image set in the file (Preview sized)
-*do NOT add 1 so we start on the outline frame instead of the invisible frame
-
-	pat: butt 1101 "WorldSwitcher_IconEditor_Palette" 654 0 24 219 1 [] 1002 0
-	part 1101
-	pose 1
-
-
+	pat: butt mame "SelectedColourPreview_PartNumber" "WorldSwitcher_IconEditor_Palette" 655 0 25 220 1 [] 1002 0
 
 
 
@@ -1129,7 +1110,9 @@ scrp 1 1 64736 1001
 
 	targ game "IconEditor_PixelGrid"
 
-	setv name "SelectedPaletteIndex" va00
+	doif targ <> null
+		setv name "SelectedPaletteIndex" va00
+	endi
 
 
 	targ ownr
@@ -1204,16 +1187,17 @@ scrp 1 1 64736 1002
 
 	inst
 
+	targ game "IconEditor_ColourEditor"
+
+	doif targ = null
+		stop
+	endi
+
+	targ ownr
+
 *move screen darkener just in front of the main panel, but still behind the newly opened colour editor panel
 	setv va00 plne
 	addv va00 1
-
-
-
-*if we managed to click it without mouse move script noticing we're hovering, manually highlight button
-	part 1101
-
-	pose 0
 
 
 
@@ -1228,10 +1212,11 @@ scrp 1 1 64736 1002
 
 	targ game "IconEditor_PixelGrid"
 
-	mesg wrt+ game "IconEditor_ColourEditor" 1000 name "SelectedPaletteIndex" 0 0
+	doif targ <> null
 
-*wake up colour editor, you are needed. _P1_ is Index (for pose), _P2_ is RGB code (for editing)
-*	mesg wrt+ game "IconEditor_ColourEditor" 1000 name "SelectedPaletteIndex" name "SelectedPaletteRGB" 0
+		mesg wrt+ game "IconEditor_ColourEditor" 1000 name "SelectedPaletteIndex" 0 0
+
+	endi
 
 endm
 
@@ -1392,8 +1377,10 @@ scrp 1 1 64736 3501
 
 	targ mame "BrushSizeSlider"
 
+	doif targ <> null
 *(re) INITIALIZE!
-	mesg writ targ 1005
+		mesg writ targ 1005
+	endi
 
 endm
 
@@ -1428,18 +1415,27 @@ scrp 1 1 64736 5500
 *on the main worldswitcher form...
 	targ game "WorldSwitcher_Main"
 
+	doif targ <> null
+
 *show preview icon.
 
 *show doesn't work on a per-part basis so we're just gonna move the part back in bounds.
 *	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
 *	show 1
 
-	pat: move game "WorldSwitcher_WorldCreation_IconPreviewPart" game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
+		pat: move game "WorldSwitcher_WorldCreation_IconPreviewPart" game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
+
+	endi
 
 *position buffer offscreen.
 	targ game "IconEditor_Buffer"
-	frel null
-	mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+	doif targ <> null
+
+		frel null
+		mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+	endi
 
 *set variable.
 	setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 0
@@ -1461,20 +1457,29 @@ scrp 1 1 64736 5600
 *on the main worldswitcher form...
 	targ game "WorldSwitcher_Main"
 
+	doif targ <> null
+
 *hide preview icon.
 
 *show doesn't work on a per-part basis so we're just gonna move the part back out of bounds.
 *	part game "WorldSwitcher_WorldCreation_IconPreviewPart"
 *	show 0
 
-	pat: move game "WorldSwitcher_WorldCreation_IconPreviewPart" game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+		pat: move game "WorldSwitcher_WorldCreation_IconPreviewPart" game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
+	endi
 
 *position buffer onscreen, in place of the preview icon.
 	targ game "IconEditor_Buffer"
-	frel game "WorldSwitcher_Main"
-	flto game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
+
+	doif targ <> null
+
+		frel game "WorldSwitcher_Main"
+		flto game "WorldSwitcher_WorldCreation_IconPreviewPart_X" game "WorldSwitcher_WorldCreation_IconPreviewPart_Y"
 *fix position
-	mvby 12 2
+		mvby 12 2
+
+	endi
 
 *set variable.
 	setv game "WorldSwitcher_WorldCreation_CustomIconEnabled" 1
@@ -1793,9 +1798,12 @@ scrp 1 1 64736 7000
 
 *targer Brush Size Slider
 	targ mame "BrushSizeSlider"
+
+	doif targ <> null
 *check if (slider back piece) or (slider playhead) is under the mouse cursor
-	doif name "Slider_PartNumber" = _p1_ or name "Playhead_PartNumber" = _p1_
-		mesg writ targ 1000
+		doif name "Slider_PartNumber" = _p1_ or name "Playhead_PartNumber" = _p1_
+			mesg writ targ 1000
+		endi
 	endi
 
 
@@ -1820,7 +1828,11 @@ scrp 1 1 64736 7001
 
 
 *run "get text from textbox" script on the slider
-	mesg writ mame "BrushSizeSlider" 1006
+	targ mame "BrushSizeSlider"
+
+	doif targ <> null
+		mesg writ targ 1006
+	endi
 
 endm
 
@@ -1841,6 +1853,11 @@ scrp 1 1 64736 7002
 *get current Brush Size Value from Slider
 	setv va00 name "BrushSize"
 	targ mame "BrushSizeSlider"
+
+	doif targ = null
+		stop
+	endi
+
 	setv va00 name "Value"
 
 
@@ -1972,6 +1989,15 @@ scrp 1 1 64736 7002
 
 	endi
 
+*update drawn cursor (if pixelgrid exists!)
+	doif type game "IconEditor_PixelGrid" = 5
+
+		targ game "IconEditor_PixelGrid"
+
+		doif targ <> null
+			mesg wrt+ targ 75 mopx mopy 0
+		endi
+	endi
 
 
 endm
@@ -2001,6 +2027,10 @@ scrp 1 1 64736 78
 *check if we're hovering over the canvas using ov03
 	targ game "IconEditor_PixelGrid"
 
+	doif targ = null
+		stop
+	endi
+
 *OV03 is set to 1 if we are in bounds
 	setv va00 ov03
 
@@ -2008,6 +2038,11 @@ scrp 1 1 64736 78
 
 *target Brush Size Slider
 	targ mame "BrushSizeSlider"
+
+	doif targ = null
+		stop
+	endi
+
 *check if any part of this slider is under the mouse cursor, OR if our cursor is over the canvas itself
 	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp or va00 = 1
 *send slider a message telling it to increase or decrease our value via _p1_
@@ -2016,7 +2051,12 @@ scrp 1 1 64736 78
 
 *force an update on overlay pixel grid so user can tell brush size changed
 		wait 1
-		mesg writ game "IconEditor_BrushPreview" 75
+
+		targ game "IconEditor_BrushPreview"
+
+		doif targ <> null
+			mesg writ game "IconEditor_BrushPreview" 75
+		endi
 
 	endi
 
@@ -2541,31 +2581,133 @@ endm
 
 scrp 1 1 64736 6001
 
+*	inst
+*
+**target Rotate Dropdown
+*	targ mame "RotateDropdown"
+**check if the correct button part number for this dropdown was sent
+*	doif name "Button_PartNumber" = _p1_
+*		mesg writ targ 1000
+*		stop
+*	endi
+*
+**target Flip Dropdown
+*	targ mame "FlipDropdown"
+**check if the correct button part number for this dropdown was sent
+*	doif name "Button_PartNumber" = _p1_
+*		mesg writ targ 1000
+*		stop
+*	endi
+*
+**target Flip Dropdown
+*	targ mame "ImageDropdown"
+**check if the correct button part number for this dropdown was sent
+*	doif name "Button_PartNumber" = _p1_
+*		mesg writ targ 1000
+*		stop
+*	endi
+*	
+
+
+
+
+*		inst
+*
+**target Rotate Dropdown
+*	targ mame "RotateDropdown"
+*	
+**we lost our dropdown, so don't do anything
+*	doif targ = null
+*		stop
+*	endi
+*	
+**check if the correct button part number for this dropdown was sent
+*	doif name "Button_PartNumber" = _p1_
+*		mesg writ targ 1000
+*		stop
+*	endi
+*
+**target Flip Dropdown
+*	targ mame "FlipDropdown"
+*	
+*	*we lost our dropdown, so don't do anything
+*	doif targ = null
+*		stop
+*	endi
+*	
+**check if the correct button part number for this dropdown was sent
+*	doif name "Button_PartNumber" = _p1_
+*		mesg writ targ 1000
+*		stop
+*	endi
+*
+**target Flip Dropdown
+*	targ mame "ImageDropdown"
+*	
+*	*we lost our dropdown, so don't do anything
+*	doif targ = null
+*		stop
+*	endi
+*	
+**check if the correct button part number for this dropdown was sent
+*	doif name "Button_PartNumber" = _p1_
+*		mesg writ targ 1000
+*		stop
+*	endi
+*	
+
+
 	inst
+	lock
 
 *target Rotate Dropdown
 	targ mame "RotateDropdown"
-*check if the correct button part number for this dropdown was sent
-	doif name "Button_PartNumber" = _p1_
-		mesg writ targ 1000
-		stop
+
+*check if this dropdown exists, and the correct button part number was sent
+	doif targ <> null
+		doif name "Button_PartNumber" = _p1_
+			mesg writ targ 1000
+*			stop
+		endi
 	endi
 
 *target Flip Dropdown
 	targ mame "FlipDropdown"
-*check if the correct button part number for this dropdown was sent
-	doif name "Button_PartNumber" = _p1_
-		mesg writ targ 1000
-		stop
+
+*check if this dropdown exists, and the correct button part number was sent
+	doif targ <> null
+		doif name "Button_PartNumber" = _p1_
+			mesg writ targ 1000
+*			stop
+		endi
 	endi
 
-*target Flip Dropdown
+*target Image Dropdown
 	targ mame "ImageDropdown"
-*check if the correct button part number for this dropdown was sent
-	doif name "Button_PartNumber" = _p1_
-		mesg writ targ 1000
-		stop
+
+*check if this dropdown exists, and the correct button part number was sent
+	doif targ <> null
+		doif name "Button_PartNumber" = _p1_
+			mesg writ targ 1000
+*			stop
+		endi
 	endi
+
+
+*push down button
+	targ ownr
+	part _p1_
+	pose 1
+*		stop
+
+	slow
+	inst
+
+*this part of script runs after the dropdown is closed, as execution is unpaused on the owner object.
+	targ ownr
+	part _p1_
+	pose 0
+
 
 endm
 
@@ -2830,6 +2972,7 @@ endm
 
 *translated keypress event!
 scrp 1 2 8000 79
+
 *user pressed esc, jump to Do Not Clear script.
 	doif _p1_ = 27
 		call 1000 0 0
@@ -3259,10 +3402,15 @@ scrp 1 1 64736 5003
 
 	targ game "IconEditor_Buffer"
 
+	doif targ = null
+		stop
+	endi
+
 	setv va50 posl
 	setv va51 post
 
 	mvto game "IconEditor_Buffer_X" game "IconEditor_Buffer_Y"
+
 
 
 
@@ -3313,9 +3461,14 @@ scrp 1 1 64736 5003
 
 
 *force re-draw of all loaded icons on main world switcher page
-	mesg wrt+ game "MouseMoveListener" 75 mopx mopy 0
+	targ game "MouseMoveListener"
+
+	doif targ <> null
+		mesg wrt+ targ 75 mopx mopy 0
+	endi
 
 
+	targ game "IconEditor_Buffer"
 
 	mvto va50 va51
 
@@ -3524,10 +3677,12 @@ endm
 
 *translated keypress event!
 scrp 1 1 64736 79
+
 *user pressed esc, close changes w/o saving!
-	doif _p1_ = 27
+	doif _p1_ = 27 and va00 = 0
 		call 4000 0 0
 	endi
+
 endm
 
 
@@ -3926,23 +4081,28 @@ scrp 1 1 64736 7500
 	call 1001 1001 0
 
 *reset to default brush size
-	mesg wrt+ name "BrushSizeSlider" 1003 1 0 0
+	targ name "BrushSizeSlider"
+	doif targ <> null
+		mesg wrt+ targ 1003 1 0 0
+	endi
+
+	targ ownr
 
 
 
-
-*listen for Mouse Wheel 32 (Brush Size Slider) + Mouse Move 4 (for the box that appears around the big Selected Colour when mouse is hovered) + Translated Keypress 64 (esc to quit) 
-	imsk 100
+*listen for Mouse Wheel 32 (Brush Size Slider) + Translated Keypress 64 (esc to quit) 
+	imsk 96
 
 	mvto 225 93
 
 
-	targ game "IconEditor_PixelGrid"
-
 *Listen for these events:
 * 8 Raw Mouse Down + 16 Raw Mouse Up + 4 Raw Mouse Move
-	imsk 28
+	targ game "IconEditor_PixelGrid"
 
+	doif targ <> null
+		imsk 28
+	endi
 
 
 
@@ -4019,12 +4179,23 @@ endm
 
 
 
+
+
+
+
+
+
+
+
 rscr
 
 
 *delete the icon rendering room
 setv va00 gmap 1024 1024
-delm va00
+
+doif va00 <> -1
+	delm va00
+endi
 
 
 
