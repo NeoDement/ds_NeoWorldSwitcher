@@ -245,16 +245,13 @@ scrp 1 1 64741 1000
 		endi
 
 
-*animate button on parent object
+*get some info from parent object
 		targ mame "ParentObject"
 
 *remember plane
 		part 0
 		setv va69 plne
 
-		part mame "Button_PartNumber"
-
-		pose 1
 
 
 		setv va50 posl
@@ -360,6 +357,15 @@ scrp 1 1 64741 1000
 *force call our scroll script with no up/down movement to update the text on all parts
 		call 78 0 0
 
+
+*animate button on parent object
+		targ mame "ParentObject"
+
+*remember plane
+		part 0
+		setv va69 plne
+
+
 	endi
 
 endm
@@ -388,11 +394,6 @@ scrp 1 1 64741 76
 
 	doif _p1_ = 1
 
-
-*target the part on the main settings panel we're attached to and set it to the NORMAL (not depressed) state.
-		targ mame "ParentObject"
-		part mame "Button_PartNumber"
-		pose 0
 
 *force run mouse move script to make sure our last hovered "Index" is up to date
 		call 75 0 0
@@ -730,11 +731,6 @@ scrp 1 1 64741 1002
 	imsk 0
 
 
-*reset button pose
-	targ mame "ParentObject"
-	part mame "Button_PartNumber"
-	pose 0
-
 
 	targ ownr
 
@@ -831,7 +827,56 @@ rscr
 *DROPDOWN MANAGERS
 *todo: unpause the game!
 
+*close dropdown without selecting anything!
+*call 1002 0 0
+
+*sets va01 sorc 1 1 64741 1002
+
+*sets va99 caos 0 0 0 0 va01 0 1 va99
+
+
+
+
+*dropdown no longer open!! other ui elements, such as the Pixel Grid, can read this variable.
+setv game "IconEditor_DropdownOpen" 0
+
+
+
 enum 1 1 64741
+
+	setv va01 name "Remembered_IMSK"
+	setv va02 name "State"
+
+	doif va02 = 1
+*UNPAUSE PARENT OBJECT
+		targ name "ParentObject"
+
+		paus 0
+*	pose 1
+*	dbg: outs "see here:"
+*	dbg: outv fmly
+*	dbg: outv gnus
+*	dbg: outv spcs
+
+
+
+*if there's an imsk to restore, do it
+		doif va01 <> 0
+
+*restore IMSK value
+			imsk va01
+
+		endi
+
+	endi
+
+
+next
+
+
+
+enum 1 1 64741
+*	mesg writ targ 1002
 	kill targ
 next
 
@@ -845,3 +890,6 @@ scrx 1 1 64741 1002
 scrx 1 1 64741 1003
 scrx 1 1 64741 79
 scrx 1 1 64741 900
+
+
+*sets va99 caos 0 0 0 0 "scrx 1 1 64741 1001" 0 1 va99
