@@ -25,7 +25,8 @@ scrp 1 1 14546 10
 *move it way out of bounds (we move it onscreen when its "created", we never actually delete it)
 	mvto -1000 -1000
 
-
+*mark it as closed (rscr uses this)
+	setv mame "State" 0
 
 
 
@@ -593,33 +594,38 @@ scrp 1 1 14546 78
 
 *target RED Slider
 	targ mame "RedSlider"
+	doif targ <> null
 *check if any part of this slider is under the mouse cursor
-	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
+		doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
 *send slider a message telling it to increase or decrease our value via _p1_
-		mesg wrt+ targ 1004 _p1_ 0 0
-		stop
+			mesg wrt+ targ 1004 _p1_ 0 0
+			stop
+		endi
 	endi
 
 
 *target GREEN Slider
 	targ mame "GreenSlider"
+	doif targ <> null
 *check if any part of this slider is under the mouse cursor
-	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
+		doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
 *send slider a message telling it to increase or decrease our value via _p1_
-		mesg wrt+ targ 1004 _p1_ 0 0
-		stop
+			mesg wrt+ targ 1004 _p1_ 0 0
+			stop
+		endi
 	endi
 
 
 *target BLUE Slider
 	targ mame "BlueSlider"
+	doif targ <> null
 *check if any part of this slider is under the mouse cursor
-	doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
+		doif name "Slider_PartNumber" = hotp or name "Playhead_PartNumber" = hotp or name "Textbox_PartNumber" = hotp
 *send slider a message telling it to increase or decrease our value via _p1_
-		mesg wrt+ targ 1004 _p1_ 0 0
-		stop
+			mesg wrt+ targ 1004 _p1_ 0 0
+			stop
+		endi
 	endi
-
 
 
 
@@ -761,26 +767,6 @@ scrp 1 1 14546 100
 
 
 
-*unpause the pixel grid and main form!!
-
-		targ game "IconEditor_Main"
-
-		paus 0
-
-		targ game "IconEditor_PixelGrid"
-
-*reset mouse click state. it gets set to true when the colour editor is opened.
-		setv ov00 0
-
-
-		paus 0
-
-		inst
-
-		targ ownr
-
-
-
 *self-terminate
 		call 200 0 0
 
@@ -863,20 +849,6 @@ scrp 1 1 14546 101
 
 	inst
 
-*unpause the pixel grid and main form!!
-	targ game "IconEditor_PixelGrid"
-
-	paus 0
-
-	targ game "IconEditor_Main"
-
-	paus 0
-
-	targ ownr
-
-
-
-
 *reset button
 	pose 0
 
@@ -892,6 +864,27 @@ scrp 1 1 14546 200
 
 	inst
 
+
+
+*unpause the pixel grid and main form!!
+
+	targ game "IconEditor_Main"
+
+	paus 0
+
+	targ game "IconEditor_PixelGrid"
+
+*reset mouse click state. it gets set to true when the colour editor is opened.
+	setv ov00 0
+
+	paus 0
+
+
+	targ ownr
+
+
+
+
 *	kill ownr
 
 *hide panel
@@ -905,8 +898,10 @@ scrp 1 1 14546 200
 
 	targ game "WorldSwitcher_IconPanel"
 
-	setv va00 plne
-	subv va00 1
+	doif targ <> null
+		setv va00 plne
+		subv va00 1
+	endi
 
 	targ game "WorldSwitcher_ScreenFader"
 
@@ -915,15 +910,8 @@ scrp 1 1 14546 200
 	endi
 
 
-
-*unclick button on main object
-
-	targ game "IconEditor_Main"
-
-	part 1101
-
-	pose 1
-
+*mark it as closed (rscr uses this)
+	setv mame "State" 0
 
 
 endm
@@ -958,11 +946,17 @@ scrp 1 1 14546 1000
 *pause the pixel grid and main form!!
 	targ game "IconEditor_PixelGrid"
 
-	paus 1
+	doif targ <> null
+		paus 1
+	endi
 
 	targ game "IconEditor_Main"
 
-	paus 1
+	doif targ <> null
+		paus 1
+	else
+		stop
+	endi
 
 	targ ownr
 
@@ -995,17 +989,29 @@ scrp 1 1 14546 1000
 
 
 *set each sliders current value to the corresponding digit of the incoming RGB code
-	mesg wrt+ mame "RedSlider" 1003 stoi subs _p2_ 1 1 0 0
+	targ mame "RedSlider"
+	doif targ <> null
+		mesg wrt+ targ 1003 stoi subs _p2_ 1 1 0 0
+	endi
 
-	mesg wrt+ mame "GreenSlider" 1003 stoi subs _p2_ 2 1 0 0
+	targ mame "GreenSlider"
+	doif targ <> null
+		mesg wrt+ targ 1003 stoi subs _p2_ 2 1 0 0
+	endi
 
-	mesg wrt+ mame "BlueSlider" 1003 stoi subs _p2_ 3 1 0 0
+	targ mame "BlueSlider"
+	doif targ <> null
+		mesg wrt+ targ 1003 stoi subs _p2_ 3 1 0 0
+	endi
 
-
+	targ ownr
 
 *move it to center of window
 	mvto 256 215
 
+
+*mark it as open (rscr uses this)
+	setv mame "State" 1
 
 
 
@@ -1119,8 +1125,51 @@ endm
 
 rscr
 
-*COLOUR EDITOR
-*todo: unpause game
+
+*carefully check if ColourEditor exists and is in OPEN state
+
+doif type game "IconEditor_ColourEditor" > 2
+	targ game "IconEditor_ColourEditor"
+endi
+
+doif targ <> null
+	doif name "State" = 1
+*unpause the pixel grid and main form!!
+
+		targ game "IconEditor_Main"
+
+		paus 0
+
+		targ game "IconEditor_PixelGrid"
+
+*reset mouse click state. it gets set to true when the colour editor is opened.
+		setv ov00 0
+
+		paus 0
+
+
+
+*move screen darkener just behind the Icon Chooser panel again. everything is obscured in such a way that this darkens everything appropriately.
+
+		targ game "WorldSwitcher_IconPanel"
+
+		doif targ <> null
+			setv va00 plne
+			subv va00 1
+		endi
+
+		targ game "WorldSwitcher_ScreenFader"
+
+		doif targ <> null
+			plne va00
+		endi
+
+	endi
+endi
+
+
+
+
 enum 1 1 14546
 	kill targ
 next
