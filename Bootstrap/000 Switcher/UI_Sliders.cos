@@ -767,7 +767,6 @@ endm
 rscr
 
 *SLIDER MANAGERS
-*todo: unpause the game!
 
 enum 1 1 64769
 	kill targ
