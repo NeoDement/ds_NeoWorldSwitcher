@@ -27,3 +27,6 @@
 *
 *
 *delete world switcher, re-create worldswitcher.
+
+
+*check if pntr is hidden, but CURSOR OBJECT doesnt exist
