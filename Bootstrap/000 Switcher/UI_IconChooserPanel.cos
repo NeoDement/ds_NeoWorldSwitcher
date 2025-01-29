@@ -186,7 +186,7 @@ scrp 1 1 34543 10
 
 
 *script on Compound Object to run after selecting an item (can be 0 to run no script)
-	setv name "ValueUpdateScript" 6002
+	setv name "ValueUpdateScript" 6003
 
 **populate the dropdown with desired items. 1001 also acts as an initialization script.
 *
@@ -346,11 +346,17 @@ scrp 1 1 34543 4000
 
 *unpause main guy!
 	targ game "WorldSwitcher_Main"
-	paus 0
+
+	doif targ <> null
+		paus 0
+	endi
 
 *goot bye
+	targ mame "IconsetDropdown"
 
-	kill mame "IconsetDropdown"
+	doif targ <> null
+		kill targ
+	endi
 
 	kill ownr
 
@@ -388,17 +394,34 @@ endm
 scrp 1 1 34543 6001
 
 	inst
+	lock
 
 *target Iconset Dropdown
 	targ mame "IconsetDropdown"
-*check if the correct button part number for this dropdown was sent
-	doif name "Button_PartNumber" = _p1_
 
-		targ mame "IconsetDropdown"
-
-		mesg writ targ 1000
-		stop
+*check if this dropdown exists, and the correct button part number was sent
+	doif targ <> null
+		doif name "Button_PartNumber" = _p1_
+			mesg writ targ 1000
+*			stop
+		endi
 	endi
+
+
+*push down button
+	targ ownr
+	part _p1_
+	pose 1
+*		stop
+
+	slow
+	inst
+
+*this part of script runs after the dropdown is closed, as execution is unpaused on the owner object.
+	targ ownr
+	part _p1_
+	pose 0
+
 
 endm
 
@@ -745,15 +768,15 @@ scrp 1 1 34543 75
 
 
 
+**target Iconset Dropdown
+*	targ mame "IconsetDropdown"
+*
+*	sets va50 vtos name "Index"
+*
+*
+*	targ ownr
 
-*target Iconset Dropdown
-	targ mame "IconsetDropdown"
-
-	sets va50 vtos name "Index"
-
-
-	targ ownr
-
+	sets va50 vtos name "CurrentIndex"
 
 
 
@@ -818,12 +841,12 @@ scrp 1 1 34543 75
 
 
 
-*target Iconset Dropdown
-				targ mame "IconsetDropdown"
-
-				sets va50 vtos name "Index"
-
-				targ ownr
+**target Iconset Dropdown
+*				targ mame "IconsetDropdown"
+*
+*				sets va50 vtos name "Index"
+*
+*				targ ownr
 
 
 
@@ -966,10 +989,36 @@ endm
 
 
 
+*this script is called by the dropdown (value update script)
+scrp 1 1 34543 6003
+
+	inst
+
+*target Iconset Dropdown
+	targ mame "IconsetDropdown"
+
+	setv va50 name "Index"
+
+	setv mame "CurrentIndex" va50
+
+*force redraw
+	call 6002 0 0
+
+*	setv va01 name "Button_PartNumber"
+*
+**unpush button
+*	targ ownr
+*	part va01
+*	pose 0
+
+endm
 
 
 
 
+
+
+*redraw script
 scrp 1 1 34543 6002
 
 
@@ -1015,16 +1064,15 @@ scrp 1 1 34543 6002
 
 
 
-
-
 *target Iconset Dropdown
-	targ mame "IconsetDropdown"
+*	targ mame "IconsetDropdown"
+*
+*	sets va50 vtos name "Index"
+*
+*
+*	targ ownr
 
-	sets va50 vtos name "Index"
-
-
-	targ ownr
-
+	sets va50 vtos name "CurrentIndex"
 
 
 *read in the specified sprite file name
