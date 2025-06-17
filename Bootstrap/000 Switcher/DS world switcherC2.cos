@@ -3,20 +3,11 @@
 
 
 
-*todo: reworked this so delete comment.
-
-*KNOWN BUGS
-
-*setting an invalid spriteFrame with a valid SpriteName will bring the whole switcher to a grinding halt. 
-*This is something that can only be triggered by manually editing files so I think it's okay.
-
-
-
 *icons are loaded from "icon" in the worlds "journal" folder, if it exists.
 *it also can find the original intended icon using the old method if icon doesn't exist or is corrupt.
 
 
-*all worldswitcher entry highlight rendering is controlled in a script instead of with simple pose commands.
+*all worldswitcher entry highlight rendering is controlled in a separate object instead of with simple pose commands.
 
 
 
@@ -177,7 +168,7 @@ scrx 1 2 1001 1000
 
 
 
-*inject our EVENT scripts and REMOVE script. this also runs all UI script remove scripts, to aid in a clean re-inject.
+*inject our EVENT scripts and REMOVE script. this also runs all separate UI_xxx.cos remove scripts, to aid in a clean re-inject.
 ject "DS world switcherC2.cos" 3
 
 
@@ -203,8 +194,14 @@ next
 
 
 
+*kill any pre-existing mouse move listener
 
-
+doif type game "MouseMoveListener" = 3
+	targ game "MouseMoveListener"
+	doif targ <> null
+		kill targ
+	endi
+endi
 
 *create mouse move listener
 new: simp 1 2 6060 "blnk" 1 0 0
@@ -730,6 +727,8 @@ scrp 1 2 1000 2000
 		sets game "engine_other_world" wrld ov04
 		file iope 2 "build"
 		sets va44 innl
+		file iclo
+
 		doif va44 = ""
 
 * Build number unknown, definitely needs to be warned of possible problems.
