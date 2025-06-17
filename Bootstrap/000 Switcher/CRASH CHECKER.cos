@@ -30,3 +30,28 @@
 
 
 *check if pntr is hidden, but CURSOR OBJECT doesnt exist
+
+
+
+
+*TODO:
+*
+*
+*improve main script so installing it kills any previous running instances of external objects... for example mouse move listener!
+*
+*
+*
+*
+*
+*remove icon editor while it is on screen
+*need to unpause parent object.
+*
+*remove icon chooser panel while it is on screen
+*need to unpause parent object.
+*
+*remove pixel grid while it is pausing time
+*needs to unpause game.
+*
+*maybe ONLY fix targ errors for objects that pause the game? idk!
+
+
