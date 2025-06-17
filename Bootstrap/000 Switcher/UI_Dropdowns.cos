@@ -153,7 +153,7 @@ scrp 1 1 64741 10
 	setv mame "Index" 0
 
 *previous index number of selected menu item. set at the same time as Index. used as a fallback if HoverPart was 0.
-	setv mame "PreviousIndex" 1
+	setv mame "PreviousIndex" 0
 
 *string value of selected menu item
 	sets mame "Value" ""
@@ -428,14 +428,13 @@ scrp 1 1 64741 76
 
 		endi
 
-
-
+*re-target parent object to modify text in textbox to currently selected index string
+		targ mame "ParentObject"
 
 *if the textbox part exists, target it and set the new text
 		doif mame "Textbox_PartNumber" <> 0 and part mame "Textbox_PartNumber" = 1
 
 			part mame "Textbox_PartNumber"
-
 
 *get string stored at our current index
 			sets va88 mame mame "Index"
@@ -663,11 +662,10 @@ scrp 1 1 64741 1001
 		doif mame "Textbox_PartNumber" <> 0 and part mame "Textbox_PartNumber" = 1
 			part mame "Textbox_PartNumber"
 
-
-*and set it as our output value no matter what
 			ptxt mame 0
 		endi
 
+*and set it as our output value no matter what
 		sets mame "Value" mame 0
 
 
@@ -692,6 +690,46 @@ scrp 1 1 64741 1001
 
 
 endm
+
+
+
+*select entry by index (_P1_)
+
+scrp 1 1 64741 1004
+
+
+	inst
+
+
+
+*check if it's a valid index
+	doif mame "ItemCount" >= _p1_
+
+*set default textbox part text if we have a textbox
+		targ mame "ParentObject"
+
+		doif mame "Textbox_PartNumber" <> 0 and part mame "Textbox_PartNumber" = 1
+			part mame "Textbox_PartNumber"
+
+			ptxt mame _p1_
+		endi
+
+*and set it as our output value no matter what
+		sets mame "Value" mame 0
+
+
+*set index
+		setv mame "Index" _p1_
+		setv mame "PreviousIndex" _p1_
+
+
+	endi
+
+
+
+endm
+
+
 
 
 
@@ -824,18 +862,6 @@ endm
 rscr
 
 
-*DROPDOWN MANAGERS
-*todo: unpause the game!
-
-*close dropdown without selecting anything!
-*call 1002 0 0
-
-*sets va01 sorc 1 1 64741 1002
-
-*sets va99 caos 0 0 0 0 va01 0 1 va99
-
-
-
 
 *dropdown no longer open!! other ui elements, such as the Pixel Grid, can read this variable.
 setv game "IconEditor_DropdownOpen" 0
@@ -852,11 +878,6 @@ enum 1 1 64741
 		targ name "ParentObject"
 
 		paus 0
-*	pose 1
-*	dbg: outs "see here:"
-*	dbg: outv fmly
-*	dbg: outv gnus
-*	dbg: outv spcs
 
 
 
@@ -876,7 +897,6 @@ next
 
 
 enum 1 1 64741
-*	mesg writ targ 1002
 	kill targ
 next
 
