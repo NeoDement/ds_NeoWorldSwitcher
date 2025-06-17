@@ -186,7 +186,9 @@ scrp 1 1 34543 10
 
 
 *script on Compound Object to run after selecting an item (can be 0 to run no script)
-	setv name "ValueUpdateScript" 6003
+	setv name "ValueUpdateScript" 6002
+
+*	setv name "Index" 2
 
 **populate the dropdown with desired items. 1001 also acts as an initialization script.
 *
@@ -234,6 +236,9 @@ scrp 1 1 34543 10
 *initialize
 	call 10000 0 0
 
+
+*force initial draw
+	call 6002 0 0
 
 
 
@@ -339,15 +344,18 @@ scrp 1 1 34543 4000
 	lock
 
 	wait 1
+	inst
 
 	kill game "WorldSwitcher_ScreenFader"
 
 
 
-*unpause main guy!
+*unpause main guy! (wait 1 to avoid re-clicking instantly)
 	targ game "WorldSwitcher_Main"
 
 	doif targ <> null
+		wait 1
+		inst
 		paus 0
 	endi
 
@@ -677,6 +685,13 @@ scrp 1 1 34543 10000
 
 	doif name "iconsets_count" > 0
 
+
+*set our initial index to 1 instead of the default 0, so we see Creatures 1 icons first
+		mesg wrt+ name "IconsetDropdown" 1004 1 0 0
+
+		slow
+		inst
+
 *call re-draw of icons using current page (reset to 1 param)
 		call 6002 0 0
 
@@ -989,29 +1004,6 @@ endm
 
 
 
-*this script is called by the dropdown (value update script)
-scrp 1 1 34543 6003
-
-	inst
-
-*target Iconset Dropdown
-	targ mame "IconsetDropdown"
-
-	setv va50 name "Index"
-
-	setv mame "CurrentIndex" va50
-
-*force redraw
-	call 6002 0 0
-
-*	setv va01 name "Button_PartNumber"
-*
-**unpush button
-*	targ ownr
-*	part va01
-*	pose 0
-
-endm
 
 
 
@@ -1019,6 +1011,8 @@ endm
 
 
 *redraw script
+
+*this script is also called by the dropdown (value update script)
 scrp 1 1 34543 6002
 
 
@@ -1026,6 +1020,15 @@ scrp 1 1 34543 6002
 
 	lock
 
+
+*target Iconset Dropdown and get out current index
+	targ mame "IconsetDropdown"
+
+	setv va50 name "Index"
+
+	setv mame "CurrentIndex" va50
+
+	targ ownr
 
 
 *if _p2_ isn't specified (dropdown click), reset page number.
