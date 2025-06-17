@@ -37,7 +37,7 @@ doif reaq va20 = 1
 	sets game "UI_CLEAR" read va20 12
 
 *unused
-	sets game "UI_EDITCOLOUR" read va20 13
+*	sets game "UI_EDITCOLOUR" read va20 13
 
 	sets game "UI_AREYOUSURE" read va20 14
 	sets game "UI_ALREADYHAVETHISCOLOUR" read va20 15
@@ -62,7 +62,7 @@ else
 	sets game "UI_CLEAR" "Clear"
 
 *unused
-	sets game "UI_EDITCOLOUR" "Edit Colour"
+*	sets game "UI_EDITCOLOUR" "Edit Colour"
 
 	sets game "UI_AREYOUSURE" "Are you sure you want to\nclear the canvas?"
 	sets game "UI_ALREADYHAVETHISCOLOUR" "You already have this\ncolour in your palette."
@@ -4056,7 +4056,12 @@ scrp 1 1 64736 7500
 
 
 *if the cursor hasn't been created yet, assume it's time to create some pixelgrids.
-	doif type game "IconEditor_Cursor" <> 3
+	doif type game "IconEditor_Cursor" = 3
+		targ game "IconEditor_Cursor"
+		doif targ = null
+			call 5000 0 0
+		endi
+	else
 		call 5000 0 0
 	endi
 
