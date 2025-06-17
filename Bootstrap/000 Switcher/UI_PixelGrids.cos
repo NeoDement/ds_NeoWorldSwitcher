@@ -1,3 +1,7 @@
+*known bug: when drawing on a pixelgrid, the faster tickrate also speeds the music up.
+
+
+
 *delete any existing PixelGrids, we never want more than one set
 inst
 
@@ -12,10 +16,6 @@ enum 1 1 64743
 	kill targ
 next
 
-*fake mouse cursor
-enum 1 1 66650
-	kill targ
-next
 
 
 
@@ -169,13 +169,17 @@ scrp 1 1 64742 75
 	inst
 
 *don't do anything to cursor if it doesn't exist
-	targ game "IconEditor_Cursor"
-
-	doif targ = null
+	doif type game "IconEditor_Cursor" = 3
+		targ game "IconEditor_Cursor"
+		doif targ = null
+			setv game "IconEditor_CursorMode" 0
+			stop
+		else
+			targ ownr
+		endi
+	else
 		setv game "IconEditor_CursorMode" 0
 		stop
-	else
-		targ ownr
 	endi
 
 
@@ -251,7 +255,7 @@ scrp 1 1 64742 75
 
 		else
 
-************************** new mess, clean this up! sorry.
+************************** this is a bit of a mess, sorry!
 
 *UNPAUSE/RESUME the game when done drawing on the canvas.
 
@@ -1599,9 +1603,7 @@ scrp 1 1 64742 9999
 
 
 *remember original tickrate to restore it when unhovering pixelgrid!
-
-*save it in a NAME variable (NOT GAME), in case anything else tries to write to it at an awkward time...
-		setv name "Tickrate_Original" buzz
+		setv game "IconEditor_Tickrate_Original" buzz
 
 *change tickrate, set ideal interval in milliseconds between each tick. 
 *this allows much smoother update rate for guis and drawing surfaces.
@@ -1684,10 +1686,9 @@ scrp 1 1 64742 9998
 		setv game "IconEditor_Paused" 0
 
 
-*its saved in a NAME variable (NOT GAME), in case anything else tries to write to it at an awkward time...
-		doif name "Tickrate_Original" <> 0
+		doif game "IconEditor_Tickrate_Original" <> 0
 *restore original tickrate from variable set when this was opened
-			buzz name "Tickrate_Original"
+			buzz game "IconEditor_Tickrate_Original"
 		else
 			buzz 50
 		endi
@@ -1793,8 +1794,103 @@ endm
 
 rscr
 
+
+*NOTE: this section a copy of the unpause script and will need to be kept up to date with any changes.
+
+
+*don't unpause if we're already UNpaused
+doif game "IconEditor_Paused" = 1
+
+	setv game "IconEditor_Paused" 0
+
+
+	doif game "IconEditor_Tickrate_Original" <> 0
+*restore original tickrate from variable set when this was opened
+		buzz game "IconEditor_Tickrate_Original"
+	else
+		buzz 50
+	endi
+
+*unpause everything!
+
+*account for if world was already paused??
+	doif game "IconEditor_World_Was_Already_Paused" = 1
+		delg "IconEditor_World_Was_Already_Paused"
+	else
+		wpau 0
+	endi
+
+
+
+
+	enum 0 0 0
+
+*account for objects that were already paused.
+		doif name "IconEditor_Object_Was_Already_Paused" = 1
+			deln "IconEditor_Object_Was_Already_Paused"
+		else
+			paus 0
+		endi
+
+	next
+
+
+
+
+*don't do anything to cursor if it doesn't exist
+	doif type game "IconEditor_Cursor" = 3
+		targ game "IconEditor_Cursor"
+		doif targ <> null
+
+
+*account for C2toDS custom cursor
+
+			rtar 2 1 50200
+			doif targ <> null
+				show 1
+
+			else
+
+*target the real Hand and make it visible again.
+
+				targ pntr
+				show 1
+
+			endi
+
+
+*target fake cursor object and set it to No Tool.
+			targ game "IconEditor_Cursor"
+
+*IconEditor CURSOR MODES!
+*0 - none, default Hand
+*1 - Pencil Tool
+*2 - Colour Picker (unimplemented)
+*3 - Fill Can (unimplemented)
+
+
+*detach the fake cursor from the real cursor, hide it
+
+			frel null
+
+			flto -50 -50
+
+
+		endi
+	endi
+
+
+
+endi
+
+
+
+
+
+
+
+
 *FULL SCALE PIXELGRIDS
-*todo: unpause game
 
 enum 1 1 64742
 	kill targ
