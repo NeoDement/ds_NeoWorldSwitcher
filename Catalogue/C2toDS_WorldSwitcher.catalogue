@@ -47,8 +47,8 @@ TAG "WorldSwitcher_AddonInstaller_Text"
 # 0
 "Failed to inject '"
 "'."
-"Error: Chunk not found. Is the .agent file is in your My Agents directory?"
 "Script not found: Type 'dbg: poll' into CAOS Command Line for details."
 "Script error: Type 'dbg: poll' into CAOS Command Line for details."
-# 5
 "'Error: Dependency evaluation failed."
+# 5
+"Error: Chunk not found. Make sure the .agent file is in 'My Agents'."
