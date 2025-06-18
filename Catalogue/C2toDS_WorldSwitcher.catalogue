@@ -12,3 +12,43 @@ TAG "WorldSwitcher_CreationScreen_Text"
 # 5
 "Please choose a new name and icon for your world:"
 "Modify\nSelected World"
+
+# ============================================ #
+# C2toDS WorldSwitcher Icon Editor Strings     #
+# ============================================ #
+
+TAG "WorldSwitcher_IconEditor_Text"
+# 0
+"Icon Editor"
+"Brush Size:"
+"Tip: Right-click with the fill tool to erase pixels"
+"Unlit:"
+"Lit:"
+# 5
+"Rotate 90"
+"Rotate -90"
+"Rotate 180"
+"Flip Horizontal"
+"Flip Vertical"
+# 10
+"Copy"
+"Paste"
+"Clear"
+"Edit Colour"
+"Are you sure you want to\nclear the canvas?"
+# 15
+"You already have this\ncolour in your palette."
+
+# ================================================ #
+# C2toDS WorldSwitcher Addon Installer Strings     #
+# ================================================ #
+
+TAG "WorldSwitcher_AddonInstaller_Text"
+# 0
+"Failed to inject '"
+"'."
+"Error: Chunk not found. Is the .agent file is in your My Agents directory?"
+"Script not found: Type 'dbg: poll' into CAOS Command Line for details."
+"Script error: Type 'dbg: poll' into CAOS Command Line for details."
+# 5
+"'Error: Dependency evaluation failed."
