@@ -1,4 +1,4 @@
-enum 1 1 64736
+enum 1 1 50297
 	kill targ
 next
 
@@ -136,7 +136,7 @@ seta game "IconEditor_Clipboard" null
 
 
 *everything happens in the creation script
-new: comp 1 1 64736 "WorldSwitcher_IconEditor_Controls" 1 45 2000
+new: comp 1 1 50297 "WorldSwitcher_IconEditor_Controls" 1 45 2000
 
 
 
@@ -163,7 +163,7 @@ new: comp 1 1 64736 "WorldSwitcher_IconEditor_Controls" 1 45 2000
 
 *creation script (so our scope has the appropriate OWNR, and we can use WAIT commands)
 
-scrp 1 1 64736 10
+scrp 1 1 50297 10
 
 	lock
 
@@ -320,7 +320,7 @@ scrp 1 1 64736 10
 
 
 *slider manager for Brush Size slider.
-	new: simp 1 1 64769 "blnk" 0 0 0
+	new: simp 1 1 50293 "blnk" 0 0 0
 
 *set a named variable on the compound object to point to this slider in particular
 	seta mame "BrushSizeSlider" targ
@@ -409,7 +409,7 @@ scrp 1 1 64736 10
 
 
 *dropdown manager for Create Action To Perform dropdown.
-	new: comp 1 1 64741 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+	new: comp 1 1 50296 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
 
 *set a named variable on the compound object to point to this dropdown in particular
 	seta mame "RotateDropdown" targ
@@ -495,7 +495,7 @@ scrp 1 1 64736 10
 
 
 *dropdown manager for Create Action To Perform dropdown.
-	new: comp 1 1 64741 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+	new: comp 1 1 50296 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
 
 *set a named variable on the compound object to point to this dropdown in particular
 	seta mame "FlipDropdown" targ
@@ -586,7 +586,7 @@ scrp 1 1 64736 10
 
 
 *dropdown manager for Create Action To Perform dropdown.
-	new: comp 1 1 64741 "blnk" 0 0 0
+	new: comp 1 1 50296 "blnk" 0 0 0
 
 *set a named variable on the compound object to point to this dropdown in particular
 	seta mame "ImageDropdown" targ
@@ -786,7 +786,7 @@ scrp 1 1 64736 10
 
 
 
-	new: comp 1 1 64743 "blnk" 0 0 2000
+	new: comp 1 1 50294 "blnk" 0 0 2000
 
 *create X by Y grid of parts, one for each pixel of the image
 *************************************************************
@@ -913,7 +913,7 @@ endm
 * RE-INIT ALL PALETTE BUTTONS! LOAD IN DEFAULT COLOURS! *
 *********************************************************
 
-scrp 1 1 64736 1500
+scrp 1 1 50297 1500
 
 
 
@@ -971,7 +971,7 @@ endm
 * PALETTE BUTTONS INITIALIZE SCRIPT *
 ****************************************
 
-scrp 1 1 64736 1000
+scrp 1 1 50297 1000
 
 
 
@@ -1097,7 +1097,7 @@ endm
 * PALETTE BUTTONS SELECT COLOUR SCRIPT *
 *************************************
 
-scrp 1 1 64736 1001
+scrp 1 1 50297 1001
 
 	inst
 
@@ -1183,7 +1183,7 @@ endm
 * EDIT CURRENT COLOUR SCRIPT *
 ******************************
 
-scrp 1 1 64736 1002
+scrp 1 1 50297 1002
 
 	inst
 
@@ -1236,7 +1236,7 @@ endm
 **************
 
 *BRUSH TOOL
-scrp 1 1 64736 3001
+scrp 1 1 50297 3001
 
 	inst
 
@@ -1263,7 +1263,7 @@ endm
 
 
 *FILL TOOL
-scrp 1 1 64736 3002
+scrp 1 1 50297 3002
 
 	inst
 
@@ -1288,7 +1288,7 @@ scrp 1 1 64736 3002
 endm
 
 *ERASER TOOL
-scrp 1 1 64736 3003
+scrp 1 1 50297 3003
 
 	inst
 
@@ -1313,7 +1313,7 @@ scrp 1 1 64736 3003
 endm
 
 *PICKER TOOL
-scrp 1 1 64736 3004
+scrp 1 1 50297 3004
 
 	inst
 
@@ -1340,7 +1340,7 @@ endm
 
 
 *hide Brush Size Slider
-scrp 1 1 64736 3500
+scrp 1 1 50297 3500
 
 	inst
 
@@ -1353,7 +1353,7 @@ endm
 
 
 *show Brush Size Slider
-scrp 1 1 64736 3501
+scrp 1 1 50297 3501
 
 	inst
 
@@ -1408,7 +1408,7 @@ endm
 
 ** DISABLE CUSTOM ICON, ENABLE PRE-SET ICON **
 
-scrp 1 1 64736 5500
+scrp 1 1 50297 5500
 
 	inst
 
@@ -1450,7 +1450,7 @@ endm
 
 ** DISABLE PRE-SET ICON, ENABLE CUSTOM ICON **
 
-scrp 1 1 64736 5600
+scrp 1 1 50297 5600
 
 	inst
 
@@ -1516,7 +1516,7 @@ endm
 *_P1_ is filename
 *_P2_ is where to save to (0 for the current world's journal directory, 1 for the main journal directory, or 2 for the GAME engine_other_world world's journal directory.)
 
-scrp 1 1 64736 5001
+scrp 1 1 50297 5001
 
 	inst
 	lock
@@ -1792,7 +1792,7 @@ endm
 ******************************* SHARED SLIDER SCRIPT ***********************************
 ****************************************7000********************************************
 
-scrp 1 1 64736 7000
+scrp 1 1 50297 7000
 
 	inst
 
@@ -1818,7 +1818,7 @@ endm
 ************************** BRUSH SLIDER TEXT INPUT SCRIPT ******************************
 ****************************************7001********************************************
 
-scrp 1 1 64736 7001
+scrp 1 1 50297 7001
 
 	inst
 
@@ -1846,7 +1846,7 @@ endm
 
 *this is called by our slider (name "ValueUpdateScript")
 
-scrp 1 1 64736 7002
+scrp 1 1 50297 7002
 
 	inst
 
@@ -2013,7 +2013,7 @@ endm
 
 *RAW MOUSE WHEEL SCRIPT
 
-scrp 1 1 64736 78
+scrp 1 1 50297 78
 
 
 *mousewheel controls BrushSize slider :)
@@ -2093,7 +2093,7 @@ endm
 
 *_P1_ is transformation type
 
-scrp 1 1 64736 6000
+scrp 1 1 50297 6000
 
 	inst
 	lock
@@ -2519,7 +2519,7 @@ scrp 1 1 64736 6000
 
 	subr Create_Clipboard
 
-		new: comp 1 1 64743 "blnk" 0 0 2000
+		new: comp 1 1 50294 "blnk" 0 0 2000
 
 *create X by Y grid of parts, one for each pixel of the image
 *************************************************************
@@ -2579,7 +2579,7 @@ endm
 
 
 
-scrp 1 1 64736 6001
+scrp 1 1 50297 6001
 
 *	inst
 *
@@ -2721,7 +2721,7 @@ endm
 
 
 
-scrp 1 1 64736 6002
+scrp 1 1 50297 6002
 
 	inst
 
@@ -2750,7 +2750,7 @@ endm
 
 
 
-scrp 1 1 64736 6003
+scrp 1 1 50297 6003
 
 	inst
 
@@ -2778,7 +2778,7 @@ endm
 
 
 
-scrp 1 1 64736 6004
+scrp 1 1 50297 6004
 
 	inst
 
@@ -2802,7 +2802,7 @@ scrp 1 1 64736 6004
 
 *Are you sure!?
 
-		new: comp 1 2 8000 "small_useful_screen" 1 0 9075
+		new: comp 1 1 50290 "small_useful_screen" 1 0 9075
 		attr 304
 
 *listen for esc press
@@ -2870,7 +2870,7 @@ endm
 
 *CLEAR!
 
-scrp 1 2 8000 1001
+scrp 1 1 50290 1001
 
 *	targ game "IconEditor_Main"
 *	paus 0
@@ -2932,7 +2932,7 @@ endm
 
 *Don't clear.
 
-scrp 1 2 8000 1000
+scrp 1 1 50290 1000
 
 	lock
 	part 1
@@ -2971,7 +2971,7 @@ endm
 
 
 *translated keypress event!
-scrp 1 2 8000 79
+scrp 1 1 50290 79
 
 *user pressed esc, jump to Do Not Clear script.
 	doif _p1_ = 27
@@ -2993,7 +2993,7 @@ endm
 *_P1_ is filename
 *_P2_ is where to load from (0 for the current world's journal directory, 1 for the main journal directory, or 2 for the GAME engine_other_world world's journal directory.)
 
-scrp 1 1 64736 5002
+scrp 1 1 50297 5002
 
 	inst
 
@@ -3389,7 +3389,7 @@ endm
 *_P2_ is name of icon file to load (passed to 5002, load icon into buffer script)
 
 
-scrp 1 1 64736 5003
+scrp 1 1 50297 5003
 
 
 
@@ -3489,7 +3489,7 @@ endm
 
 *CONFIRM (TICK) BUTTON - Save this icon and set it as this worlds icon
 
-scrp 1 1 64736 3000
+scrp 1 1 50297 3000
 
 	lock
 
@@ -3620,7 +3620,7 @@ endm
 
 *CANCEL (NO) BUTTON - Abort changes, keep using previous version of icon
 
-scrp 1 1 64736 4000
+scrp 1 1 50297 4000
 
 	lock
 
@@ -3676,7 +3676,7 @@ endm
 
 
 *translated keypress event!
-scrp 1 1 64736 79
+scrp 1 1 50297 79
 
 *user pressed esc, close changes w/o saving!
 	doif _p1_ = 27 and va00 = 0
@@ -3692,7 +3692,7 @@ endm
 
 
 
-scrp 1 1 64736 5000
+scrp 1 1 50297 5000
 
 ****************************************************
 
@@ -3700,7 +3700,7 @@ scrp 1 1 64736 5000
 
 ****************************************************
 
-	new: simp 1 1 66650 "WorldSwitcher_IconEditor_Cursors" 0 0 9999
+	new: simp 1 1 50292 "WorldSwitcher_IconEditor_Cursors" 0 0 9999
 
 	seta game "IconEditor_Cursor" targ
 
@@ -3729,7 +3729,7 @@ scrp 1 1 64736 5000
 
 *MAKE MAIN PIXEL GRID
 
-	new: comp 1 1 64742 "blnk" 0 0 2000
+	new: comp 1 1 50295 "blnk" 0 0 2000
 
 *floatable. we are attached to the main icon editor "form"
 	attr 32
@@ -3785,7 +3785,7 @@ scrp 1 1 64736 5000
 
 *MAKE BRUSH PREVIEW OVERLAY GRID
 
-	new: comp 1 1 64742 "blnk" 0 0 2001
+	new: comp 1 1 50295 "blnk" 0 0 2001
 
 *floatable. we are attached to the main icon editor "form"
 	attr 32
@@ -3873,7 +3873,7 @@ scrp 1 1 64736 5000
 *2 Previews (Lit and Unlit)
 	reps 2
 
-		new: comp 1 1 64743 "blnk" 0 0 2000
+		new: comp 1 1 50294 "blnk" 0 0 2000
 
 *floatable. we are attached to the main icon editor "form"
 		attr 32
@@ -4048,7 +4048,7 @@ endm
 
 
 
-scrp 1 1 64736 7500
+scrp 1 1 50297 7500
 
 
 	inst
@@ -4126,7 +4126,7 @@ endm
 
 
 
-scrp 1 1 64736 8000
+scrp 1 1 50297 8000
 
 	inst
 
@@ -4209,13 +4209,13 @@ endi
 *ARE YOU SURE!? Clear popup yes/no screen.
 *todo: unpause game
 
-enum 1 2 8000
+enum 1 1 50290
 	kill targ
 next
 
-scrx 1 2 8000 1001
-scrx 1 2 8000 1000
-scrx 1 2 8000 79
+scrx 1 1 50290 1001
+scrx 1 1 50290 1000
+scrx 1 1 50290 79
 
 
 
@@ -4225,42 +4225,42 @@ scrx 1 2 8000 79
 *ICON EDITOR MAIN
 *todo: unpause the game
 
-enum 1 1 64736
+enum 1 1 50297
 	kill targ
 next
 
-scrx 1 1 64736 10
-scrx 1 1 64736 1500
-scrx 1 1 64736 1000
-scrx 1 1 64736 1001
-scrx 1 1 64736 1002
-scrx 1 1 64736 3001
-scrx 1 1 64736 3002
-scrx 1 1 64736 3003
-scrx 1 1 64736 3004
-scrx 1 1 64736 3500
-scrx 1 1 64736 3501
-scrx 1 1 64736 5500
-scrx 1 1 64736 5600
-scrx 1 1 64736 5001
-scrx 1 1 64736 7000
-scrx 1 1 64736 7001
-scrx 1 1 64736 7002
-scrx 1 1 64736 78
-scrx 1 1 64736 6000
-scrx 1 1 64736 6001
-scrx 1 1 64736 6002
-scrx 1 1 64736 6003
-scrx 1 1 64736 6004
-*scrx 1 1 64736 10000
-scrx 1 1 64736 5002
-scrx 1 1 64736 5003
-scrx 1 1 64736 3000
-scrx 1 1 64736 4000
-scrx 1 1 64736 79
-scrx 1 1 64736 5000
-scrx 1 1 64736 7500
-scrx 1 1 64736 8000
+scrx 1 1 50297 10
+scrx 1 1 50297 1500
+scrx 1 1 50297 1000
+scrx 1 1 50297 1001
+scrx 1 1 50297 1002
+scrx 1 1 50297 3001
+scrx 1 1 50297 3002
+scrx 1 1 50297 3003
+scrx 1 1 50297 3004
+scrx 1 1 50297 3500
+scrx 1 1 50297 3501
+scrx 1 1 50297 5500
+scrx 1 1 50297 5600
+scrx 1 1 50297 5001
+scrx 1 1 50297 7000
+scrx 1 1 50297 7001
+scrx 1 1 50297 7002
+scrx 1 1 50297 78
+scrx 1 1 50297 6000
+scrx 1 1 50297 6001
+scrx 1 1 50297 6002
+scrx 1 1 50297 6003
+scrx 1 1 50297 6004
+*scrx 1 1 50297 10000
+scrx 1 1 50297 5002
+scrx 1 1 50297 5003
+scrx 1 1 50297 3000
+scrx 1 1 50297 4000
+scrx 1 1 50297 79
+scrx 1 1 50297 5000
+scrx 1 1 50297 7500
+scrx 1 1 50297 8000
 
 
 
@@ -4268,6 +4268,6 @@ scrx 1 1 64736 8000
 *CUSTOM CURSOR
 
 *todo: unhide original cursor, with c2tods cursor cope code.
-enum 1 1 66650
+enum 1 1 50292
 	kill targ
 next

@@ -204,7 +204,7 @@ doif type game "MouseMoveListener" = 3
 endi
 
 *create mouse move listener
-new: simp 1 2 6060 "blnk" 1 0 0
+new: simp 1 1 50291 "blnk" 1 0 0
 seta game "MouseMoveListener" targ
 
 
@@ -219,7 +219,7 @@ seta game "MouseMoveListener" targ
 
 *(also manually called a few times to update icons at appropriate times)
 
-scrp 1 2 6060 75
+scrp 1 1 50291 75
 *stop
 	inst
 	lock
@@ -2887,7 +2887,7 @@ scrp 1 2 1000 200
 *pause main panel (so we can't press ESC!!)
 	paus 1
 
-	new: comp 1 1 34543 "WorldSwitcher_IconPanel" 1 0 1000
+	new: comp 1 1 50298 "WorldSwitcher_IconPanel" 1 0 1000
 
 endm
 
@@ -4490,11 +4490,11 @@ scrx 1 2 1000 5600
 
 
 *WORLD ENTRY MOUSE MOVE LISTENER
-enum 1 2 6060
+enum 1 1 50291
 	kill targ
 next
 
-scrx 1 2 6060 75
+scrx 1 1 50291 75
 
 
 

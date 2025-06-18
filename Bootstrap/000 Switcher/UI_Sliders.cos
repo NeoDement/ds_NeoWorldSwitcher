@@ -54,7 +54,7 @@ setv game "WorldSwitcher_slider_PlayheadWidth" 10
 *
 *
 **slider manager for Example slider.
-*	new: simp 1 1 64769 "blnk" 0 0 0
+*	new: simp 1 1 50293 "blnk" 0 0 0
 *
 **set a named variable on the compound object to point to this slider in particular
 *	seta mame "ExampleSlider" targ
@@ -135,7 +135,7 @@ setv game "WorldSwitcher_slider_PlayheadWidth" 10
 *and then put the result (editable text part number) of (compound object this slider is attached to).
 *input values (_P1_) must be in 0.0 - 1.0 range!
 
-scrp 1 1 64769 1002
+scrp 1 1 50293 1002
 
 	inst
 
@@ -349,7 +349,7 @@ endm
 
 *called from external compound object when clicking anywhere on the bar or playhead
 
-scrp 1 1 64769 1000
+scrp 1 1 50293 1000
 
 
 *get us out of any text boxes
@@ -380,7 +380,7 @@ endm
 
 *(only enabled when clicking and holding the pat: butt)
 
-scrp 1 1 64769 75
+scrp 1 1 50293 75
 
 *call the Move Slider Head to Pointer Position script
 	call 1001 0 0
@@ -396,7 +396,7 @@ endm
 
 *(only enabled when clicking and holding the pat: butt)
 
-scrp 1 1 64769 77
+scrp 1 1 50293 77
 
 *disable listening for any further input (mouse moves)
 	imsk 0
@@ -416,7 +416,7 @@ endm
 ****************************************
 
 
-scrp 1 1 64769 1003
+scrp 1 1 50293 1003
 
 
 	inst
@@ -481,7 +481,7 @@ endm
 **************** 1001 ******************
 ****************************************
 
-scrp 1 1 64769 1001
+scrp 1 1 50293 1001
 
 	inst
 
@@ -547,7 +547,7 @@ endm
 
 *1004
 
-scrp 1 1 64769 1004
+scrp 1 1 50293 1004
 
 *The delta value is sent in _P1_ - 120 units per 'click'.
 
@@ -636,7 +636,7 @@ endm
 *this is essentially our initialization script!
 
 
-scrp 1 1 64769 1005
+scrp 1 1 50293 1005
 
 	inst
 
@@ -727,7 +727,7 @@ endm
 *get text from textbox and set slider to that value!
 
 
-scrp 1 1 64769 1006
+scrp 1 1 50293 1006
 
 	inst
 
@@ -753,7 +753,7 @@ endm
 
 
 *changed room (NOTE: This script is not natively executed by the engine, but is triggered by a script in DS Favorite Places.cos. Called when the main camera is switched to a different metaroom.
-scrp 1 1 64769 900
+scrp 1 1 50293 900
 *run mouse unclick script to release slider!
 	doif _p1_ = 27
 		call 77 0 0
@@ -768,17 +768,17 @@ rscr
 
 *SLIDER MANAGERS
 
-enum 1 1 64769
+enum 1 1 50293
 	kill targ
 next
 
-scrx 1 1 64769 1002
-scrx 1 1 64769 1000
-scrx 1 1 64769 75
-scrx 1 1 64769 77
-scrx 1 1 64769 1003
-scrx 1 1 64769 1001
-scrx 1 1 64769 1004
-scrx 1 1 64769 1005
-scrx 1 1 64769 1006
-scrx 1 1 64769 900
+scrx 1 1 50293 1002
+scrx 1 1 50293 1000
+scrx 1 1 50293 75
+scrx 1 1 50293 77
+scrx 1 1 50293 1003
+scrx 1 1 50293 1001
+scrx 1 1 50293 1004
+scrx 1 1 50293 1005
+scrx 1 1 50293 1006
+scrx 1 1 50293 900

@@ -1,18 +1,18 @@
 
 
-enum 1 1 14546
+enum 1 1 50299
 	kill targ
 next
 
 
 
-new: comp 1 1 14546 "small_useful_screen" 1 0 3000
+new: comp 1 1 50299 "small_useful_screen" 1 0 3000
 
 seta game "IconEditor_ColourEditor" targ
 
 
 
-scrp 1 1 14546 10
+scrp 1 1 50299 10
 
 	inst
 
@@ -107,7 +107,7 @@ scrp 1 1 14546 10
 
 
 *slider manager for Brush Size slider.
-	new: simp 1 1 64769 "blnk" 0 0 0
+	new: simp 1 1 50293 "blnk" 0 0 0
 
 *set a named variable on the compound object to point to this slider in particular
 	seta mame "RedSlider" targ
@@ -207,7 +207,7 @@ scrp 1 1 14546 10
 
 
 *slider manager for Brush Size slider.
-	new: simp 1 1 64769 "blnk" 0 0 0
+	new: simp 1 1 50293 "blnk" 0 0 0
 
 *set a named variable on the compound object to point to this slider in particular
 	seta mame "GreenSlider" targ
@@ -306,7 +306,7 @@ scrp 1 1 14546 10
 
 
 *slider manager for Brush Size slider.
-	new: simp 1 1 64769 "blnk" 0 0 0
+	new: simp 1 1 50293 "blnk" 0 0 0
 
 *set a named variable on the compound object to point to this slider in particular
 	seta mame "BlueSlider" targ
@@ -387,7 +387,7 @@ endm
 ******************************* SHARED SLIDER SCRIPT ***********************************
 ****************************************7000********************************************
 
-scrp 1 1 14546 7000
+scrp 1 1 50299 7000
 
 	inst
 
@@ -427,7 +427,7 @@ endm
 ************************** RED SLIDER TEXT INPUT SCRIPT ******************************
 ****************************************7003********************************************
 
-scrp 1 1 14546 7003
+scrp 1 1 50299 7003
 
 	inst
 
@@ -447,7 +447,7 @@ endm
 ************************** GREEN SLIDER TEXT INPUT SCRIPT ******************************
 ****************************************7003********************************************
 
-scrp 1 1 14546 7004
+scrp 1 1 50299 7004
 
 	inst
 
@@ -467,7 +467,7 @@ endm
 ************************** BLUE SLIDER TEXT INPUT SCRIPT ******************************
 ****************************************7003********************************************
 
-scrp 1 1 14546 7005
+scrp 1 1 50299 7005
 
 	inst
 
@@ -490,7 +490,7 @@ endm
 
 *this is called by our slider (name "ValueUpdateScript")
 
-scrp 1 1 14546 7002
+scrp 1 1 50299 7002
 
 	inst
 
@@ -579,7 +579,7 @@ endm
 
 *RAW MOUSE WHEEL SCRIPT
 
-scrp 1 1 14546 78
+scrp 1 1 50299 78
 
 
 *mousewheel controls whichever slider we're hovering over :)
@@ -645,7 +645,7 @@ endm
 
 *ACCEPT BUTTON
 
-scrp 1 1 14546 100
+scrp 1 1 50299 100
 
 
 	inst
@@ -778,7 +778,7 @@ scrp 1 1 14546 100
 
 		snde "no__"
 
-		new: comp 1 2 8009 "small_useful_screen_1button" 1 0 9075
+		new: comp 1 1 50289 "small_useful_screen_1button" 1 0 9075
 		attr 304
 
 *listen for esc press
@@ -835,7 +835,7 @@ endm
 
 *CANCEL BUTTON
 
-scrp 1 1 14546 101
+scrp 1 1 50299 101
 
 	inst
 
@@ -860,7 +860,7 @@ endm
 
 
 
-scrp 1 1 14546 200
+scrp 1 1 50299 200
 
 	inst
 
@@ -936,7 +936,7 @@ endm
 
 *summon the palette window
 
-scrp 1 1 14546 1000
+scrp 1 1 50299 1000
 
 	inst
 
@@ -1071,7 +1071,7 @@ endm
 
 **You already have this in your palette! Dialog Results
 
-scrp 1 2 8009 1000
+scrp 1 1 50289 1000
 
 	lock
 	part 1
@@ -1109,7 +1109,7 @@ endm
 
 
 *translated keypress event!
-scrp 1 2 8009 79
+scrp 1 1 50289 79
 *user pressed esc, run You already have this in your palette! Dialog close script!
 	doif _p1_ = 27
 		call 1000 0 0
@@ -1170,28 +1170,28 @@ endi
 
 
 
-enum 1 1 14546
+enum 1 1 50299
 	kill targ
 next
 
-scrx 1 1 14546 10
-scrx 1 1 14546 7000
-scrx 1 1 14546 7003
-scrx 1 1 14546 7004
-scrx 1 1 14546 7005
-scrx 1 1 14546 7002
-scrx 1 1 14546 78
-scrx 1 1 14546 100
-scrx 1 1 14546 101
-scrx 1 1 14546 200
-scrx 1 1 14546 1000
+scrx 1 1 50299 10
+scrx 1 1 50299 7000
+scrx 1 1 50299 7003
+scrx 1 1 50299 7004
+scrx 1 1 50299 7005
+scrx 1 1 50299 7002
+scrx 1 1 50299 78
+scrx 1 1 50299 100
+scrx 1 1 50299 101
+scrx 1 1 50299 200
+scrx 1 1 50299 1000
 
 
 *YOU ALREADY HAVE THIS IN YOUR PALETTE popup box.
 *todo: unpause game
-enum 1 2 8009
+enum 1 1 50289
 	kill targ
 next
 
-scrx 1 2 8009 1000
-scrx 1 2 8009 79
+scrx 1 1 50289 1000
+scrx 1 1 50289 79

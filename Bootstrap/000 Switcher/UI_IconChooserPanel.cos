@@ -49,7 +49,7 @@ setv game "WorldSwitcher_IconChooser_CurrentPage" 1
 
 
 *all the magic happens in the creation script. this is called from script 200 in DS world switcherC2.cos
-*new: comp 1 1 34543 "worldswitcher_IconPanel" 1 0 1000
+*new: comp 1 1 50298 "worldswitcher_IconPanel" 1 0 1000
 
 
 
@@ -57,7 +57,7 @@ setv game "WorldSwitcher_IconChooser_CurrentPage" 1
 
 *creation script
 
-scrp 1 1 34543 10
+scrp 1 1 50298 10
 
 
 
@@ -141,7 +141,7 @@ scrp 1 1 34543 10
 
 
 *dropdown manager for Create Action To Perform dropdown.
-	new: comp 1 1 64741 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+	new: comp 1 1 50296 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
 
 
 *set a named variable on the compound object to point to this dropdown in particular
@@ -257,7 +257,7 @@ scrp 1 1 34543 10
 
 *make the background dark (less distracting)
 
-	new: simp 1 2 64736 "WorldSwitcher_ScreenFader" 1 0 va00
+	new: simp 1 1 50288 "WorldSwitcher_ScreenFader" 1 0 va00
 
 	attr 32
 
@@ -287,7 +287,7 @@ endm
 
 *open icon editor
 
-scrp 1 1 34543 2000
+scrp 1 1 50298 2000
 
 	lock
 	part _p1_
@@ -338,7 +338,7 @@ endm
 
 *CLOSE script
 
-scrp 1 1 34543 4000
+scrp 1 1 50298 4000
 
 	inst
 	lock
@@ -378,7 +378,7 @@ endm
 
 
 *translated keypress event!
-scrp 1 1 34543 79
+scrp 1 1 50298 79
 *user pressed esc, close changes w/o saving!
 	doif _p1_ = 27
 		call 4000 0 0
@@ -399,7 +399,7 @@ endm
 
 
 
-scrp 1 1 34543 6001
+scrp 1 1 50298 6001
 
 	inst
 	lock
@@ -446,7 +446,7 @@ endm
 *************************************************************************************
 
 
-scrp 1 1 34543 1000
+scrp 1 1 50298 1000
 
 	inst
 
@@ -499,7 +499,7 @@ endm
 
 *load iconsets script
 
-scrp 1 1 34543 10000
+scrp 1 1 50298 10000
 
 
 	lock
@@ -735,7 +735,7 @@ endm
 
 *mouse CLICK script (used to send selected icon GALL and POSE back to parent form)
 
-scrp 1 1 34543 76
+scrp 1 1 50298 76
 
 	inst
 
@@ -762,7 +762,7 @@ endm
 
 *(ALSO used by mouse click script to get the index of icon clicked using _p2_
 
-scrp 1 1 34543 75
+scrp 1 1 50298 75
 
 
 	inst
@@ -1013,7 +1013,7 @@ endm
 *redraw script
 
 *this script is also called by the dropdown (value update script)
-scrp 1 1 34543 6002
+scrp 1 1 50298 6002
 
 
 	inst
@@ -1248,23 +1248,23 @@ rscr
 *ICON CHOOSER PANEL
 *todo: unpause the game
 
-enum 1 1 34543
+enum 1 1 50298
 	kill targ
 next
 
-scrx 1 1 34543 10
-scrx 1 1 34543 2000
-scrx 1 1 34543 4000
-scrx 1 1 34543 79
-scrx 1 1 34543 6001
-scrx 1 1 34543 1000
-scrx 1 1 34543 10000
-scrx 1 1 34543 76
-scrx 1 1 34543 75
-scrx 1 1 34543 6002
+scrx 1 1 50298 10
+scrx 1 1 50298 2000
+scrx 1 1 50298 4000
+scrx 1 1 50298 79
+scrx 1 1 50298 6001
+scrx 1 1 50298 1000
+scrx 1 1 50298 10000
+scrx 1 1 50298 76
+scrx 1 1 50298 75
+scrx 1 1 50298 6002
 
 
 *SCREEN FADER
-enum 1 2 64736
+enum 1 1 50288
 	kill targ
 next

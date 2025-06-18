@@ -7,12 +7,12 @@ inst
 
 
 *full scale PixelGrids
-enum 1 1 64742
+enum 1 1 50295
 	kill targ
 next
 
 *tiny scale PixelGrids
-enum 1 1 64743
+enum 1 1 50294
 	kill targ
 next
 
@@ -105,7 +105,7 @@ setv game "IconEditor_Tickrate_Fast" 1
 
 *ov00 is set to 1 when the mouse is pressed down.
 
-scrp 1 1 64742 76
+scrp 1 1 50295 76
 
 	inst
 
@@ -151,7 +151,7 @@ endm
 
 *ov00 is set to 0 when the mouse is NOT pressed down.
 
-scrp 1 1 64742 77
+scrp 1 1 50295 77
 
 	setv ov00 0
 
@@ -164,7 +164,7 @@ endm
 
 *RAW MOUSE MOVE SCRIPT
 
-scrp 1 1 64742 75
+scrp 1 1 50295 75
 
 	inst
 
@@ -365,7 +365,7 @@ endm
 * RETURNS 1 (TRUE) TO OV03 IF WE ARE IN BOUNDS *
 ************************************************
 
-scrp 1 1 64742 9007
+scrp 1 1 50295 9007
 
 *get canvas bounds and store them in va00, va01, va02 and va03
 
@@ -434,7 +434,7 @@ endm
 
 *NOTE: maybe add an option to only let it pick parts on a given agent would be an improvement.
 
-scrp 1 1 64742 9009
+scrp 1 1 50295 9009
 
 	inst
 
@@ -547,7 +547,7 @@ endm
 ********
 
 
-scrp 1 1 64742 9015
+scrp 1 1 50295 9015
 
 
 	inst
@@ -622,7 +622,7 @@ endm
 
 *NOTE: maybe add an option to only let it pick parts on a given agent would be an improvement
 
-scrp 1 1 64742 9008
+scrp 1 1 50295 9008
 
 	inst
 
@@ -684,7 +684,7 @@ endm
 
 **************** 9012  ****************
 
-scrp 1 1 64742 9012
+scrp 1 1 50295 9012
 
 	inst
 
@@ -751,7 +751,7 @@ endm
 * DRAW AT X/Y WITH SELECTED BRUSH - _p1_ _p2_ mouse cursor again *
 ******************************************************************
 
-scrp 1 1 64742 9010
+scrp 1 1 50295 9010
 
 *wait 1
 
@@ -1589,7 +1589,7 @@ endm
 ***********************(9999)*************************
 ******************************************************
 
-scrp 1 1 64742 9999
+scrp 1 1 50295 9999
 
 	inst
 
@@ -1676,7 +1676,7 @@ endm
 ********(9998)*******
 *********************
 
-scrp 1 1 64742 9998
+scrp 1 1 50295 9998
 
 	inst
 
@@ -1742,7 +1742,7 @@ endm
 ******************************( 9011 )*****************************
 *****************************************************************
 
-scrp 1 1 64742 9011
+scrp 1 1 50295 9011
 
 	inst
 
@@ -1781,7 +1781,7 @@ endm
 
 *annoying hack so we can click "through" the buffer pixelgrid when it's drawn in front of the panel it stays in.
 
-scrp 1 1 64743 1
+scrp 1 1 50294 1
 
 	mesg writ game "WorldSwitcher_Main" 200
 
@@ -1892,27 +1892,27 @@ endi
 
 *FULL SCALE PIXELGRIDS
 
-enum 1 1 64742
+enum 1 1 50295
 	kill targ
 next
 
-scrx 1 1 64742 76
-scrx 1 1 64742 77
-scrx 1 1 64742 75
-scrx 1 1 64742 9007
-scrx 1 1 64742 9009
-scrx 1 1 64742 9015
-scrx 1 1 64742 9008
-scrx 1 1 64742 9012
-scrx 1 1 64742 9010
-scrx 1 1 64742 9999
-scrx 1 1 64742 9998
-scrx 1 1 64742 9011
+scrx 1 1 50295 76
+scrx 1 1 50295 77
+scrx 1 1 50295 75
+scrx 1 1 50295 9007
+scrx 1 1 50295 9009
+scrx 1 1 50295 9015
+scrx 1 1 50295 9008
+scrx 1 1 50295 9012
+scrx 1 1 50295 9010
+scrx 1 1 50295 9999
+scrx 1 1 50295 9998
+scrx 1 1 50295 9011
 
 *SMALL SCALE PIXELGRIDS
 
-enum 1 1 64743
+enum 1 1 50294
 	kill targ
 next
 
-scrx 1 1 64743 1
+scrx 1 1 50294 1

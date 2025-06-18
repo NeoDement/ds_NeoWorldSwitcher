@@ -53,7 +53,7 @@ setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 50
 *
 *
 **dropdown manager for Create Action To Perform dropdown.
-*	new: comp 1 1 64741 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
+*	new: comp 1 1 50296 "blnk" 0 0 game "WorldSwitcher_IconEditor_Dropdown_Plane"
 *
 **set a named variable on the compound object to point to this dropdown in particular
 *	seta mame "ExampleDropdown" targ
@@ -120,7 +120,7 @@ setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 50
 *
 *
 *
-*scrp 1 1 64736 6001
+*scrp 1 1 50297 6001
 *
 *	inst
 *
@@ -142,7 +142,7 @@ setv game "WorldSwitcher_IconEditor_Dropdown_Plane" 50
 
 
 *dropdown manager creation script
-scrp 1 1 64741 10
+scrp 1 1 50296 10
 
 	inst
 
@@ -174,7 +174,7 @@ endm
 
 
 
-scrp 1 1 64741 1000
+scrp 1 1 50296 1000
 
 	inst
 
@@ -384,7 +384,7 @@ endm
 
 *RAW MOUSE DOWN SCRIPT
 
-scrp 1 1 64741 76
+scrp 1 1 50296 76
 
 	inst
 
@@ -470,7 +470,7 @@ endm
 
 *RAW MOUSE WHEEL SCRIPT
 
-scrp 1 1 64741 78
+scrp 1 1 50296 78
 
 *The delta value is sent in _P1_ - 120 units per 'click'.
 
@@ -548,7 +548,7 @@ endm
 
 *mouse move script
 
-scrp 1 1 64741 75
+scrp 1 1 50296 75
 
 	inst
 
@@ -635,7 +635,7 @@ endm
 
 *add named entry to dropdown
 
-scrp 1 1 64741 1001
+scrp 1 1 50296 1001
 
 
 	inst
@@ -695,7 +695,7 @@ endm
 
 *select entry by index (_P1_)
 
-scrp 1 1 64741 1004
+scrp 1 1 50296 1004
 
 
 	inst
@@ -735,7 +735,7 @@ endm
 
 *kill all existing parts and move out of bounds
 
-scrp 1 1 64741 1002
+scrp 1 1 50296 1002
 
 	inst
 
@@ -794,7 +794,7 @@ endm
 
 *clear dropdown entries
 
-scrp 1 1 64741 1003
+scrp 1 1 50296 1003
 
 	inst
 
@@ -837,7 +837,7 @@ endm
 
 
 *translated keypress event!
-scrp 1 1 64741 79
+scrp 1 1 50296 79
 *user pressed esc, close dropdown without selecting anything!
 	doif _p1_ = 27
 		call 1002 0 0
@@ -847,7 +847,7 @@ endm
 
 
 *changed room (NOTE: This script is not natively executed by the engine, but is triggered by a script in DS Favorite Places.cos. Called when the main camera is switched to a different metaroom.
-scrp 1 1 64741 900
+scrp 1 1 50296 900
 *close dropdown without selecting anything!
 	doif _p1_ = 27
 		call 1002 0 0
@@ -868,7 +868,7 @@ setv game "IconEditor_DropdownOpen" 0
 
 
 
-enum 1 1 64741
+enum 1 1 50296
 
 	setv va01 name "Remembered_IMSK"
 	setv va02 name "State"
@@ -896,20 +896,20 @@ next
 
 
 
-enum 1 1 64741
+enum 1 1 50296
 	kill targ
 next
 
-scrx 1 1 64741 10
-scrx 1 1 64741 1000
-scrx 1 1 64741 76
-scrx 1 1 64741 78
-scrx 1 1 64741 75
-scrx 1 1 64741 1001
-scrx 1 1 64741 1002
-scrx 1 1 64741 1003
-scrx 1 1 64741 79
-scrx 1 1 64741 900
+scrx 1 1 50296 10
+scrx 1 1 50296 1000
+scrx 1 1 50296 76
+scrx 1 1 50296 78
+scrx 1 1 50296 75
+scrx 1 1 50296 1001
+scrx 1 1 50296 1002
+scrx 1 1 50296 1003
+scrx 1 1 50296 79
+scrx 1 1 50296 900
 
 
-*sets va99 caos 0 0 0 0 "scrx 1 1 64741 1001" 0 1 va99
+*sets va99 caos 0 0 0 0 "scrx 1 1 50296 1001" 0 1 va99
