@@ -875,7 +875,7 @@ enum 1 1 50296
 
 	doif va02 = 1
 *UNPAUSE PARENT OBJECT
-		targ name "ParentObject"
+		targ mame "ParentObject"
 
 		paus 0
 
