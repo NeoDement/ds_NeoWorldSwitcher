@@ -4065,7 +4065,7 @@ scrp 1 1 50297 7500
 		call 5000 0 0
 	endi
 
-
+	targ ownr
 
 *** EITHER LOAD IN THE BLANK ICON, OR LOAD IN WHATEVER CUSTOM ICON THE LOADED WORLD HAS ***
 
@@ -4086,7 +4086,7 @@ scrp 1 1 50297 7500
 	call 1001 1001 0
 
 *reset to default brush size
-	targ name "BrushSizeSlider"
+	targ mame "BrushSizeSlider"
 	doif targ <> null
 		mesg wrt+ targ 1003 1 0 0
 	endi
